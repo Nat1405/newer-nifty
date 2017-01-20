@@ -8,12 +8,15 @@ This pipeline is open source, but is not supported by Gemini Observaory.
 Any feedback and comments (mbusserolle@gemini.edu) are welcome !
 
 ________________________________________________________________________________________________________________________________________
-----------------------------------------------------------------------------------------------------------------------------------------COPYRIGHT
+----------------------------------------------------------------------------------------------------------------------------------------
+
+COPYRIGHT
 
 For more details, please read the LICENSE.
 
 ________________________________________________________________________________________________________________________________________
 ----------------------------------------------------------------------------------------------------------------------------------------
+
 HOW TO SUBMIT BUGS AND REQUESTS
 
 Very important: DO NOT SUBMIT A GEMINI HELPDESK TICKET.
@@ -24,9 +27,11 @@ ________________________________________________________________________________
 ----------------------------------------------------------------------------------------------------------------------------------------
 
 INSTALLATION
+
 1. Install the Gemini IRAF package (http://www.gemini.edu/sciops/data-and-results/processing-software). Requirements for the Gemini IRAF package can be found at  : http://www.gemini.edu/sciops/data-and-results/processing-software/requirements
 
 2. Nifty is composed of these necessary scripts (all need to be located in the same directory) which are found in this repo:
+
 Main.py
 nifsSort.py
 nifsReduce.py
@@ -37,18 +42,24 @@ nifsMerge.py
 nifsDefs.py
 
 The following files need to be located in the same directory as the scripts:
+
 1.   vega_ext.fits
 2.   starstemp.txt
 
 MANDATORY COMMAND LINE OPTIONS
+
 -d   or   --date		to specify the date when the data were observed; e.g. YYYYMMDD (used ONLY within the GEMINI network)
+
 -p   or    --program	   	to specify the program number of the observed data; e.g. GN-2013B-Q-109 (used ONLY within the GEMINI network)
 				program number can also be specified together with date to reduce data from a specific night of an observing program; e.g. -p GN-2013B-109 -d 20131010
 -q   or    --path		to specify the path of the directory where the raw files are stored; e.g. users/name/reduction/Raw
 
-OTHER COMMAND LINE OPTIONS	
+OTHER COMMAND LINE OPTIONS
+
 -o   or   --over		if over is specified then old files will be overwritten during the data reduction
+
 -c   or   --nocopy		if specified then the data will not be copied from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)
+
 -s   or    --nosort		if specified then the data will not be sorted and file lists (i.e. objlist, skylist, flatlist)  will not be created; data is sorted as follows:
 				SCIENCE:	Object Name/Date/Grating/OBSID	e.g.  HD14004/20100401/K/obs107
 				TELLURIC:   Sci Object Name/Date/Grating/Tellurics/OBSID        e.g.  HD14004/20100401/K/Tellurics/obs109
@@ -80,6 +91,7 @@ OTHER COMMAND LINE OPTIONS
 
 
 BASELINE CALIBRATION REDUCTION STEPS (these are the steps in nifsReduce.py)
+
 1      Determine the shift to the MDF file
 2      Produce a normalized spectral flatfield and bad pixel mask
 3      Prepare and combine the arc darks (if more than one)
@@ -88,6 +100,7 @@ BASELINE CALIBRATION REDUCTION STEPS (these are the steps in nifsReduce.py)
 6      Determine the spatial curvature and distortion in the Ronchi flat
 
 SCIENCE AND TELLURIC DATA REDUCTION STEPS (these are the steps in nifsScience.py)
+
 1	Prepare raw data
 2	Combine multiple sky frames for the telluric data and copy sky frames for the science data
 3	Sky subtraction
@@ -102,12 +115,15 @@ MERGING is found in a separate script called nifsMerge.py and is performed after
 NOTES:
 
 OBJECT AND SKY FRAMES
+
 If the sorting script does not create a skylist in the object or telluric observation directories this means that the offsets between sky frames and object frames were smaller than expected. A skylist can be manually created and saved in the appropriate directory, or the limit placed on the offset can be changed. In nifsSort.py the limit set on "rad" can be lowered in lines 194, 245, and 492 for object sky images and in lines 198, 249, and 495 for telluric sky images.
 
 TELLURIC CORRECTION
+
 The extraction of 1-D spectrum (used only in the telluric correction) must be done interactively. The diameter of the circular extraction aperture can be changed in nifsScience.py in line 383 by changing the value of "diam."
 
 H-LINE REMOVAL
+
 The H-line removal can be done non-interactively, but it is advised that this be performed interactively and using the "vega_tweak" method in order to accurately scale the vega spectrum.
 In the interactive mode for the initial scaling and call to "telluric" these are the cursor keys and colon commands (from http://iraf.net/irafhelp.php?val=telluric&help=Help+Page):
 ? - print help
@@ -145,6 +161,7 @@ It is necessary to press 'i' before 'q' once the h-lines have been removed in or
 
 
 MERGING
+
 Cubes can be shifted using QFits View (this is currently necessary for
 very faint objects) and then combined using nifsMerge.py by prepending the name of each file with the prefix "shif" and saving them in the observation directory (where the reduced science data is stored).  
 
