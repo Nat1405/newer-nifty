@@ -41,6 +41,24 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 #--------------------------------------------------------------------#
 
 def start(program, date, dir, tel, over, copy, sort):
+    """ copy and sort data based on command line input
+
+    Parameters:
+        dir: local path to raw files directory. Specified with -q at command line.
+        tel (boolean): specified with -t at command line. If yes no
+                        telluric corrections will be executed. Default: True.
+        over (boolean): Specified with -o at command line. If yes
+                        old files will be overwritten during data reduction. Default: False.
+        copy (boolean): Specified with -c or --nocopy at command line. If True data
+                        will not be copied from gemini network. Default: True.
+        sort (boolean): Specified with -s at command line. If True data will not be
+                        sorted. Default: False.
+
+            FOR INTERNAL GEMINI USE:
+        program: specied with -p at command line. Used only within Gemini network.
+        date: specified with -d at command line. Used only within Gemini network.
+
+    """
 
     ### copy and sort data based on command line input
 
