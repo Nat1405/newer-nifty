@@ -197,6 +197,12 @@ def start(dir, tel, sort, over, copy, program, date):
 #                                                                                                                #
 #                                       CASE 1: LOCAL RAW FILES FUNCTIONS                                        #
 #                                                                                                                #
+#                                   -makeSortFiles() also used in case 2.                                        #
+#                                   -sortObs() also used in case 2.                                              #
+#                                   -sortCals() also used in case 2.                                             #
+#                                   -telSort() also used in case 2.                                              #
+#                                   -getPaths() also used in case 2.                                             #
+#                                                                                                                #
 ##################################################################################################################
 
 
