@@ -39,8 +39,8 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 #     - List of paths to the calibrations and science frames         #
 #                                                                    #
 #--------------------------------------------------------------------#
-#--------------------------------------------------------------------#
-#--------------------------------------------------------------------#
+
+
 
 def start(dir, tel, sort, over, copy, program, date):
     """ copy and sort data based on command line input.
