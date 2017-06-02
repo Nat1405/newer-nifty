@@ -71,9 +71,9 @@ def start(dir, tel, sort, over, copy, program, date):
 
     path = os.getcwd()
 
-    # Exit if -q and -c True specified at command line. Cannot copy from Gemini AND use local raw data.
+    # Exit if -q and -c True are specified at command line (cannot copy from Gemini AND use local raw data).
     if dir and copy:
-        print "\n Error in nifsSort.py. Cannot specify local raw files directory with -q AND -c True copy files from Gemini network.\n"
+        print "\n Error in nifsSort.py. Cannot specify -q AND -c True (local raw files directory AND copy files from Gemini network).\n"
         raise SystemExit
 
 
@@ -82,11 +82,14 @@ def start(dir, tel, sort, over, copy, program, date):
     #                                                                          #
     #                      USE LOCAL RAW FILES                                 #
     #                                                                          #
+    #    These conditionals are used when a local path to raw files            #
+    #    is specified with -q at command line.                                 #
+    #                                                                          #
     ############################################################################
     ############################################################################
 
 
-    # If a local raw directory path is given with -q at command line sort or don't sort data.
+    # If a local raw directory path is given with -q at command line, sort or don't sort data.
     if dir:
         if sort:
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
@@ -107,6 +110,10 @@ def start(dir, tel, sort, over, copy, program, date):
     ############################################################################
     #                                                                          #
     #                      USE INTERNAL GEMINI NETWORK                         #
+    #                                                                          #
+    #     These conditionals are used if -c True is specified at command       #
+    #     line (files copied from Gemini internal network) OR files were       #
+    #     previously copied from the Gemini Network.                           #
     #                                                                          #
     ############################################################################
     ############################################################################
@@ -181,7 +188,9 @@ def start(dir, tel, sort, over, copy, program, date):
 
 
 ##################################################################################################################
+#                                                                                                                #
 #                                                     FUNCTIONS                                                  #
+#                                                                                                                #
 ##################################################################################################################
 
 
