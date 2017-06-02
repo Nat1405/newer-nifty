@@ -7,7 +7,7 @@ import logging, os
 
 #--------------------------------------------------------------------#
 #                                                                    #
-#                             Nifty                                  #
+#     MAIN                                                           #
 #                                                                    #
 #     This is the python data reduction script for NIFS              #
 #                                                                    #
@@ -30,7 +30,7 @@ def main():
 
     # Format logging options
     FORMAT = '%(asctime)s %(message)s'
-    DATEFMT = datefmt()
+    DATEFMT = datefmt() 
 
     # Set up the logging file
     logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
@@ -60,11 +60,11 @@ def main():
     parser.add_option('-w', '--telinter', dest = 'telinter', default = 'True', action = 'store_true', help = 'perform the telluric correction interactively. The interactive procedure is done in iraf and the non-interactive procedure is done in Python.')
     parser.add_option('-n', '--nosci', dest = 'sci', default = 'True', action = 'store_false', help = 'don\'t reduce the science images')
     parser.add_option('-m', '--nomerge', dest = 'merge', default= 'True', action = 'store_false', help = 'don\'t create a merged cube')
-
+    
     (options, args) = parser.parse_args()
 
     # Define command line options
-
+    
     date = options.to
     program = options.prog
     dir = options.raw
@@ -86,7 +86,7 @@ def main():
         start = 1
     else:
         start = options.start
-
+        
     # set the stopping step of science reduction to 9
     if not options.stop:
         stop = 9
@@ -104,12 +104,12 @@ def main():
         rstop = 6
     else:
         rstop = options.rstop
-
+ 
     print 'Starting point is', start
     logging.info('Starting point is %s', start)
-
+        
     print 'Starting point is', stop
-    logging.info('Stopping point is %s', stop)
+    logging.info('Stopping point is %s', stop)               
 
     # set the H line removal method
     if not options.hline:
@@ -117,16 +117,16 @@ def main():
     else:
         hline = options.hline
         print 'H line removal method is', hline
-        logging.info('H line removal method is %s', hline)
-
-
+        logging.info('H line removal method is %s', hline)        
+    
+        
     # set yes or no for interactive the h line removal, telluric correction, and continuum fitting
     if options.hinter==True:
         hlineinter = 'yes'
     else:
         hlineinter = 'no'
     print 'H line removal method is set to interactive ? ', hlineinter
-    logging.info('H line removal method is set to interactive ? %s', hlineinter)
+    logging.info('H line removal method is set to interactive ? %s', hlineinter)    
 
     if options.continter==True:
         continuuminter = 'yes'
@@ -134,21 +134,21 @@ def main():
         continuuminter = 'no'
     print 'telluric continuum fitting is set to interactive ? ', continuuminter
     logging.info('telluric continuum fitting is set to interactive ? %s', continuuminter)
-
+        
     if options.telinter==True:
         telinter = 'yes'
     else:
         telinter = 'no'
     print 'telluric correction is set to interactive ? ', telinter
     logging.info('telluric correction is set to interactive ? %s', telinter)
-
+    
     if options.fluxcal==True:
         fluxcal = 'yes'
     else:
         fluxcal = 'no'
     print 'Flux calibration is performed  ? ', fluxcal
-    logging.info('Flux calibration is performed ? %s', fluxcal)
-
+    logging.info('Flux calibration is performed ? %s', fluxcal)   
+            
     # sort the data and calibrations
     obsDirList, calDirList, telDirList = nifsSort.start(program, date, dir, tel, over, copy, sort)
     print 'I am sorting the data'
@@ -157,7 +157,7 @@ def main():
     logging.info('telDirList : %s', telDirList)
     print 'obsDirList : ', obsDirList
     print 'telDirList : ', telDirList
-
+    
     # reduce the calibrations
     print ' I am starting to reduce the calibrations '
     logging.info('I am starting to reduce the calibrations ')
@@ -173,19 +173,19 @@ def main():
 
         # create telluric correction spectrum and blackbody spectrum
         print ' I am starting to create telluric correction spectrum and blackbody spectrum'
-        logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')
+        logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')        
         if fluxcal:
             nifsFluxCalib.start(telDirList, continuuminter, hlineinter, hline, spectemp, mag, over)
-
+    
     # reduce the science images
     print ' I am starting to reduce the science images '
-    logging.info('I am starting to reduce the science images')
+    logging.info('I am starting to reduce the science images')    
     if sci:
         nifsScience.start(obsDirList, calDirList, start, stop, tel, telinter, over)
 
     # merge all cubes
     print ' I am starting to merge all cubes '
-    logging.info('I am starting to merge all cubes')
+    logging.info('I am starting to merge all cubes')    
     if merge:
         nifsMerge.start(obsDirList, over)
         print obsDirList
@@ -194,3 +194,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+

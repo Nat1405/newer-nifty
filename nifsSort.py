@@ -1,4 +1,4 @@
-from xml.dom.minidom import parseString
+?;from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
 import pyfits
