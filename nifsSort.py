@@ -53,8 +53,8 @@ def start(dir, tel, sort, over, copy, program, date):
                         sorted. Default: True.
 
             FOR INTERNAL GEMINI USE:
-        copy (boolean): Specified with -c or --nocopy at command line. If True data
-                        will not be copied from gemini network. Default: True.
+        copy (boolean): Specified with -c or --copy at command line. If True data
+                        will be copied from gemini network. Default: False.
         program: specied with -p at command line. Used only within Gemini network.
         date: specified with -d at command line. Used only within Gemini network.
 
@@ -69,7 +69,7 @@ def start(dir, tel, sort, over, copy, program, date):
     path = os.getcwd()
 
     # Sort data if a local raw directory path is given with -q at command line.
-    if dir and sort:
+    if dir and sort and not copy:
         allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
         objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, dir)
         calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, dir)
@@ -138,6 +138,28 @@ def start(dir, tel, sort, over, copy, program, date):
         # if a telluric correction will be performed sort the science and telluric images based on time between observations
         if tel:
             telSort(telDirList, obsDirList)
+
+
+# Copy from Gemini Internal network and sort. Specified with -c at command line.
+    elif copy and sort:
+        # copy data from archives and sort if a program is given
+        if program:
+            allfilelist, filelist, skylist, telskylist = getProgram(program, date, over)
+            arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
+            objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
+            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
+            # if a telluric correction will be performed sort the science and telluric images based on time between observations
+            if tel:
+                telSort(telDirList, obsDirList)
+        # copy data from archives and sort if a date is given
+        if date:
+           allfilelist, filelist, skylist, telskylist = getScience(date, over)
+           arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList = getCals(filelist, over)
+           objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
+           calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
+           # if a telluric correction will be performed sort the science and telluric images based on time between observations
+           if tel:
+               telSort(telDirList, obsDirList)
 
     # exit if no or incorrectly formatted input is given
     else:

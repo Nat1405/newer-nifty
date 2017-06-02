@@ -114,3 +114,36 @@ NFPAD: Input file is a non-MEF NIFS frame
 2017/06/01 17:26:51  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
 2017/06/01 17:26:51  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
 2017/06/01 17:26:51  I am starting to reduce the calibrations 
+2017/06/01 17:42:26  Login file is main.log
+2017/06/01 17:42:26  Starting point is 1
+2017/06/01 17:42:26  Stopping point is 9
+2017/06/01 17:42:26  H line removal method is set to interactive ? no
+2017/06/01 17:42:26  telluric continuum fitting is set to interactive ? no
+2017/06/01 17:42:26  telluric correction is set to interactive ? no
+2017/06/01 17:42:26  Flux calibration is performed ? no
+2017/06/01 17:42:26   I am sorting the data 
+2017/06/01 17:42:45  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/01 17:42:45  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/01 17:42:45  I am starting to reduce the calibrations 
+2017/06/02 08:56:12  Login file is main.log
+2017/06/02 08:56:12  Starting point is 1
+2017/06/02 08:56:12  Stopping point is 9
+2017/06/02 08:56:12  H line removal method is set to interactive ? no
+2017/06/02 08:56:12  telluric continuum fitting is set to interactive ? no
+2017/06/02 08:56:12  telluric correction is set to interactive ? no
+2017/06/02 08:56:12  Flux calibration is performed ? no
+2017/06/02 08:56:12   I am sorting the data 
+2017/06/02 08:56:33  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/02 08:56:33  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/02 08:56:33  I am starting to reduce the calibrations 
+2017/06/02 08:57:43  Login file is main.log
+2017/06/02 08:57:43  Starting point is 1
+2017/06/02 08:57:43  Stopping point is 9
+2017/06/02 08:57:43  H line removal method is set to interactive ? no
+2017/06/02 08:57:43  telluric continuum fitting is set to interactive ? no
+2017/06/02 08:57:43  telluric correction is set to interactive ? no
+2017/06/02 08:57:43  Flux calibration is performed ? no
+2017/06/02 08:57:43   I am sorting the data 
+2017/06/02 08:57:51  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/02 08:57:51  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/02 08:57:51  I am starting to reduce the calibrations 

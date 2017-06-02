@@ -45,7 +45,7 @@ def main():
     parser.add_option('-p', '--program', dest = 'prog', type = 'string', action = 'store', help = 'specify the program number of the observed data; e.g. GN-2013B-Q-109 (used ONLY within the GEMINI network)')
     parser.add_option('-q', '--path', dest='raw', type='string', action='store', help='pecify the path of the directory where the raw files are stored; e.g. users/name/reduction/Raw')
     parser.add_option('-o', '--over', dest = 'over', default = False, action = 'store_true', help = 'overwrite old files')
-    parser.add_option('-c', '--nocopy', dest = 'copy', default = True, action = 'store_false', help = 'don\'t copy raw data from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)')
+    parser.add_option('-c', '--copy', dest = 'copy', default = False, action = 'store_true', help = 'copy raw data from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)')
     parser.add_option('-s', '--sort', dest = 'sort', default = True, action = 'store_false', help = 'sort data')
     parser.add_option('-r', '--noreduce', dest = 'red', default = True, action = 'store_false', help = 'don\'t reduce the baseline calibrations')
     parser.add_option('-k', '--notelred', dest = 'telred', default= 'True', action = 'store_false', help = 'don\'t reduce telluric data')
