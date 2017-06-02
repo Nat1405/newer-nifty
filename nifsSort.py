@@ -39,6 +39,8 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 #     - List of paths to the calibrations and science frames         #
 #                                                                    #
 #--------------------------------------------------------------------#
+#--------------------------------------------------------------------#
+#--------------------------------------------------------------------#
 
 def start(dir, tel, sort, over, copy, program, date):
     """ copy and sort data based on command line input.
@@ -75,8 +77,16 @@ def start(dir, tel, sort, over, copy, program, date):
         raise SystemExit
 
 
+    ############################################################################
+    ############################################################################
+    #                                                                          #
+    #                      USE LOCAL RAW FILES                                 #
+    #                                                                          #
+    ############################################################################
+    ############################################################################
 
-    # Sort or don't sort data if a local raw directory path is given with -q at command line.
+
+    # If a local raw directory path is given with -q at command line sort or don't sort data.
     if dir:
         if sort:
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
@@ -92,16 +102,15 @@ def start(dir, tel, sort, over, copy, program, date):
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
 
-    # When copy not performed sort data
-    elif sort and not copy:
-        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
-        # Sort and get data from Gemini Internal Network
-        if program or date:
-            objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
-            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
-        # if a telluric correction will be performed sort the science and telluric images based on time between observations
-        if tel:
-            telSort(telDirList, obsDirList)
+
+    ############################################################################
+    ############################################################################
+    #                                                                          #
+    #                      USE INTERNAL GEMINI NETWORK                         #
+    #                                                                          #
+    ############################################################################
+    ############################################################################
+
 
     # Copy from Gemini Internal Network and sort. Specified with -c True at command line. Must provide a program id or date with -d or -p.
     elif copy and sort:
@@ -147,6 +156,17 @@ def start(dir, tel, sort, over, copy, program, date):
             print "\n Error in nifsSort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
             raise SystemExit
 
+    # Sort data already copied from Gemini Network. Specified if -s and -c are NOT specified at command line.
+    elif sort and not copy:
+        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
+        # Sort and get data from Gemini Internal Network
+        if program or date:
+            objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
+            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
+        # if a telluric correction will be performed sort the science and telluric images based on time between observations
+        if tel:
+            telSort(telDirList, obsDirList)
+
     # exit if no or incorrectly formatted input is given
     else:
         print "\n Enter a program ID, observation date, or directory where the raw files are located.\n"
@@ -156,9 +176,17 @@ def start(dir, tel, sort, over, copy, program, date):
 
     return obsDirList, calDirList, telDirList
 
+
+
+
+
 ##################################################################################################################
 #                                                     FUNCTIONS                                                  #
 ##################################################################################################################
+
+
+
+
 
 def getProgram(program, date, over):
 
