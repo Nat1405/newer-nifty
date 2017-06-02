@@ -1,0 +1,41 @@
+2017/06/01 16:12:17  Login file is main.log
+2017/06/01 16:12:17  Starting point is 1
+2017/06/01 16:12:17  Stopping point is 9
+2017/06/01 16:12:17  H line removal method is set to interactive ? no
+2017/06/01 16:12:17  telluric continuum fitting is set to interactive ? no
+2017/06/01 16:12:17  telluric correction is set to interactive ? no
+2017/06/01 16:12:17  Flux calibration is performed ? no
+2017/06/01 16:12:30   I am sorting the data 
+2017/06/01 16:12:30  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/01 16:12:30  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/01 16:12:30  I am starting to reduce the calibrations 
+2017/06/01 16:12:30  ###############################
+2017/06/01 16:12:30  #                             #
+2017/06/01 16:12:30  # Start Calibration Reduction #
+2017/06/01 16:12:30  #                             #
+2017/06/01 16:12:30  ###############################
+------------------------------------------------------------------------------
+NSHEADERS -- Thu Jun  1 16:12:32 HST 2017
+ 
+Set header values from gnirs$data/nifs.dat
+                   for nifs.
+ 
+NSHEADERS exit status: good.
+-------------------------------------------------------------------------------
+NFPREPARE -- Thu Jun  1 16:12:32 HST 2017
+ 
+Processing 1 files
+NFPREPARE: Will measure MDF offset using N20100410S0362
+           (OBSTYPE=FLAT)
+NFPREPARE: Both shiftx and shifty are INDEF.  The shift for MDF will be
+           measured using cross-correlation.
+           You should verify that the measured shift is correct by
+           examining the cut data.
+           NOTE that it is important to ensure that the same shift is used
+           for all data processed together, including calibration frames.
+           So, if you use the automatic shift, either process all the data
+           in just one call to nfprepare or use the shiftimage parameter
+           (or shiftx and shifty directly) to copy the shift from a 
+           previously processed image on subsequent calls to nfprepare.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
