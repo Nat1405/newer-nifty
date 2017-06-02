@@ -40,7 +40,7 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 #                                                                    #
 #--------------------------------------------------------------------#
 
-def start(program, date, dir, tel, over, copy, sort):
+def start(dir, tel, copy, sort, over, program, date):
     """ copy and sort data based on command line input
 
     Parameters:
