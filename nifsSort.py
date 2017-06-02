@@ -87,15 +87,10 @@ def start(dir, tel, sort, over, copy, program, date):
     # When copy not performed sort data
     elif not copy and sort:
         allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
-
         # Sort and get data from Gemini Internal Network
         if program or date:
             objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
             calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
-        # sort data when a directory is given
-        if dir:
-            objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, dir)
-            calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, dir)
         # if a telluric correction will be performed sort the science and telluric images based on time between observations
         if tel:
             telSort(telDirList, obsDirList)
@@ -118,26 +113,6 @@ def start(dir, tel, sort, over, copy, program, date):
         if dir:
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
-
-    # copy data from archives and sort if a program is given
-    elif program and sort and copy:
-        allfilelist, filelist, skylist, telskylist = getProgram(program, date, over)
-        arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
-        objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
-        calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
-        # if a telluric correction will be performed sort the science and telluric images based on time between observations
-        if tel:
-            telSort(telDirList, obsDirList)
-
-    # copy data from archives and sort if a date is given
-    elif date and copy and sort:
-        allfilelist, filelist, skylist, telskylist = getScience(date, over)
-        arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList = getCals(filelist, over)
-        objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
-        calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
-        # if a telluric correction will be performed sort the science and telluric images based on time between observations
-        if tel:
-            telSort(telDirList, obsDirList)
 
 
 # Copy from Gemini Internal network and sort. Specified with -c at command line.
