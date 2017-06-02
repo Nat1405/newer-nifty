@@ -43,7 +43,7 @@ def main():
     parser = OptionParser()
     parser.add_option('-d', '--date', dest='to', type='string', action='store', help='specify the date when the data were observed; e.g. YYYYMMDD (used ONLY within the GEMINI network)')
     parser.add_option('-p', '--program', dest = 'prog', type = 'string', action = 'store', help = 'specify the program number of the observed data; e.g. GN-2013B-Q-109 (used ONLY within the GEMINI network)')
-    parser.add_option('-q', '--path', dest='raw', type='string', action='store', help='pecify the path of the directory where the raw files are stored; e.g. users/name/reduction/Raw')
+    parser.add_option('-q', '--path', dest='raw', type='string', action='store', help='specify the path of the directory where the raw files are stored; e.g. users/name/reduction/Raw')
     parser.add_option('-o', '--over', dest = 'over', default = False, action = 'store_true', help = 'overwrite old files')
     parser.add_option('-c', '--copy', dest = 'copy', default = False, action = 'store_true', help = 'copy raw data from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)')
     parser.add_option('-s', '--sort', dest = 'sort', default = True, action = 'store_false', help = 'sort data')
