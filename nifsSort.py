@@ -41,7 +41,9 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 #--------------------------------------------------------------------#
 
 def start(dir, tel, sort, over, copy, program, date):
-    """ copy and sort data based on command line input
+    """ copy and sort data based on command line input.
+        If -c (or --copy) True is specified data will be copied from Gemini network,
+        even if a path to raw images is provided with -q.
 
     Parameters:
         dir: local path to raw files directory. Specified with -q at command line.
@@ -68,24 +70,24 @@ def start(dir, tel, sort, over, copy, program, date):
 
     path = os.getcwd()
 
-    # Sort data if a local raw directory path is given with -q at command line.
-    if dir and sort and not copy:
-        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
-        objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, dir)
-        calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, dir)
-        # if a telluric correction will be performed sort the science and telluric images based on time between observations
-        if tel:
-            telSort(telDirList, obsDirList)
-
-    # When copy and sort are not performed, create a list of data directory paths
-    # This will be executed if -c False, -s False and -q <path to raw image files>
-    # are specified at command line.
-    elif not copy and not sort:
-        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
-        obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
+    # Sort data if a local raw directory path is given with -q at command line. Will not work if -c is specified at command line.
+    if dir and not copy:
+        if sort:
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
+            objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, dir)
+            calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, dir)
+            # if a telluric correction will be performed sort the science and telluric images based on time between observations
+            if tel:
+                telSort(telDirList, obsDirList)
+        # When copy and sort are not performed, create a list of data directory paths
+        # This will be executed if -s False and -q <path to raw image files> are
+        # specified at command line.
+        else:
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
+            obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
 
     # When copy not performed sort data
-    elif not copy and sort:
+    elif sort and not copy:
         allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
         # Sort and get data from Gemini Internal Network
         if program or date:

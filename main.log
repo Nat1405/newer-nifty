@@ -147,3 +147,14 @@ NFPAD: Input file is a non-MEF NIFS frame
 2017/06/02 08:57:51  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
 2017/06/02 08:57:51  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
 2017/06/02 08:57:51  I am starting to reduce the calibrations 
+2017/06/02 09:20:06  Login file is main.log
+2017/06/02 09:20:06  Starting point is 1
+2017/06/02 09:20:06  Stopping point is 9
+2017/06/02 09:20:06  H line removal method is set to interactive ? no
+2017/06/02 09:20:06  telluric continuum fitting is set to interactive ? no
+2017/06/02 09:20:06  telluric correction is set to interactive ? no
+2017/06/02 09:20:06  Flux calibration is performed ? no
+2017/06/02 09:20:06   I am sorting the data 
+2017/06/02 09:20:14  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/02 09:20:14  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/02 09:20:14  I am starting to reduce the calibrations 
