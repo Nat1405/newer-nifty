@@ -60,7 +60,7 @@ OTHER COMMAND LINE OPTIONS
 
 -c   or   --nocopy		if specified then the data will not be copied from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)
 
--s   or    --nosort		if specified then the data will not be sorted and file lists (i.e. objlist, skylist, flatlist)  will not be created; data is sorted as follows:
+-s   or    --sort		if specified then the data will be sorted and file lists (i.e. objlist, skylist, flatlist)  will be created; data is sorted as follows:
 				SCIENCE:	Object Name/Date/Grating/OBSID	e.g.  HD14004/20100401/K/obs107
 				TELLURIC:   Sci Object Name/Date/Grating/Tellurics/OBSID        e.g.  HD14004/20100401/K/Tellurics/obs109
 				CALIBRATIONS:   Sci Object Name/Date/Calibrations         e.g.  HD14004/20100401/Calibrations	  		   	
@@ -174,7 +174,7 @@ python Main.py -q users/name/reduction/Raw -t -k -m
 python Main.py -q users/name/reduction/Raw -t -k
 
 3. To perform sorting, calibration data reductions, and science reductions without the telluric correction, no flux calibration, and produce a merged cube:
-python Main.py -q users/name/reduction/Raw -f -1 
+python Main.py -q users/name/reduction/Raw -f -1
 
 4. To perform sorting, calibration data reductions, and science reductions with the telluric correction (interactively), flux calibration, and produce a merged cube:
 python Main.py -q users/name/reduction/Raw -w
@@ -183,6 +183,4 @@ python Main.py -q users/name/reduction/Raw -w
 python Main.py -q users/name/reduction/Raw -s -r -n -t -k
 
 6. To start the script by performing the telluric correction and produce a merged cube (assuming the telluric data and science data have already been reduced)
-python Main.py -q users/name/reduction/Raw -s -r -k -b 8 
-
-
+python Main.py -q users/name/reduction/Raw -s -r -k -b 8
