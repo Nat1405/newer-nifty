@@ -22,14 +22,14 @@ from nifsDefs import convertRAdec, datefmt, writeList
 #                                                                    #
 #     This module contains all the functions needed to remove        #
 #     H lines from the standard star and do the flux calibration.    #
-#
+#                                                                    #
 #                                                                    #
 #    COMMAND LINE OPTIONS                                            #
 #    If you wish to skip this script enter -t in the command line    #
 #    Specify a spectral type or temperature with -e                  #
 #    Specify a magniture with -f                                     #
 #    Specify an H line fitting method with -l (default is vega)      #
-#    Specify interactive H line fitting with -i (default inter=no)   #                   
+#    Specify interactive H line fitting with -i (default inter=no)   #
 #    Specify interactive continuum fitting with -y (def inter=no)    #
 #                                                                    #
 #     INPUT:                                                         #
@@ -48,6 +48,33 @@ iraf.onedspec(_doprint=0)
 iraf.nsheaders('nifs',Stdout='/dev/null')
 
 def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, over):
+    """
+#--------------------------------------------------------------------#
+#                                                                    #
+#     FLUX CALIBRATION                                               #
+#                                                                    #
+#     This module contains all the functions needed to remove        #
+#     H lines from the standard star and do the flux calibration.    #
+#                                                                    #
+#                                                                    #
+#    COMMAND LINE OPTIONS                                            #
+#    If you wish to skip this script enter -t in the command line    #
+#    Specify a spectral type or temperature with -e                  #
+#    Specify a magniture with -f                                     #
+#    Specify an H line fitting method with -l (default is vega)      #
+#    Specify interactive H line fitting with -i (default inter=no)   #
+#    Specify interactive continuum fitting with -y (def inter=no)    #
+#                                                                    #
+#     INPUT:                                                         #
+#     - reduced and combined standard star spectra                   #
+#                                                                    #
+#     OUTPUT:                                                        #
+#     - reduced (H line and continuum fit) standard star spectra     #
+#     - flux calibrated blackbody spectrum                           #
+#                                                                    #
+#--------------------------------------------------------------------#
+    """
+
     path = os.getcwd()
     # Set up the logging file
     FORMAT = '%(asctime)s %(message)s'
@@ -69,11 +96,11 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
     print " mag=", mag
     print " over=", over
 
-    
+
     for telDir in telDirList:
         os.chdir(telDir)
         iraffunctions.chdir(telDir)
-        
+
         # open and define standard star spectrum and its relevant header keywords
         try:
             standard = str(open('telluricfile', 'r').readlines()[0]).strip()
@@ -83,7 +110,7 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
         if not os.path.exists('objtellist'):
             print "No objtellist found in ", telDir
             continue
-  
+
         telheader = pyfits.open(standard+'.fits')
         band = telheader[0].header['GRATING'][0]
         RA = telheader[0].header['RA']
@@ -105,7 +132,7 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
         # find standard star spectral type, temperature, and magnitude
         mag2mass(name, path, spectemp, mag, band)
         print " list", name, path, spectemp, mag, band
-        
+
         # File for recording shift/scale from calls to "telluric"
         t1 = open('telluric_hlines.txt', 'w')
 
@@ -121,31 +148,31 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
         if hline_method == "none":
             #need to copy files so have right names for later use
             iraf.imcopy(input=standard+'[sci,'+str(1)+']', output="ftell_nolines"+band, verbose='no')
-            
+
         if hline_method == "none" and not no_hline:
             print ""
             print "***Removing intrinsic lines in standard star***"
             print ""
-    
+
         if hline_method == "vega" and not no_hline:
             vega(standard, band, path, hlineinter, airmass_std, t1, log, over)
-                
+
         if hline_method == "linefit_auto" and not no_hline:
             linefit_auto(standard, band)
 
         if hline_method == "linefit_manual" and not no_hline:
             linefit_manual(standard+'[sci,1]', band)
-    
+
         if hline_method == "vega_tweak" and not no_hline:
             #run vega removal automatically first, then give user chance to interact with spectrum as well
             vega(standard,band, path, hlineinter, airmass_std, t1, log, over)
             linefit_manual("ftell_nolines"+band, band)
-    
+
         if hline_method == "linefit_tweak" and not no_hline:
             #run Lorentz removal automatically first, then give user chance to interact with spectrum as well
             linefit_auto(standard,band)
             linefit_manual("ftell_nolines"+band, band)
-            
+
         # make a list of exposure times from the science images that use this standard star spectrum for the telluric correction
         # used to make flux calibrated blackbody spectra
         objtellist = open('objtellist', 'r').readlines()
@@ -160,17 +187,17 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
                 exptime = objheader[0].header['EXPTIME']
                 if not exptimelist or exptime not in exptimelist:
                     exptimelist.append(int(exptime))
-                    
+
         os.chdir(telDir)
         for tgt_exp in exptimelist:
-            
+
             # Make blackbody spectrum to be used in nifsScience.py
             file = open('std_star.txt','r')
             lines = file.readlines()
             #Extract stellar temperature from std_star.txt file , for use in making blackbody
             star_kelvin = float(lines[0].replace('\n','').split()[3])
             #Extract mag from std_star.txt file and convert to erg/cm2/s/A, for a rough flux scaling
-                
+
             try:
                 #find out if a matching band mag exists in std_star.txt
                 if band == 'K':
@@ -186,7 +213,7 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
                     star_mag = float(star_mag)
                     flambda = 10**(-star_mag/2.5) * 3.129E-10
                 print "flambda=", flambda
-               
+
             except:
                 #if not then just set to 1; no absolute flux cal. attempted
                 flambda = 1
@@ -200,7 +227,7 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
             #account for standard star/science target exposure times
             std_exp = telheader[0].header['EXPTIME']
             flambda = flambda * (float(std_exp) / float(tgt_exp))
-            
+
             #find the start and end wavelengths of the spectrum
             wstart = iraf.hselect(images=standard+'[SCI]', field='CRVAL1', expr='yes',  missing='INDEF', mode='al', Stdout=1)
             wstart = float(wstart[0].replace("'",""))
@@ -231,17 +258,20 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
                 iraf.imarith(operand1="blackbody"+str(tgt_exp), op="*", operand2=scalefac, result="bbscale"+str(tgt_exp),title='',divzero=0.0,hparams='',pixtype='',calctype='',verbose='no',noact='no',mode='al')
             else:
                 print "Output file exists and -over- not set - skipping blackbody flux scaling"
-                
+
             writeList("bbscale"+str(tgt_exp), "blackbodyfile", telDir)
             '''
-            
+
     os.chdir(path)
-        
+
 #####################################################################################
 #                                        FUNCTIONS                                  #
 #####################################################################################
 
 def mag2mass(name, path, spectemp, mag, band):
+    """Find standard star spectral type, temperature, and magnitude
+    """
+
     starfile = 'std_star.txt'
     kelvinfile = path+'/starstemp.txt'
 
@@ -250,14 +280,14 @@ def mag2mass(name, path, spectemp, mag, band):
     Kmag = ''
     Jmag = ''
     Hmag = ''
-   
+
     # check to see if a spectral type or temperature has been given
     if spectemp:
         if not isinstance(spectemp[0], int):
             spectral_type = spectemp
             specfind = False
             tempfind = True
-        else: 
+        else:
             kelvin = spectemp
             tempfind = False
             specfind = False
@@ -274,7 +304,7 @@ def mag2mass(name, path, spectemp, mag, band):
             Jmag=mag
     else:
         magfind = True
-        
+
     if specfind or tempfind or magfind:
         #Construct URL based on standard star coords, execute SIMBAD query to find spectral type
         name = name.replace("+","%2b")
@@ -287,12 +317,12 @@ def mag2mass(name, path, spectemp, mag, band):
         html2 = html2.replace(' ','')
         search_error = str(html2.split('\n'))
 
-   
-        #Exit if the lookup found nothing.	
+
+        #Exit if the lookup found nothing.
         if 'Noastronomicalobjectfound' in search_error:
             print "ERROR: no object was found at the coordinates you entered. You'll need to supply information in a file; see the manual for instructions."
-            
-        #If >1 object found, decrease search radius and try again	
+
+        #If >1 object found, decrease search radius and try again
         if 'Numberofrows:' in search_error:
             start_name='http://simbad.u-strasbg.fr/simbad/sim-coo?Coord='
             end_name = '&submit=submit%20query&Radius.unit=arcsec&Radius=1'
@@ -302,7 +332,7 @@ def mag2mass(name, path, spectemp, mag, band):
             html2 = html2.replace(' ','')
             search_error = str(html2.split('\n'))
 
-        #If that didn't return anything, exit and let the user sort it out	
+        #If that didn't return anything, exit and let the user sort it out
         if 'Noastronomicalobjectfound' in search_error:
             print "ERROR: didn't find a star at your coordinates within a search radius of 10 or 1 arcsec. You'll need to supply information in a file; see the manual for instructions."
             sys.exit()
@@ -322,11 +352,11 @@ def mag2mass(name, path, spectemp, mag, band):
             if count > 0:
                 print "ERROR: problem with SIMBAD output. You'll need to supply the spectral type or temperature in the command line prompt."
                 sys.exit()
-                    
-                    
+
+
         if magfind:
             for line in html2:
-     
+
                 if 'Fluxes' in line:
                     i = html2.index(line)
                     break
@@ -357,7 +387,7 @@ def mag2mass(name, path, spectemp, mag, band):
                     continue
                 else:
                     if	spectral_type in line.split()[0]:
-                        kelvin = line.split()[1] 
+                        kelvin = line.split()[1]
                         count = 0
                         break
                     else:
@@ -366,7 +396,7 @@ def mag2mass(name, path, spectemp, mag, band):
             if count > 0:
                 print "ERROR: can't find a temperature for spectral type", spectral_type,". You'll need to supply information in a file; see the manual for instructions."
                 sys.exit()
-        
+
         if (Kmag or Jmag or Hmag) and Kmag!='x' and magfind:
             print "magnitudes retrieved OK"
             sf.write('k K '+Kmag+' '+kelvin+'\n')
@@ -384,11 +414,15 @@ def mag2mass(name, path, spectemp, mag, band):
             sf.write('j J N/A '+kelvin+' \n')
 
     sf.close()
-    klf.close()    
+    klf.close()
 
 #-------------------------------------------------------------------------------#
 
 def write_line_positions(nextcur, var):
+    """
+    Write line x,y info to file containing Lorentz fitting commands for bplot
+    """
+
     curfile = open(nextcur, 'w')
     i=-1
     for line in var:
@@ -408,12 +442,13 @@ def write_line_positions(nextcur, var):
         curfile.write("0 0 1 i \n")
         curfile.write("0 0 q \n")
         curfile.close()
-    
+
 #-------------------------------------------------------------------------------#
 
 def vega(spectrum, band, path, hlineinter, airmass, t1, log, over):
-    # Use "telluric" to remove H lines from standard star, then remove normalization added by telluric
-    # specify the extension for vega_ext.fits from the band
+    """Use "telluric" to remove H lines from standard star, then remove normalization added by telluric
+       specify the extension for vega_ext.fits from the band
+    """
     if band=='K':
         ext = '1'
     if band=='H':
@@ -451,8 +486,10 @@ def vega(spectrum, band, path, hlineinter, airmass, t1, log, over):
 #-------------------------------------------------------------------------------#
 
 def linefit_auto(spectrum, band):
-    # automatically fit Lorentz profiles to lines defined in existing cur* files
-    # Go to x position in cursor file and use space bar to find spectrum at each of those points
+    """automatically fit Lorentz profiles to lines defined in existing cur* files
+    Go to x position in cursor file and use space bar to find spectrum at each of those points
+    """
+
     specpos = iraf.bplot(images=spectrum+'[SCI,1]', cursor='cur'+band, Stdout=1, StdoutG='/dev/null')
     specpose = str(specpos).split("'x,y,z(x):")
     nextcur = 'nextcur'+band+'.txt'
@@ -465,7 +502,9 @@ def linefit_auto(spectrum, band):
 #-------------------------------------------------------------------------------#
 
 def linefit_manual(spectrum, band):
-    # Enter splot so the user can fit and subtract lorents (or, actually, any) profiles
+    """ Enter splot so the user can fit and subtract lorents (or, actually, any) profiles
+    """
+
     iraf.splot(images=spectrum, new_image='ftell_nolines'+band, save_file='../PRODUCTS/lorentz_hlines.txt', overwrite='yes')
     # it's easy to forget to use the 'i' key to actually write out the line-free spectrum, so check that it exists:
     # with the 'tweak' options, the line-free spectrum will already exists, so this lets the user simply 'q' and move on w/o editing (too bad if they edit and forget to hit 'i'...)
@@ -480,9 +519,11 @@ def linefit_manual(spectrum, band):
 #-------------------------------------------------------------------------------#
 
 def effspec(telDir, standard, telnolines, mag, T, over):
-
+    """
     # This flux calibration method was adapted to NIFS
-    
+    """
+
+
     # define constants
     c=2.99792458e8
     h = 6.62618e-34
@@ -491,7 +532,7 @@ def effspec(telDir, standard, telnolines, mag, T, over):
     f0emp = lambda p, T: p[0]*np.log(T)**2+p[1]*np.log(T)+p[2]
     fnu = lambda x, T: (2.*h*(x**3)*(c**(-2)))/(np.exp((h*x)/(k*T))-1)
     flambda = lambda x, T: (2.*h*(c**2)*(x**(-5)))/((np.exp((h*c)/(x*k*T)))-1)
-    
+
     print 'Input Standard spectrum for flux calibration is ', standard
 
     if os.path.exists('c'+standard+'.fits'):
@@ -523,27 +564,26 @@ def effspec(telDir, standard, telnolines, mag, T, over):
     if 'ZJ' in telfilter:
         coeff = [0.14903624, -3.14636068, -9.32675924]
         lamc = 11100.
-        
+
     lamc = telheader[0].header['WAVELENG']
     f0 = np.exp(f0emp(coeff, T))
-        
+
     # create black body spectrum at a given temperature
     blackbody = (flambda(telwave*1e-10, T))*1e-7
-        
+
     lamc_ind = np.where(telwave==min(telwave, key=lambda x:abs(x-lamc)))
 
     tel_bb = telluric[0].data/blackbody
     csb = tel_bb[lamc_ind[0]]
     cs =  telluric[0].data[lamc_ind[0]]
-        
+
     effspec =  (tel_bb/exptime)*(cs/csb)*(10**(0.4*mag))*(f0)**-1
     print 'effspec =', effspec
-	    
+
     telheader[1].data = effspec
     telheader.writeto('c'+standard+'.fits',  output_verify='ignore')
     writeList('c'+standard, 'corrtellfile', telDir)
-    
+
 #telDirList = ['/Users/kklemmer/CGCG448-020_SourceC_TEL/20090826/K/Tellurics/obs47']
 
 #start(telDirList, False, False, 'vega', False, False, True)
-
