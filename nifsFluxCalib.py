@@ -520,7 +520,7 @@ def linefit_manual(spectrum, band):
 
 def effspec(telDir, standard, telnolines, mag, T, over):
     """
-    # This flux calibration method was adapted to NIFS
+    This flux calibration method was adapted to NIFS
     """
 
 
