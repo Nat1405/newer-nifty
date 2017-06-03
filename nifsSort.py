@@ -15,7 +15,7 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 #                                                                    #
 #                                                                    #
 #    If running this from the Gemini North network, data can be      #
-#    copied from /net/wikiwiki/dataflow by entering a program id,    #
+#    copied from /net/mko-nfs/sci/dataflow by entering a program id, #
 #    date, or both. If data does not need to be copied or the        #
 #    script is being run outside of the network, a path to the raw   #
 #    files must be entered.                                          #
@@ -25,7 +25,7 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 #    line and if you wish to skip the sort procedure enter -s.       #
 #                                                                    #
 #                                                                    #
-#     INPUT:                                                         #
+#     INPUT FILES:                                                   #
 #     + Raw files                                                    #
 #       - Science frames                                             #
 #       - Calibration frames                                         #
@@ -1014,7 +1014,7 @@ def getScience(date, over):
             filelist.append(entry)
 
     # path to data archive
-    raw = '/net/wikiwiki/dataflow'
+    raw = '/net/mko-nfs/sci/dataflow'
 
 
     # make a directory called Raw if one does not already exist
@@ -1037,7 +1037,7 @@ def getCals(filelist, over):
     """ copies the necessary calibration files to the Raw directory using http://fits/calmgr to match calibrations frames to science frames
     """
     # path to data archive
-    raw = '/net/wikiwiki/dataflow'
+    raw = '/net/mko-nfs/sci/dataflow'
 
     # make a directory called Raw if one does not already exist
     path = os.getcwd()
