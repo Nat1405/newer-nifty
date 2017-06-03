@@ -29,7 +29,7 @@ from nifsTelluric import extrap1d, readCube, readSpec, telCor
 #    If you wish to skip this script for telluric data               #
 #    enter -k in the command line                                    #
 #    Specify a start value with -b (default is 1)                    #
-#    Specify a stop value with -x (default is 9)                     #                                                                 
+#    Specify a stop value with -x (default is 9)                     #
 #                                                                    #
 #     INPUT:                                                         #
 #     + Raw files                                                    #
@@ -47,9 +47,46 @@ from nifsTelluric import extrap1d, readCube, readSpec, telCor
 #--------------------------------------------------------------------#
 
 def start(obsDirList, calDirList, start, stop, tel, telinter, over):
+    """
+    #--------------------------------------------------------------------#
+    #                                                                    #
+    #     SCIENCE                                                        #
+    #                                                                    #
+    #     This module contains all the functions needed to reduce        #
+    #     the NIFS science images.                                       #
+    #                                                                    #
+    #    COMMAND LINE OPTIONS                                            #
+    #    If you wish to skip this script for science data                #
+    #    enter -n in the command line                                    #
+    #    If you wish to skip this script for telluric data               #
+    #    enter -k in the command line                                    #
+    #    Specify a start value with -b (default is 1)                    #
+    #    Specify a stop value with -x (default is 9)                     #
+    #                                                                    #
+    #     INPUT:                                                         #
+    #     + Raw files                                                    #
+    #       - Science frames                                             #
+    #       - Sky frames                                                 #
+    #       - Reference file                                             #
+    #       - Bad Pixel Mask                                             #
+    #       - Flat field                                                 #
+    #       - Reduced arc frame                                          #
+    #       - Reduced ronchi mask                                        #
+    #                                                                    #
+    #     OUTPUT:                                                        #
+    #     - Reduced science frame: data cube. (ie c(a)tfbrgnSCI.fits)    #
+    #                                                                    #
+    #--------------------------------------------------------------------#
 
+    Args:
+        telDirList: [‘path/obj/date/grat/Tellurics/obsid’]
+        calDirList: [‘path/obj/date/Calibrations’]
+        tel (bool): Default True.
+        telinter (bool): Default True.
+
+    """
     path = os.getcwd()
-    
+
     # set up log
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
@@ -61,7 +98,7 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
     for obsDir in obsDirList:
         os.chdir(obsDir)
         tempObs = obsDir.split(os.sep)
-    
+
         # finds the Calibrations directory that corresponds to the science observation date
         for calDir in calDirList:
             tempCal = calDir.split(os.sep)
@@ -71,9 +108,9 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
             elif tempObs[-4]==tempCal[-2]:
                 calDir = calDir+'/'
                 break
-       
+
         obsid = tempObs[-1]
-        
+
         # reset iraf tasks
         iraf.unlearn(iraf.gemini,iraf.gemtools,iraf.gnirs,iraf.nifs,iraf.imcopy)
 
@@ -83,7 +120,7 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
         pwd = os.getcwd()
         iraffunctions.chdir(pwd)
         iraf.nsheaders("nifs",logfile=log)
-      
+
         # define all the necessary variables and lists for the calibration and science images
         shift = calDir+str(open(calDir+"shiftfile", "r").readlines()[0]).strip()
         flat = calDir+str(open(calDir+"flatfile", "r").readlines()[0]).strip()
@@ -91,11 +128,11 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
         iraf.copy(calDir+ronchi+".fits",output="./")
         sflat_bpm = calDir+str(open(calDir+"sflat_bpmfile", "r").readlines()[0]).strip()
         arcdark = calDir+str(open(calDir+"arcdarkfile", "r").readlines()[0]).strip()
-        
+
         # copy wavelength calibrated arc to obsDir
         arc = "wrgn"+str(open(calDir+"arclist", "r").readlines()[0]).strip()
         iraf.copy(calDir+arc+".fits",output="./")
-     
+
         # determines whether the data is science or telluric
         if tempObs[-2]=='Tellurics':
             kind = 'Telluric'
@@ -118,12 +155,12 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
             # check to see if the number of sky images matches the number of science images and if not duplicates sky images and rewrites the sky file and skylist
         if not len(skylist)==len(objlist):
             skylist = makeSkyList(skylist, objlist, obsDir)
-            
+
         centers = writeCenters(objlist)
-        
+
         # Make sure the database files are in place. Current understanding is that
         # these should be local to the reduction directory, so need to be copied from
-        # the calDir. 
+        # the calDir.
         if os.path.isdir("./database"):
             if over:
                 shutil.rmtree("./database")
@@ -131,12 +168,12 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
         elif not os.path.isdir("./database"):
             os.mkdir('./database/')
         iraf.copy(input=calDir+'database/*', output="./database/")
-      
+
         #=========================================================
         # Start main processing steps. Do this within a while loop
         # to allow the use of start and stop positions
         #=========================================================
-        
+
         logging.info('############################')
         logging.info('                            ')
         logging.info('   Reducing Observations    ')
@@ -145,11 +182,11 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
 
         print '############################'
         print '                            '
-        print '   Reducing Observations    ' 
+        print '   Reducing Observations    '
         print '                            '
         print '############################'
-        
-        
+
+
         valindex = start
         if valindex > stop  or valindex < 1 or stop > 9:
             print "problem with start/stop values"
@@ -161,7 +198,7 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
             if valindex == 1:
                 objlist = prepare(objlist, shift, sflat_bpm, log, over)
                 skylist = prepare(skylist, shift, sflat_bpm, log, over)
-                       
+
             #####################
             ## Combine multiple frames ->gn
             elif valindex == 2:
@@ -173,39 +210,39 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
                         copyImage(skylist, 'gn'+sky+'.fits', over)
                 else:
                     pass
-                        
+
             ##################
-            ## Sky Subtraction ->gn           
+            ## Sky Subtraction ->gn
             elif valindex == 3:
                 skySubtractObj(objlist, skylist, log, over)
                 logging.info('Sky Subtraction ->gn')
-                    
+
             #################
             ## Flat field ->rgn
             elif valindex == 4:
                 applyFlat(objlist, flat, log, over, kind)
                 logging.info('Flat field ->rgn')
-                    
+
             #################
-            ## Correct bad pixels ->brgn            
+            ## Correct bad pixels ->brgn
             elif valindex == 5:
                 fixBad(objlist, log, over)
                 logging.info('Correct bad pixels ->brgn')
-                    
+
             #################
-            ## Derive 2D->3D transformation ->fbrgn            
+            ## Derive 2D->3D transformation ->fbrgn
             elif valindex == 6:
                 fitCoords(objlist, arc, ronchi, log, over, kind)
                 logging.info('Derive 2D->3D transformation ->fbrgn')
-            
+
             #################
-            ## Apply transformation ->tfbrgn            
+            ## Apply transformation ->tfbrgn
             elif valindex == 7:
                 transform(objlist, log, over)
                 logging.info('Apply transformation ->tfbrgn')
-            
+
             #################
-            ## Derive or apply telluric correction ->atfbrgn            
+            ## Derive or apply telluric correction ->atfbrgn
             elif valindex == 8:
                 logging.info('Derive or apply telluric correction ->atfbrgn')
                 if kind=='Telluric':
@@ -217,7 +254,7 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
                     applyTelluric(objlist, obsid, skylist, telinter, log, over)
 
             #################
-            ## Create a 3D cube -> catfbrgn            
+            ## Create a 3D cube -> catfbrgn
             elif valindex == 9:
                 if kind == "Telluric":
                    print "No cube being made for tellurics"
@@ -229,8 +266,8 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
                     makeCube('tfbrgn', objlist, tel, obsDir, log, over)
 
             valindex += 1
-            
-    os.chdir(path)    
+
+    os.chdir(path)
     return
 
 ##################################################################################################################
@@ -238,8 +275,8 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
 ##################################################################################################################
 
 def prepare(inlist, shiftima, sflat_bpm, log, over):
-    # prepare list of images
-    
+    """prepare list of images"""
+
     for image in inlist:
         if os.path.exists("n"+image+".fits"):
             if over:
@@ -250,12 +287,12 @@ def prepare(inlist, shiftima, sflat_bpm, log, over):
         iraf.nfprepare(image, rawpath="", shiftimage=shiftima, fl_vardq="yes", bpm=sflat_bpm, logfile=log)
     inlist = checkLists(inlist, '.', 'n', '.fits')
     return inlist
-                
-        
+
+
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def combineImages(inlist, out, log, over):
-    # gemcombine a list of images
+    """ gemcombine a list of images"""
     print inlist
     if os.path.exists(out+".fits"):
         if over:
@@ -268,8 +305,8 @@ def combineImages(inlist, out, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def copyImage(input, output, over):
-    # copy an image (used to add the correct prefix)
-    
+    """ copy an image (used to add the correct prefix)"""
+
     if os.path.exists(output):
         if over:
             iraf.delete(output)
@@ -279,10 +316,10 @@ def copyImage(input, output, over):
     iraf.copy('n'+input[0]+'.fits', output)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
-   
+
 def skySubtractObj(objlist, skylist, log, over):
-    # sky subtraction for science
-    
+    """" sky subtraction for science"""
+
     for i in range(len(objlist)):
         image = str(objlist[i])
         sky = str(skylist[i])
@@ -297,8 +334,8 @@ def skySubtractObj(objlist, skylist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def skySubtractTel(tellist, sky, log, over):
-    # sky subtraction for telluric
-    
+    """ sky subtraction for telluric"""
+
     for image in tellist:
         if os.path.exists("gn"+image+".fits"):
             if over:
@@ -309,14 +346,14 @@ def skySubtractTel(tellist, sky, log, over):
         iraf.gemarith ("n"+image, "-", sky, "gn"+image, fl_vardq="yes", logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
-            
+
 def applyFlat(objlist, flat, log, over, kind, dark=""):
-    # flat field and cut the data
-    
+    """ flat field and cut the data"""
+
     fl_dark = "no"
     if dark != "":
         fl_dark = "yes"
-         
+
     for image in objlist:
         image = str(image).strip()
         if os.path.exists("rgn"+image+".fits"):
@@ -331,10 +368,10 @@ def applyFlat(objlist, flat, log, over, kind, dark=""):
             iraf.nsreduce("gn"+image, darki=dark, fl_cut="yes", fl_nsappw="no", fl_dark=fl_dark, fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="yes",logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
-        
+
 def fixBad(objlist, log, over):
-    # interpolate over bad pixels flagged in the DQ plane
-    
+    """ interpolate over bad pixels flagged in the DQ plane"""
+
     for image in objlist:
         image = str(image).strip()
         if os.path.exists("brgn"+image+".fits"):
@@ -346,10 +383,10 @@ def fixBad(objlist, log, over):
         iraf.nffixbad("rgn"+image,logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
-            
+
 def fitCoords(objlist, arc, sflat, log, over, kind):
-    # derive the 2D to 3D spatial/spectral transformation
-    
+    """ derive the 2D to 3D spatial/spectral transformation"""
+
     for image in objlist:
         image = str(image).strip()
         if os.path.exists("fbrgn"+image+".fits"):
@@ -362,12 +399,12 @@ def fitCoords(objlist, arc, sflat, log, over, kind):
             iraf.nsfitcoords("brgn"+image,lamptransf=arc, sdisttransf=sflat,logfile=log)
         elif kind=='Telluric':
             iraf.nsfitcoords("brgn"+image, fl_int='no', lamptransf=arc, sdisttransf=sflat, lxorder=4, syorder=4, logfile=log)
-            
+
 #--------------------------------------------------------------------------------------------------------------------------------#
-            
+
 def transform(objlist, log, over):
-    # apply the transformation determined in the nffitcoords step
-    
+    """ apply the transformation determined in the nffitcoords step"""
+
     for image in objlist:
         image = str(image).strip()
         if os.path.exists("tfbrgn"+image+".fits"):
@@ -381,8 +418,9 @@ def transform(objlist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def makeTelluric(objlist, log, over):
-    # Extracts 1-D spectra and combines them
-    # This step is currently only done interactively
+    """ Extracts 1-D spectra and combines them
+        This step is currently only done interactively
+    """
 
     for image in objlist:
         image = str(image).strip()
@@ -393,9 +431,9 @@ def makeTelluric(objlist, log, over):
                 print "Output file exists and -over not set - skipping extraction in make_telluric"
                 continue
         diam = 0.5
-        
+
         iraf.nfextract("tfbrgn"+image, outpref="x", diameter=diam, fl_int='yes', logfile=log)
-                     
+
 
     #combine all the 1D spectra to one final output file
     telluric = str(objlist[0]).strip()
@@ -413,8 +451,9 @@ def makeTelluric(objlist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def applyTelluric(objlist, obsid, skylist, telinter, log, over):
-    # corrects the data for telluric absorption features
-    # nftelluric is currently only run interactively
+    """ corrects the data for telluric absorption features
+        nftelluric is currently only run interactively
+    """
 
     obsDir = os.getcwd()
     os.chdir('../Tellurics')
@@ -445,13 +484,13 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
                 bblist = open('blackbodyfile', 'r').readlines()
                 bblist = [image.strip() for image in bblist]
                 '''
-            
+
                 os.chdir(obsDir)
                 iraffunctions.chdir(obsDir)
                 if obsid in objlist:
                     index = objlist.index(obsid)
                     i=index+1
-        
+
                     while i<len(objlist) and 'obs' not in objlist[i]:
                         if os.path.exists("atfbrgn"+objlist[i]+".fits"):
                             if over:
@@ -461,7 +500,7 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
                                 print "Output file exists and -over not set - skipping nftelluric in applyTelluric"
                         elif not os.path.exists('atfbrgn'+objlist[i]+'.fits'):
                             iraf.nftelluric('tfbrgn'+objlist[i], outprefix='a', calspec=telluric, fl_inter = 'yes', logfile=log)
-                   
+
                         '''
                         # remove continuum fit from reduced science image
                         if over:
@@ -481,19 +520,21 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
                                 if over:
                                     if os.path.exists('bbatfbrgn'+objlist[i]+'.fits'):
                                         os.remove('bbatfbrgn'+objlist[i]+'.fits')
-                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrgn'+objlist[i]+'.fits') 
+                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrgn'+objlist[i]+'.fits')
                                 elif not os.path.exists('bbatfbrgn'+objlist[i]+'.fits'):
-                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrgn'+objlist[i]+'.fits') 
+                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrgn'+objlist[i]+'.fits')
                                 else:
                                     print "Output file exists and -over- not set - skipping blackbody calibration in applyTelluric"
                         '''
                         i+=1
             os.chdir('../Tellurics')
-                    
+
 #--------------------------------------------------------------------------------------------------------------------------------#
-   
+
 def makeCube(pre, objlist, tel, obsDir, log, over):
-    # reformat the data into a 3-D datacube
+    """ reformat the data into a 3-D datacube
+    """
+    
     os.chdir(obsDir)
     for image in objlist:
         if os.path.exists("c"+pre+image+".fits"):
@@ -508,15 +549,15 @@ def makeCube(pre, objlist, tel, obsDir, log, over):
 #            hdulist.info()
             exptime = hdulist[0].header['EXPTIME']
             cube = hdulist[1].data
-            gain = 2.8 
+            gain = 2.8
             cube_calib = cube / (exptime * gain)
             hdulist[1].data = cube_calib
-            hdulist.flush()          
+            hdulist.flush()
         else:
             iraf.nifcube (pre+image, outcubes = 'c'+pre+image, logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
-    
+
 
 #obsDirList = ['/Users/kklemmer/NIFS_Scripts/AEGISz1284/20130530/H/obs38']
 #calDirList = ['']

@@ -44,6 +44,101 @@ from nifsDefs import datefmt, listit, checkLists
 #--------------------------------------------------------------------#
 
 def start(obsDirList, calDirList, over, start, stop):
+    """
+    #--------------------------------------------------------------------#
+    #                                                                    #
+    #     REDUCE                                                         #
+    #                                                                    #
+    #     This module contains all the functions needed to reduce        #
+    #     the NIFS calibrations (reducing the images is done in the      #
+    #     science reduction scripts). The reduction steps were made      #
+    #     according to                                                   #
+    #                                                                    #
+    #   http://www.gemini.edu/sciops/instruments/nifs/NIFS_Basecalib.py  #
+    #                                                                    #
+    #     COMMAND LINE OPTIONS                                           #
+    #     If you wish to skip this step enter -r in the command line     #
+    #     Specify a start value with -a (default is 1)                   #
+    #     Specify a stop value with -z (default is 6)                    #
+    #                                                                    #
+    #     INPUT FILES:                                                   #
+    #     + Raw files                                                    #
+    #       - Flats (lamps on)                                           #
+    #       - Flats (lamps off)                                          #
+    #       - Arcs                                                       #
+    #       - Darks                                                      #
+    #       - Ronchi masks                                               #
+    #                                                                    #
+    #     OUTPUT FILES:                                                  #
+    #     - Shift file. (ie sCALFLAT.fits)                               #
+    #     - Bad Pixel Mask. (ie rgnCALFLAT_sflat_bmp.pl)                 #
+    #     - Flat field. (ie rgnCALFLAT_flat.fits)                        #
+    #     - Reduced arc frame. (ie wrgnARC.fits)                         #
+    #     - Reduced ronchi mask. (ie. rgnRONCHI.fits)                    #
+    #     - Reduced dark frame. (ie. rgnARCDARK.fits)                    #
+    #                                                                    #
+    #--------------------------------------------------------------------#
+
+    Args:
+        obsDirList: list of paths to science observations. ['path/obj/date/grat/obsid']
+        calDirList: list of paths to calibrations. ['path/obj/date/calibrations']
+        over (boolean): overwrite old files. Default: False.
+        start (int): int; starting step of daycal reduction. Specified at command line with -a. Default: 1.
+        stop (int); stopping step of daycal reduction. Specified at command line with -z. Default: 6.
+
+    Directory structure after nifsReduce:
+
+--->cwd/
+    --->Nifty files (eg Main.py, nifsSort.py, main.log)
+        --->objectname/ (Science target name- found from .fits file headers).
+            --->date/ (YYYYMMDD)
+                --->Calibrations/
+                    --->N*.fits (raw .fits image files)
+                    --->nN*.fits
+                    --->nN*.fits
+                    --->nN*.fits
+                    --->nN*.fits
+                    --->gnN*.fits
+                    --->gnN*.fits
+                    --->gnN*.fits
+                    --->gnN*.fits
+                    --->rgnN*.fits
+                    --->rgnN*.fits
+                    --->rgnN*.fits
+                    --->rgnN*_sflat.fits
+                    --->rgnN*_sflat.bpm.pl
+                    --->rgnN*_flat.fits
+                    --->brgnN*.fits (Possible. May not appear.)
+                    --->wrgnN*.fits
+                    --->arcdarkfile (textfile storing raw image name)
+                    --->arcdarklist (list of .fits files)
+                    --->arclist (list of .fits files)
+                    --->database/
+                    --->idrgn_SCI_[i]_
+                    --->idwrgn_SCI_[i]_
+                    --->flatdarklist (list of .fits files)
+                    --->flatlist (list of .fits files)
+                    --->ronchilist (list of .fits files)
+                    --->sN*.fits (raw .fits file. Eg sN20100410S0362.fits)
+                    --->ronchifile (textfile storing name of raw file)
+                    --->shiftfile (textfile storing name of raw shiftfile).
+                    --->flatfile (textfile storing name of raw _flat image)
+                    --->sflatfile (textile storing name of raw _sflat image)
+                    --->sflat_bpmfile (storing name of sflat_bpm.pl)
+                --->grating_or_filter/ (eg, K, H)
+                    --->ot_observation_name/ (Science images)
+                        --->N*.fits (raw .fits image files)
+                        --->objlist (text file of image names. N*\n)
+                        --->skylist (text file of image names. N*\n)
+                    --->Tellurics/
+                        --->ot_observation_name/
+                        -->N*.fits (raw .fits image files)
+                        --->objtellist (text file. See format above)
+                        --->skylist (text file of image names. N*\n)
+                        --->tellist (text file of image names. N*\n)
+
+    """
+
 
     # Set up the logging file
     FORMAT = '%(asctime)s %(message)s'
@@ -56,16 +151,16 @@ def start(obsDirList, calDirList, over, start, stop):
     logging.info('# Start Calibration Reduction #')
     logging.info('#                             #')
     logging.info('###############################')
-    
+
     print '###############################'
     print '#                             #'
     print '# Start Calibration Reduction #'
     print '#                             #'
     print '###############################'
-    
+
     # Unlearn the used tasks
     iraf.unlearn(iraf.gemini,iraf.gemtools,iraf.gnirs,iraf.nifs)
-    
+
     # Prepare the package for NIFS
     iraf.nsheaders("nifs",logfile=log)
 
@@ -87,7 +182,7 @@ def start(obsDirList, calDirList, over, start, stop):
         arcdarklist = open("arcdarklist", "r").readlines()
         arclist = open("arclist", "r").readlines()
         ronchilist = open("ronchilist", "r").readlines()
-    
+
         calflat = (flatlist[0].strip()).rstrip('.fits')
         flatdark = (flatdarklist[0].strip()).rstrip('.fits')
         arcdark = (arcdarklist[0].strip()).rstrip('.fits')
@@ -103,16 +198,16 @@ def start(obsDirList, calDirList, over, start, stop):
 
             ####################
             ## Prepare raw data
-        
+
             if valindex == 1:
-                getShift(calflat, over, log)    
+                getShift(calflat, over, log)
 
             ####################
             ## Make flat
 
             elif valindex == 2:
                 makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
-            
+
             ####################
             ## Combine arc darks
 
@@ -130,7 +225,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 5:
                 wavecal("rgn"+arc, log, over)
-                
+
             ####################
             ## Combine arc darks
 
@@ -138,7 +233,7 @@ def start(obsDirList, calDirList, over, start, stop):
                 ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
             else:
                 print "No step associated to this value"
-                
+
             valindex += 1
     os.chdir(path)
     return
@@ -148,7 +243,7 @@ def start(obsDirList, calDirList, over, start, stop):
 #####################################################################################
 
 def getShift(calflat, over, log):
-    # Determine the shift to the MDF file
+    """Determine the shift to the MDF file"""
 
     if os.path.exists('s'+calflat+'.fits'):
         if over:
@@ -156,14 +251,14 @@ def getShift(calflat, over, log):
         else:
             return
     iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', logfile=log)
-        
+
     open("shiftfile", "w").write("s"+calflat)
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
-    # make flat and bad pixel mask
-    
+    """make flat and bad pixel mask"""
+
     for image in flatlist:
         image = str(image).strip()
         if os.path.exists('n'+image+'.fits'):
@@ -188,7 +283,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
             iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_int='yes',fl_corr='no',fl_nonl='no', logfile=log)
     flatdarklist = checkLists(flatdarklist, '.', 'n', '.fits')
 
-    if os.path.exists('gn'+calflat+'.fits'):    
+    if os.path.exists('gn'+calflat+'.fits'):
         if over:
             iraf.delete("gn"+calflat+".fits")
             iraf.gemcombine(listit(flatlist,"n"),output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
@@ -224,8 +319,8 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
         iraf.delete("rgn"+flatdark+"_dark.fits")
         iraf.delete("rgn"+calflat+"_sflat.fits")
         iraf.delete("rgn"+calflat+"_sflat_bpm.pl")
-    iraf.nsflat("rgn"+calflat,darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat", darkfile="rgn"+flatdark+"_dark",fl_save_dark='yes',process="fit", thr_flo=0.15,thr_fup=1.55,fl_vardq='yes',logfile=log) 
-        
+    iraf.nsflat("rgn"+calflat,darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat", darkfile="rgn"+flatdark+"_dark",fl_save_dark='yes',process="fit", thr_flo=0.15,thr_fup=1.55,fl_vardq='yes',logfile=log)
+
     #rectify the flat for slit function differences - make the final flat.
 
     if over:
@@ -239,16 +334,16 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
     open("sflatfile", "w").write("rgn"+calflat+"_sflat")
     open("sflat_bpmfile", "w").write("rgn"+calflat+"_sflat_bpm.pl")
 #---------------------------------------------------------------------------------------------------------------------------------------#
-    
+
 def makeArcDark(arcdarklist, arcdark, calflat, over, log):
-    # combine the daytime arc darks
+    """" combine the daytime arc darks"""
     for image in arcdarklist:
         image = str(image).strip()
         if over:
             iraf.delete("n"+image+".fits")
         iraf.nfprepare(image, rawpath='./', shiftimage="s"+calflat, bpm="rgn"+calflat+"_sflat_bpm.pl",fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
     arcdarklist = checkLists(arcdarklist, '.', 'n', '.fits')
-    
+
     if over:
         iraf.delete("gn"+arcdark+".fits")
     if len(arcdarklist) > 1:
@@ -257,17 +352,17 @@ def makeArcDark(arcdarklist, arcdark, calflat, over, log):
         iraf.copy('n'+arcdark+'.fits', 'gn'+arcdark+'.fits')
 
     open("arcdarkfile", "w").write("gn"+arcdark)
-    
+
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def reduceArc(arclist, arc, log, over):
-    # flat field and cut the arc data
+    """ flat field and cut the arc data"""
 
     shiftima = open("shiftfile", "r").readlines()[0].strip()
     sflat_bpm = open("sflat_bpmfile", "r").readlines()[0].strip()
     flat = open("flatfile", "r").readlines()[0].strip()
     dark = open("arcdarkfile", "r").readlines()[0].strip()
-    
+
     for image in arclist:
         image = str(image).strip()
         if os.path.exists("n"+image+".fits"):
@@ -277,7 +372,7 @@ def reduceArc(arclist, arc, log, over):
                 print "Output file exists and -over not set - skipping combine_ima"
                 return
         iraf.nfprepare(image, rawpath="", shiftimage=shiftima, fl_vardq="yes", bpm=sflat_bpm, logfile=log)
-        
+
         if os.path.exists("gn"+image+".fits"):
             if over:
                 iraf.delete("gn"+image+".fits")
@@ -285,12 +380,12 @@ def reduceArc(arclist, arc, log, over):
                 print "Output file exists and -over not set - skipping apply_flat_arc"
                 return
     arclist = checkLists(arclist, '.', 'n', '.fits')
-            
+
     if len(arclist)>1:
         iraf.gemcombine(listit(arclist,"n"),output="gn"+arc,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
     else:
         iraf.copy("n"+arc+".fits", "gn"+arc+".fits")
-        
+
     if os.path.exists("rgn"+image+".fits"):
         if over:
             iraf.delete("rgn"+image+".fits")
@@ -309,10 +404,11 @@ def reduceArc(arclist, arc, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def wavecal(arc, log, over):
-    # Determine the wavelength of the observation and set the arc coordinate
-    # file.  If the user wishes to change the coordinate file to a different
-    # one, they need only to change the "clist" variable to their line list
-    # in the coordli= parameter in the nswavelength call.
+    """ Determine the wavelength of the observation and set the arc coordinate
+        file.  If the user wishes to change the coordinate file to a different
+        one, they need only to change the "clist" variable to their line list
+        in the coordli= parameter in the nswavelength call.
+    """
 
     if os.path.exists("w"+arc+".fits"):
         if over:
@@ -339,24 +435,25 @@ def wavecal(arc, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
-    
+    """combine arc darks
+    """
     for image in ronchilist:
         image = str(image).strip()
         if over:
             iraf.delete("n"+image+'.fits')
         iraf.nfprepare(image,rawpath="", shiftimage="s"+calflat, bpm="rgn"+calflat+"_sflat_bpm.pl", fl_vardq="yes",fl_corr="no",fl_nonl="no", logfile=log)
     ronchilist = checkLists(ronchilist, '.', 'n', '.fits')
-        
+
     # Determine the number of input Ronchi calibration mask files so that
     # the routine runs automatically for single or multiple files.
-    
+
     if over:
         iraf.delete("gn"+ronchiflat+".fits")
     if len(ronchilist) > 1:
         iraf.gemcombine(listit(ronchilist,"n"),output="gn"+ronchiflat,fl_dqpr="yes", masktype="none",fl_vardq="yes",logfile=log)
     else:
         iraf.copy("n"+ronchiflat+".fits","gn"+ronchiflat+".fits")
-        
+
     if over:
         iraf.delete("rgn"+ronchiflat+".fits")
     iraf.nsreduce("gn"+ronchiflat, outpref="r",dark="rgn"+flatdark+"_dark", flatimage="rgn"+calflat+"_flat",fl_cut="yes", fl_nsappw="yes",fl_flat="yes", fl_sky="no", fl_dark="yes", fl_vardq="no", logfile=log)
@@ -371,4 +468,3 @@ def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
     open("ronchifile", "w").write("rgn"+ronchiflat)
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
-    
