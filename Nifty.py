@@ -7,7 +7,7 @@ import logging, os
 
 #--------------------------------------------------------------------#
 #                                                                    #
-#     MAIN                                                           #
+#                         Nifty.py                                   #
 #                                                                    #
 #     This is the python data reduction script for NIFS              #
 #                                                                    #
@@ -38,7 +38,7 @@ def main():
     logging.info('Login file is main.log')
 
     # Enable Debugging break points. Used for testing.
-    debug = True
+    debug = False
 
     parser = OptionParser()
     parser.add_option('-d', '--date', dest='to', type='string', action='store', help='specify the date when the data were observed; e.g. YYYYMMDD (used ONLY within the GEMINI network)')
