@@ -174,12 +174,16 @@ def main():
 
     if tel:
         # reduce the telluric images
+        if debug:
+            a = raw_input('About to enter nifsScience to reduce Telluric images.')
         print ' I am starting to reduce the telluric images '
         logging.info('I am starting to reduce the telluric images')
         if telred:
             nifsScience.start(telDirList, calDirList, start, stop, tel, telinter, over)
 
         # create telluric correction spectrum and blackbody spectrum
+        if debug:
+            a = raw_input('About to enter nifsFluxCalib.')
         print ' I am starting to create telluric correction spectrum and blackbody spectrum'
         logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')
         if fluxcal:
@@ -187,14 +191,18 @@ def main():
 
     # reduce the science images
     print ' I am starting to reduce the science images '
+    if debug:
+        a = raw_input('About to enter nifsScience to reduce science images.')
     logging.info('I am starting to reduce the science images')
     if sci:
         nifsScience.start(obsDirList, calDirList, start, stop, tel, telinter, over)
 
     # merge all cubes
-    print ' I am starting to merge all cubes '
-    logging.info('I am starting to merge all cubes')
     if merge:
+        print ' I am starting to merge all cubes '
+        logging.info('I am starting to merge all cubes')
+        if debug:
+            a = raw_input('About to enter nifsMerge to merge cubes.')
         nifsMerge.start(obsDirList, over)
         print obsDirList
 
