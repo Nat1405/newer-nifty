@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 import glob
 import shutil
@@ -534,7 +536,7 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
 def makeCube(pre, objlist, tel, obsDir, log, over):
     """ reformat the data into a 3-D datacube
     """
-    
+
     os.chdir(obsDir)
     for image in objlist:
         if os.path.exists("c"+pre+image+".fits"):

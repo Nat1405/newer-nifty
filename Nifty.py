@@ -38,7 +38,7 @@ def main():
     logging.info('Login file is main.log')
 
     # Enable Debugging break points. Used for testing.
-    debug = False
+    debug = True
 
     parser = OptionParser()
     parser.add_option('-d', '--date', dest='to', type='string', action='store', help='specify the date when the data were observed; e.g. YYYYMMDD (used ONLY within the GEMINI network)')

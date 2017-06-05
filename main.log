@@ -53220,3 +53220,14 @@ logfile              = /Users/ncomeau/research/newer-nifty/main.log
 verbose              = yes
 
 Working on image rgnN20100401S0142
+2017/06/05 08:29:19  Login file is main.log
+2017/06/05 08:29:19  Starting point is 1
+2017/06/05 08:29:19  Stopping point is 9
+2017/06/05 08:29:19  H line removal method is set to interactive ? no
+2017/06/05 08:29:19  telluric continuum fitting is set to interactive ? no
+2017/06/05 08:29:19  telluric correction is set to interactive ? no
+2017/06/05 08:29:19  Flux calibration is performed ? no
+2017/06/05 08:29:19   I am sorting the data 
+2017/06/05 08:29:39  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/05 08:29:39  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/05 08:29:39  I am starting to reduce the calibrations 
