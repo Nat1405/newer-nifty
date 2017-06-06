@@ -58,7 +58,7 @@ OTHER COMMAND LINE OPTIONS
 
 -o   or   --over		if over is specified then old files will be overwritten during the data reduction
 
--c   or   --nocopy		if specified then the data will not be copied from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)
+-c   or   --copy		if specified then the data will be copied from /net/mko-nfs/sci/dataflow (used ONLY within the GEMINI network)
 
 -s   or    --sort		if specified then the data will be sorted and file lists (i.e. objlist, skylist, flatlist)  will be created; data is sorted as follows:
 				SCIENCE:	Object Name/Date/Grating/OBSID	e.g.  HD14004/20100401/K/obs107
@@ -69,7 +69,7 @@ OTHER COMMAND LINE OPTIONS
 -z   or   --redstop		to specify the stopping step of the baseline calibration reductions; any integer value from 1 to 6 may be chosen; the default is 6; SEE BASELINE CALIBRATION REDUCTION STEPS BELOW
 -k  or   --notelred		if specified then the telluric data will not be reduced according to the science and telluric reduction steps below
 -g  or	 --nofluxcal          if specified then the final flux calibrated telluric (with hydrogen lines removed) will not be produced, which means that a telluric correction cannot be performed
--t   or   --notelcorr	   	if specified then no H line removal, flux calibrations, or telluric corrections on science data will be executed
+-t   or   --telcorr	   	if specified then no H line removal, flux calibrations, or telluric corrections on science data will be executed
 -e  or   --stdspectemp   	to specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000
 -f   or   --stdmag	      	to specify the K band magnitude of the standard star; e.g. 5.4
 				if you do not wish to do a flux calibration then enter -f -1
