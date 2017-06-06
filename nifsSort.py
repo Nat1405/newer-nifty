@@ -44,7 +44,9 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 
 def start(dir, tel, sort, over, copy, program, date):
     """Copy and sort data based on command line input.
-    If -c (or --copy) True is specified data will be copied from Gemini network.
+
+    If -c (or --copy) True is specified data will be copied from Internal Gemini
+    network (used ONLY within Gemini).
 
     Args:
         dir:            Local path to raw files directory. Specified with -q at command line.
@@ -85,21 +87,23 @@ def start(dir, tel, sort, over, copy, program, date):
     #    These conditionals are used when a local path to raw files            #
     #    is specified with -q at command line.                                 #
     #                                                                          #
+    #                                                                          #
     ############################################################################
     ############################################################################
 
 
-    # If a local raw directory path is given with -q, sort or don't sort data.
+    # IF a local raw directory path is given with -q at command line, sort OR don't sort data.
     if dir:
         if sort:
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
             objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, dir)
             calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, dir)
-            # if a telluric correction will be performed sort the science and telluric images based on time between observations
+            # If a telluric correction will be performed sort the science and telluric images based on time between observations.
+            # This will ONLY NOT be executed if -t False is specified at command line.
             if tel:
                 telSort(telDirList, obsDirList)
-        # When not sorting, create a list of data directory paths
-        # This will be executed if -q <path to raw image files> and -s False are
+        # When not sorting, create a list of data directory paths.
+        # This will ONLY be executed IF -q <path to raw image files> AND -s False are
         # specified at command line.
         elif not sort:
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
@@ -112,33 +116,36 @@ def start(dir, tel, sort, over, copy, program, date):
     #                       CASE 2: USE GEMINI NETWORK                         #
     #                                                                          #
     #     These conditionals are used if -c True is specified at command       #
-    #     line. Files will be copied from Gemini internal network. Will also   #
-    #     run if files were previously copied from the Gemini Network.         #
+    #     line OR files were previously copied from Internal Gemini Network.   #
+    #     Files will be copied from Gemini internal network.                   #
+    #                                                                          #
     #                                                                          #
     ############################################################################
     ############################################################################
 
 
-    # Copy from Gemini Internal Network AND sort. Specified with -c True at command
-    # line. MUST provide a program id or date with -d or -p.
+    # Copy from Gemini Internal Network AND sort. This will be executed IF ONLY -c True is
+    # specified at command line. MUST provide a program id or date with -d or -p.
 
     elif copy and sort:
-        # copy data from archives and sort if a program is given
+        # Copy data from archives and sort ONLY IF a program is given with -p.
         if program:
             allfilelist, filelist, skylist, telskylist = getProgram(program, date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
             objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
             calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
-            # if a telluric correction will be performed sort the science and telluric images based on time between observations
+            # If a telluric correction will be performed sort the science and telluric images based on time between observations.
+            # This will ONLY NOT be executed if -t False is specified at command line.
             if tel:
                 telSort(telDirList, obsDirList)
-        # copy data from archives and sort if a date is given
+        # Copy data from archives and sort ONLY IF a date is given with -d.
         elif date:
             allfilelist, filelist, skylist, telskylist = getScience(date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList = getCals(filelist, over)
             objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
             calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
-            # if a telluric correction will be performed sort the science and telluric images based on time between observations
+            # If telluric correction will be performed sort the science and telluric images based on time between observations.
+            # This will ONLY NOT be executed if -t False is specified at command line.
             if tel:
                 telSort(telDirList, obsDirList)
             # Exit if a program or date was not probided with -p or -d at command line.
@@ -146,15 +153,15 @@ def start(dir, tel, sort, over, copy, program, date):
                 print "\n Error in nifsSort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
                 raise SystemExit
 
-    # Copy from Gemini Internal network and DON'T sort. Specified with -c True and -s False at command line. MUST provide a program id or date with -d or -p.
+    # Copy from Gemini Internal network and DON'T sort. This will be executed IF -c True and -s False are specified at command line. MUST provide a program id or date with -d or -p.
     elif copy and not sort:
-        # when a program is given (looks for program using http://fits/xmlfilelist/summary/NIFS)
+        # When a program is given (looks for program using http://fits/xmlfilelist/summary/NIFS)
         if program:
             allfilelist, filelist, skylist, telskylist = getProgram(program, date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
-        # when a date is given (looks for data using http://fits/xmlfilelist/summary/NIFS)
+        # When a date is given (looks for data using http://fits/xmlfilelist/summary/NIFS)
         elif date:
             allfilelist, filelist, skylist, telskylist = getScience(date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
@@ -211,7 +218,7 @@ def start(dir, tel, sort, over, copy, program, date):
 
 def makeSortFiles(dir):
 
-    ### creates lists of file names necessary for sorting the files into the proper directories
+    """Creates lists of file names necessary for sorting the files into the proper directories."""
 
     allfilelist = []
     flatlist = []
@@ -323,7 +330,7 @@ def makeSortFiles(dir):
 
 def sortObs(allfilelist, skylist, telskylist, dir):
 
-    """ sorts the science images, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass, when not using the Gemini network
+    """Sorts the science images, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass, when not using the Gemini network.
     """
 
     objDirList = []
@@ -445,7 +452,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
 
 def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, dir):
 
-    """ sort calibrations into the appropriate directory based on date
+    """Sort calibrations into the appropriate directory based on date.
     """
     calDirList = []
     filelist = ['arclist', 'arcdarklist', 'flatlist', 'ronchilist', 'flatdarklist']
@@ -551,7 +558,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
 def getPaths(allfilelist, objDateList, dir):
 
-    """ creates a list of Calibrations directories, observation directories, and Tellurics directories
+    """Creates a list of Calibrations directories, observation directories, and Tellurics directories.
     """
 
     obsDirList = []
@@ -607,14 +614,16 @@ def getPaths(allfilelist, objDateList, dir):
 
 def telSort(telDirList, obsDirList):
 
-    """ matches science images with the telluric images that are closest in time
-        creates a file in each telluric observation directory called objtellist
-        objtellist lists the obsid of the science images (ie. obs123) and then the science images with this obsid that match the telluric observation
-        EXAMPLE:    obs28
-                    N20130527S0264
-                    N20130527S0266
-                    obs30
-                    N201305727S0299
+    """Matches science images with the telluric images that are closest in time.
+    Creates a file in each telluric observation directory called objtellist.
+    objtellist lists the obsid of the science images (ie. obs123) and then the
+    science images with this obsid that match the telluric observation.
+
+    EXAMPLE:    obs28
+                N20130527S0264
+                N20130527S0266
+                obs30
+                N201305727S0299
 
     """
 
@@ -691,15 +700,20 @@ def telSort(telDirList, obsDirList):
 
     return
 
+
+
 ##################################################################################################################
 #                                                                                                                #
 #                                       CASE 2: GEMINI NETWORK FUNCTIONS                                         #
 #                                                                                                                #
 ##################################################################################################################
 
+
+
 def sortObsGem(allfilelist, skylist, telskylist):
 
-    """ sorts the science images, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass; called when sorting in the Gemini network
+    """Sorts the science images, tellurics and acquisitions into the appropriate directories based
+    on date, grating, obsid, obsclass; called when sorting in the Gemini network.
     """
 
     path = os.getcwd()
@@ -809,7 +823,7 @@ def sortObsGem(allfilelist, skylist, telskylist):
 
 def sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, dateObjList, objDirList, obsidDateList):
 
-    """ sort calibrations into the appropriate directory based on date
+    """Sort calibrations into the appropriate directory based on date.
     """
     calDirList = []
 
@@ -902,7 +916,7 @@ def sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, dateOb
 
 def getProgram(program, date, over):
 
-    """ copies all the science, acquisition, and telluric images for a given program to the Raw directory
+    """Copies all the science, acquisition, and telluric images for a given program to the Raw directory.
     """
     rawfiles = []
     missingRaw = []
@@ -968,7 +982,7 @@ def getProgram(program, date, over):
 
 def getScience(date, over):
 
-    """ copies all the science, acquisition, and telluric images for a given date to the Raw directory
+    """Copies all the science, acquisition, and telluric images for a given date to the Raw directory.
     """
     allfilelist = []
     filelist = []
@@ -1036,7 +1050,8 @@ def getScience(date, over):
 
 def getCals(filelist, over):
 
-    """ copies the necessary calibration files to the Raw directory using http://fits/calmgr to match calibrations frames to science frames
+    """Copies the necessary calibration files to the Raw directory using
+    http://fits/calmgr to match calibrations frames to science frames.
     """
     # path to data archive
     raw = '/net/mko-nfs/sci/dataflow'
@@ -1091,7 +1106,7 @@ def getCals(filelist, over):
 
 def getArc(filelist, obsidlist):
 
-    """ finds and returns a list of arcs and arc darks to use to reduce the science data
+    """Finds and returns a list of arcs and arc darks to use to reduce the science data.
     """
     templist = []
     arclist = []
@@ -1147,7 +1162,8 @@ def getArc(filelist, obsidlist):
 
 def getFlat(filelist):
 
-    """ finds and returns a list of flats (lamps on, lamps off, and ronchi) to use to reduce the science data
+    """Finds and returns a list of flats (lamps on, lamps off, and ronchi) to use to
+    reduce the science data.
     """
 
     templist = []

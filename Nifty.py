@@ -50,7 +50,7 @@ def main():
     parser.add_option('-r', '--noreduce', dest = 'red', default = True, action = 'store_false', help = 'don\'t reduce the baseline calibrations')
     parser.add_option('-k', '--notelred', dest = 'telred', default= 'True', action = 'store_false', help = 'don\'t reduce telluric data')
     parser.add_option('-g', '--fluxcal', dest = 'fluxcal', default = 'True', action = 'store_true', help = ' perform flux calibration')
-    parser.add_option('-t', '--notelcorr', dest = 'tel', default= 'True', action = 'store_false', help = 'don\'t perform telluric correction')
+    parser.add_option('-t', '--telcorr', dest = 'tel', default= 'True', action = 'store_false', help = 'don\'t perform telluric correction')
     parser.add_option('-e', '--stdspectemp', dest = 'spectemp', action = 'store', help = 'specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000')
     parser.add_option('-f', '--stdmag', dest = 'mag', action = 'store', help = 'specify the IR magnitude of the standard star; if you do not wish to do a flux calibration then enter -f x')
     parser.add_option('-l', '--hline', dest = 'hline', type = 'string', action = 'store', help = 'choose a method for removing H lines from the telluric spectra. The default is vega and the choices are vega, linefit_auto, linefit_manual, vega_tweak, linefit_tweak, and none')
