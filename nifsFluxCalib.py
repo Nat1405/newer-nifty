@@ -60,7 +60,7 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
 #    COMMAND LINE OPTIONS                                            #
 #    If you wish to skip this script enter -t in the command line    #
 #    Specify a spectral type or temperature with -e                  #
-#    Specify a magniture with -f                                     #
+#    Specify a magnitude with -f                                     #
 #    Specify an H line fitting method with -l (default is vega)      #
 #    Specify interactive H line fitting with -i (default inter=no)   #
 #    Specify interactive continuum fitting with -y (def inter=no)    #
@@ -73,6 +73,21 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
 #     - flux calibrated blackbody spectrum                           #
 #                                                                    #
 #--------------------------------------------------------------------#
+
+    Args:
+        telDirList: list of telluric directories.
+        continuuminter (boolean): Interactive continuum fitting. Specified with -y
+                                  at command line. Default False.
+        hlineinter (boolean):  Interactive H line fitting. Specified with -i at
+                               command line. Default False.
+        hline_method (string): Method for removing H lines from the telluric spectra.
+                               Specified with -l or --hline at command line. Default is
+                               vega and choices are vega, linefit_auto, linefit_manual,
+                               vega_tweak, linefit_tweak, and none.
+        spectemp: spectral type or temperature. Specified at command line with -e or --stdspectemp.
+        mag: The IR magnitude of the standard star. Specified at command line with -f or --stdmag.
+        over: overwrite old files.
+
     """
 
     path = os.getcwd()
@@ -149,10 +164,10 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
             #need to copy files so have right names for later use
             iraf.imcopy(input=standard+'[sci,'+str(1)+']', output="ftell_nolines"+band, verbose='no')
 
-        if hline_method == "none" and not no_hline:
-            print ""
-            print "***Removing intrinsic lines in standard star***"
-            print ""
+        #if hline_method == "none" and not no_hline:
+        #    print ""
+        #    print "***Removing intrinsic lines in standard star***"
+        #    print ""
 
         if hline_method == "vega" and not no_hline:
             vega(standard, band, path, hlineinter, airmass_std, t1, log, over)
@@ -280,7 +295,7 @@ def mag2mass(name, path, spectemp, mag, band):
             path: current working directory (usually with Nifty files).
             spectemp: specified at command line with -e.
             mag: specified at command line with -f.
-            band: from the telluric standard .fits file.
+            band: from the telluric standard .fits file header. Eg 'J', 'K'.
 
     """
 
@@ -475,8 +490,23 @@ def write_line_positions(nextcur, var):
 #-------------------------------------------------------------------------------#
 
 def vega(spectrum, band, path, hlineinter, airmass, t1, log, over):
-    """Use "telluric" to remove H lines from standard star, then remove normalization added by telluric
-       specify the extension for vega_ext.fits from the band
+    """Use iraf.telluric to remove H lines from standard star, then remove
+    normalization added by telluric with iraf.imarith.
+
+    The extension for vega_ext.fits is specified from band (from header of
+    telluricfile.fits).
+
+    Args:
+        spectrum (string): filename from 'telluricfile'.
+        band: from telluricfile .fits header. Eg 'K', 'H', 'J'.
+        path: usually top directory with Nifty scripts.
+        hlineinter (boolean): Interactive H line fitting. Specified with -i at
+                              command line. Default False.
+        airmass: from telluricfile .fits header.
+        t1: "pointer" to telluric_hlines.txt.
+        log: path to logfile.
+        over (boolean): overwrite old files. Specified at command line.
+
     """
     if band=='K':
         ext = '1'
@@ -548,7 +578,16 @@ def linefit_manual(spectrum, band):
 #-------------------------------------------------------------------------------#
 
 def effspec(telDir, standard, telnolines, mag, T, over):
-    """This flux calibration method was adapted to NIFS
+    """This flux calibration method was adapted to NIFS.
+
+    Args:
+        telDir: telluric directory.
+        standard: "pointer" to file named in telluricfile.
+        telnolines (string): filename.
+        mag: IR magnitude of standard star.
+        T: temperature in kelvin.
+        over (boolean): overwrite old files.
+
     """
 
     # define constants
