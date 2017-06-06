@@ -43,23 +43,23 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 
 
 def start(dir, tel, sort, over, copy, program, date):
-    """ copy and sort data based on command line input.
-        If -c (or --copy) True is specified data will be copied from Gemini network.
+    """Copy and sort data based on command line input.
+    If -c (or --copy) True is specified data will be copied from Gemini network.
 
-    Parameters:
-        dir: local path to raw files directory. Specified with -q at command line.
-        tel (boolean):  Specified with -t at command line. If yes no
+    Args:
+        dir:            Local path to raw files directory. Specified with -q at command line.
+        tel (boolean):  Specified with -t at command line. If False no
                         telluric corrections will be executed. Default: True.
-        over (boolean): Specified with -o at command line. If yes
+        over (boolean): Specified with -o at command line. If True
                         old files will be overwritten during data reduction. Default: False.
-        sort (boolean): Specified with -s or --sort at command line. If True data will be
+        sort (boolean): Specified with -s or --sort at command line. If False data will not be
                         sorted. Default: True.
 
             FOR INTERNAL GEMINI USE:
         copy (boolean): Specified with -c or --copy at command line. If True data
-                        will be copied from gemini network. Default: False.
-        program: specied with -p at command line. Used only within Gemini network.
-        date: specified with -d at command line. YYYYMMDD. Used only within Gemini network.
+                        will be copied from Gemini network. Default: False.
+        program: Specified with -p at command line. Eg GN-2013B-Q-109. Used only within Gemini network.
+        date: Specified with -d at command line. YYYYMMDD. Used only within Gemini network.
 
     """
 
@@ -89,7 +89,7 @@ def start(dir, tel, sort, over, copy, program, date):
     ############################################################################
 
 
-    # If a local raw directory path is given with -q at command line, sort or don't sort data.
+    # If a local raw directory path is given with -q, sort or don't sort data.
     if dir:
         if sort:
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
@@ -109,17 +109,19 @@ def start(dir, tel, sort, over, copy, program, date):
     ############################################################################
     ############################################################################
     #                                                                          #
-    #                     CASE 2: USE GEMINI NETWORK                           #
+    #                       CASE 2: USE GEMINI NETWORK                         #
     #                                                                          #
     #     These conditionals are used if -c True is specified at command       #
-    #     line (files will be copied from Gemini internal network) OR files    #
-    #     were previously copied from the Gemini Network.                      #
+    #     line. Files will be copied from Gemini internal network. Will also   #
+    #     run if files were previously copied from the Gemini Network.         #
     #                                                                          #
     ############################################################################
     ############################################################################
 
 
-    # Copy from Gemini Internal Network and sort. Specified with -c True at command line. Must provide a program id or date with -d or -p.
+    # Copy from Gemini Internal Network AND sort. Specified with -c True at command
+    # line. MUST provide a program id or date with -d or -p.
+
     elif copy and sort:
         # copy data from archives and sort if a program is given
         if program:
@@ -144,7 +146,7 @@ def start(dir, tel, sort, over, copy, program, date):
                 print "\n Error in nifsSort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
                 raise SystemExit
 
-    # Copy from Gemini Internal network and DON'T sort. Specified with -c True and -s False at command line. Must provide a program id or date with -d or -p.
+    # Copy from Gemini Internal network and DON'T sort. Specified with -c True and -s False at command line. MUST provide a program id or date with -d or -p.
     elif copy and not sort:
         # when a program is given (looks for program using http://fits/xmlfilelist/summary/NIFS)
         if program:
@@ -158,12 +160,12 @@ def start(dir, tel, sort, over, copy, program, date):
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
-        # Exit if a program or date was not probided with -p or -d at command line.
+        # Exit if a program or date was not provided with -p or -d at command line.
         else:
             print "\n Error in nifsSort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
             raise SystemExit
 
-    # Sort data already copied from Gemini Network. Specified if -s and -c are NOT specified at command line.
+    # Sort data ALREADY copied from Gemini Network. Specified if -s and -c are NOT specified at command line.
     elif sort and not copy:
         allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
         # Sort and get data from Gemini Internal Network
@@ -174,7 +176,7 @@ def start(dir, tel, sort, over, copy, program, date):
         if tel:
             telSort(telDirList, obsDirList)
 
-    # exit if no or incorrectly formatted input is given
+    # Exit if no or incorrectly formatted input is given
     else:
         print "\n Enter a program ID, observation date, or directory where the raw files are located.\n"
         raise SystemExit
