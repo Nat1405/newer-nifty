@@ -270,6 +270,13 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
 
 def mag2mass(name, path, spectemp, mag, band):
     """Find standard star spectral type, temperature, and magnitude
+
+        Args:
+            name: RA and Dec
+            path: current working directory hosting Nifty
+            spectemp: specified at command line with -e.
+            mag: specified at command line with -f.
+
     """
 
     starfile = 'std_star.txt'
@@ -341,13 +348,14 @@ def mag2mass(name, path, spectemp, mag, band):
             count = 0
             aux = 0
             for line in html2:
-                if (line[0:8] == 'Spectral') :
+                if (line[0:13] == 'Spectraltype:') :
                     numi = aux + 5
                     count = 0
                     break
                 else:
                     count += 1
                 aux += 1
+            print html2[aux:numi+1]
             spectral_type = str(html2[numi][0:3])
             if count > 0:
                 print "ERROR: problem with SIMBAD output. You'll need to supply the spectral type or temperature in the command line prompt."
