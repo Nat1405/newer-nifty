@@ -26,8 +26,7 @@ def datefmt():
 #-----------------------------------------------------------------------------#
 
 def getFitsHeader(fitsFile, fitsKeyWords):
-    # imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py
-    #
+    """ imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py """
     selection2 ="fullheader/"+fitsFile
     url2 ="http://fits/" + selection2
     u2 = urllib.urlopen(url2)
@@ -43,7 +42,7 @@ def getFitsHeader(fitsFile, fitsKeyWords):
 #-----------------------------------------------------------------------------#
 
 def FitsKeyEntry(fitsKeyWd, fullheader):
-    # imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py
+    """ imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py """
     selectEntry ="none found"
     fullList = fullheader.splitlines()
     checkKeyWd = fitsKeyWd.ljust(8,' ')
@@ -58,8 +57,8 @@ def FitsKeyEntry(fitsKeyWd, fullheader):
 #-----------------------------------------------------------------------------#
 
 def stripString(inputString):
-    # imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py
-    #
+    """ imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py """
+
     delimString ="'"
     delimList = []
     for index in range(len(inputString)):
@@ -73,8 +72,8 @@ def stripString(inputString):
 #-----------------------------------------------------------------------------#
 
 def stripNumber(inputString):
-    # imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py
-    #
+    """ imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py
+    """
     delim1 ="="
     delim2 ="/"
     delimList = []
@@ -93,7 +92,7 @@ def stripNumber(inputString):
 #-----------------------------------------------------------------------------#
 
 def getUrlFiles(url,tag):
-    # imported from IPM scripts globaldefs.py
+    """ imported from IPM scripts globaldefs.py """
     u = urllib.urlopen(url)
     xml = u.read()
     u.close()
@@ -115,12 +114,14 @@ def getUrlFiles(url,tag):
 #-----------------------------------------------------------------------------#
 
 def checkOverCopy(filelist, path, over):
-    # checks if over is True or False and copies files from /net/wikiwiki/dataflow based on this
+    """ checks if over is True or False and copies files from /net/mko-nfs/sci/dataflo
+    based on this.
+    """
 
     rawfiles = []
     missingRaw = []
 
-    raw = '/net/wikiwiki/dataflow'
+    raw = '/net/mko-nfs/sci/dataflo'
 
 
     for entry in filelist:
@@ -159,7 +160,7 @@ def checkOverCopy(filelist, path, over):
 #-----------------------------------------------------------------------------#
 
 def checkQAPIreq(alist):
-    # checks to make sure that the arcs meet the PI and QA requirements
+    """ checks to make sure that the arcs meet the PI and QA requirements """
 
     blist = []
     for entry in alist:
@@ -180,7 +181,8 @@ def checkQAPIreq(alist):
 #-----------------------------------------------------------------------------#
 
 def listit(list, prefix):
-    # Returns a string where each element of list is prepended with prefix
+    """ Returns a string where each element of list is prepended with prefix """
+
     l = []
     for x in list:
         l.append(prefix+(x.strip()).rstrip('.fits'))
@@ -189,7 +191,10 @@ def listit(list, prefix):
 #-----------------------------------------------------------------------------#
 
 def checkDate(list):
-    # check the dates on all the telluric and acquisition files to make sure that there are science images on the same night
+    """ check the dates on all the telluric and acquisition files to make sure that
+        there are science images on the same night
+    """
+
     removelist = []
     datelist = []
 
@@ -263,6 +268,8 @@ def checkEntry(entry, entryType, filelist):
 #-----------------------------------------------------------------------------#
 
 def checkLists(list, path, prefix, suffix):
+    """Check that all files made it through an iraf step. """
+
     for image in list:
         image = image.strip()
         if os.path.exists(path+'/'+prefix+image+suffix):
@@ -276,7 +283,8 @@ def checkLists(list, path, prefix, suffix):
 #-----------------------------------------------------------------------------#
 
 def writeCenters(objlist):
-    """Write centers to a text file"""
+    """Write centers to a text file, load that textfile into list centers and
+        return that list. """
 
     centers = []
     for image in objlist:
