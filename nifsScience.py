@@ -83,8 +83,8 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
     Args:
         telDirList: [‘path/obj/date/grat/Tellurics/obsid’]
         calDirList: [‘path/obj/date/Calibrations’]
-        tel (bool): Default True.
-        telinter (bool): Default True.
+        tel (bool): Perform telluric correction. Default True.
+        telinter (bool): Perform an interactive Telluric Correction. Default True.
 
     """
     path = os.getcwd()
@@ -277,7 +277,21 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
 ##################################################################################################################
 
 def prepare(inlist, shiftima, sflat_bpm, log, over):
-    """prepare list of images"""
+    """Prepare list of images using iraf.nfprepare. Output: -->n.
+
+    Processing with NFPREPARE (this task is used only for NIFS data
+    but other instruments have their own preparation tasks
+    with similar actions) will rename the data extension and add
+    variance and data quality extensions. By default (see NSHEADERS)
+    the extension names are SCI for science data, VAR for variance, and
+    DQ for data quality (0 = good). Generation of the data quality
+    plane (DQ) is important in order to fix hot and dark pixels on the
+    NIFS detector in subsequent steps in the data reduction process.
+    Various header keywords (used later) are also added in NFPREPARE.
+    NFPREPARE will also add an MDF file (extension MDF) describing the
+    NIFS image slicer pattern and how the IFU maps to the sky field.
+
+"""
 
     for image in inlist:
         if os.path.exists("n"+image+".fits"):
@@ -294,7 +308,7 @@ def prepare(inlist, shiftima, sflat_bpm, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def combineImages(inlist, out, log, over):
-    """ gemcombine a list of images"""
+    """Gemcombine multiple frames. Output: -->gn."""
     print inlist
     if os.path.exists(out+".fits"):
         if over:
@@ -307,7 +321,7 @@ def combineImages(inlist, out, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def copyImage(input, output, over):
-    """ copy an image (used to add the correct prefix)"""
+    """Copy an image (used to add the correct prefix)."""
 
     if os.path.exists(output):
         if over:
@@ -320,7 +334,7 @@ def copyImage(input, output, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def skySubtractObj(objlist, skylist, log, over):
-    """" sky subtraction for science"""
+    """"Sky subtraction for science using iraf.gemarith(). Output: -->gn"""
 
     for i in range(len(objlist)):
         image = str(objlist[i])
@@ -350,7 +364,18 @@ def skySubtractTel(tellist, sky, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def applyFlat(objlist, flat, log, over, kind, dark=""):
-    """ flat field and cut the data"""
+    """Flat field and cut the data with iraf.nsreduce(). Output: -->rgn.
+
+    NSREDUCE - Process NearIR Spectral data (task resides in the GNIRS
+    package)
+
+    NSREDUCE is used for basic reduction of raw data - it provides a
+    single, unified interface to several tasks and also allows for
+    the subtraction of dark frames and dividing by the flat. For
+    NIFS reduction, NSREDUCE is used to call the NSCUT and NSAPPWAVE
+    routines.
+
+    """
 
     fl_dark = "no"
     if dark != "":
@@ -372,7 +397,16 @@ def applyFlat(objlist, flat, log, over, kind, dark=""):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def fixBad(objlist, log, over):
-    """ interpolate over bad pixels flagged in the DQ plane"""
+    """Interpolate over bad pixels flagged in the DQ plane with iraf.nffixbad(). Output: -->brgn.
+
+    NFFIXBAD - Fix Hot/Cold pixels on the NIFS detector
+
+    This routine uses the information in the Data Quality
+    extensions to fix hot and cold pixels in the NIFS science
+    fields. NFFIXBAD is a wrapper script which calls the task
+    FIXPIX, using the DQ plane to define the pixels to be corrected.
+
+    """
 
     for image in objlist:
         image = str(image).strip()
@@ -387,7 +421,10 @@ def fixBad(objlist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def fitCoords(objlist, arc, sflat, log, over, kind):
-    """ derive the 2D to 3D spatial/spectral transformation"""
+    """ Derive the 2D to 3D spatial/spectral transformation with iraf.nsfitcoords().
+    Output: -->fbrgn
+
+    """
 
     for image in objlist:
         image = str(image).strip()
@@ -405,7 +442,19 @@ def fitCoords(objlist, arc, sflat, log, over, kind):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def transform(objlist, log, over):
-    """ apply the transformation determined in the nffitcoords step"""
+    """Apply the transformation determined in the iraf.nffitcoords() step with
+    iraf.nstransform(). Output: -->tfbrgn
+
+    NSTRANSFORM - Spatially rectify and wavelength calibrate data.
+
+    NFTRANSFORM applies the wavelength solution found by
+    NSWAVELENGTH and the spatial correction found by NFSDIST,
+    aligning all the IFU extensions consistently onto a common
+    coordinate system. The output of this routine is still in 2D
+    format, with each of the IFU slices represented by its own data
+    extension.
+
+    """
 
     for image in objlist:
         image = str(image).strip()
@@ -420,8 +469,15 @@ def transform(objlist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def makeTelluric(objlist, log, over):
-    """ Extracts 1-D spectra and combines them
-        This step is currently only done interactively
+    """ Extracts 1-D spectra with iraf.nfextract() and combines them with iraf.gemcombine().
+    iraf.nfextract() is currently only done interactively. Output: -->atfbrgn
+
+    NFEXTRACT - Extract NIFS spectra.
+
+    This could be used to extract a 1D spectra from IFU data and is
+    particularly useful for extracting the bright spectra of
+    telluric calibrator stars. Note that this routine only works
+    on data that has been run through NFTRANSFORM.
     """
 
     for image in objlist:
@@ -453,8 +509,13 @@ def makeTelluric(objlist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def applyTelluric(objlist, obsid, skylist, telinter, log, over):
-    """ corrects the data for telluric absorption features
-        nftelluric is currently only run interactively
+    """ Corrects the data for telluric absorption features with iraf.nftelluric().
+    iraf.nftelluric() is currently only run interactively. Output: -->atfbrgn
+
+    NFTELLURIC
+
+    NFTELLURIC uses input science and a 1D spectrum of a telluric
+    calibrator to correct atmospheric absorption features.
     """
 
     obsDir = os.getcwd()
@@ -534,7 +595,15 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def makeCube(pre, objlist, tel, obsDir, log, over):
-    """ reformat the data into a 3-D datacube
+    """ Reformat the data into a 3-D datacube using iraf.nifcube(). Output: If
+    telluric correction to be applied, -->catfbrgn. Else, -->ctfbrgn.
+
+    NIFCUBE - Construct 3D NIFS datacubes.
+
+    NIFCUBE takes input from data output by either NFFITCOORDS or
+    NFTRANSFORM and converts the 2D data images into data cubes
+    that have coordinates of x, y, lambda.
+
     """
 
     os.chdir(obsDir)
@@ -559,8 +628,3 @@ def makeCube(pre, objlist, tel, obsDir, log, over):
             iraf.nifcube (pre+image, outcubes = 'c'+pre+image, logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
-
-
-#obsDirList = ['/Users/kklemmer/NIFS_Scripts/AEGISz1284/20130530/H/obs38']
-#calDirList = ['']
-#start(obsDirList, calDirList, 8, 9, True, False)
