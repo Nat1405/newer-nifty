@@ -269,13 +269,18 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
 #####################################################################################
 
 def mag2mass(name, path, spectemp, mag, band):
-    """Find standard star spectral type, temperature, and magnitude
+    """Find standard star spectral type, temperature, and magnitude. Write results
+       to std_star.txt in cwd.
+
+    Executes a SIMBAD query and parses the resulting html to find spectal type,
+    temperature and/or magnitude.
 
         Args:
-            name: RA and Dec
-            path: current working directory hosting Nifty
+            name (string): RA, d, Dec, d (for negatives); RA, +d, Dec, d (for positives).
+            path: current working directory (usually with Nifty files).
             spectemp: specified at command line with -e.
             mag: specified at command line with -f.
+            band: from the telluric standard .fits file.
 
     """
 
@@ -343,7 +348,13 @@ def mag2mass(name, path, spectemp, mag, band):
         if 'Noastronomicalobjectfound' in search_error:
             print "ERROR: didn't find a star at your coordinates within a search radius of 10 or 1 arcsec. You'll need to supply information in a file; see the manual for instructions."
             sys.exit()
+
+
+        # Split source by \n into a list
         html2 = html2.split('\n')
+
+
+
         if specfind:
             count = 0
             aux = 0
@@ -369,24 +380,32 @@ def mag2mass(name, path, spectemp, mag, band):
                     i = html2.index(line)
                     break
             while 'IMGSRC' not in html2[i]:
-                if all(s in html2[i] for s in ('K', 'C', '[', ']')):
-                    index = html2[i].index('[')
-                    Kmag = html2[i][1:index]
-                if all(s in html2[i] for s in ('H', 'C', '[', ']')):
-                    index = html2[i].index('[')
-                    Hmag = html2[i][1:index]
-                if all(s in html2[i] for s in ('J', 'C', '[', ']')):
-                    index = html2[i].index('[')
-                    Jmag = html2[i][1:index]
+                if all(s in html2[i] for s in ('K', '[', ']')):
+                    if 'C' in html2[i+2]:
+                        index = html2[i].index('[')
+                        Kmag = html2[i][1:index]
+                if all(s in html2[i] for s in ('H', '[', ']')):
+                    if 'C' in html2[i+2]:
+                        index = html2[i].index('[')
+                        Hmag = html2[i][1:index]
+                if all(s in html2[i] for s in ('J', '[', ']')):
+                    if 'C' in html2[i+2]:
+                        index = html2[i].index('[')
+                        Jmag = html2[i][1:index]
                 i+=1
                 if i>len(html2):
                     print "ERROR: problem with SIMBAD output. You'll need to supply the magniture in the command line prompt."
+
+
         if not Kmag:
             Kmag = 'nothing'
         if not Jmag:
             Jmag = 'nothing'
         if not Hmag:
             Hmag = 'nothing'
+
+
+
         if tempfind:
             #Find temperature for this spectral type in kelvinfile
             count = 0
@@ -405,6 +424,8 @@ def mag2mass(name, path, spectemp, mag, band):
                 print "ERROR: can't find a temperature for spectral type", spectral_type,". You'll need to supply information in a file; see the manual for instructions."
                 sys.exit()
 
+
+        # Write results to std_star.txt
         if (Kmag or Jmag or Hmag) and Kmag!='x' and magfind:
             print "magnitudes retrieved OK"
             sf.write('k K '+Kmag+' '+kelvin+'\n')
@@ -427,8 +448,8 @@ def mag2mass(name, path, spectemp, mag, band):
 #-------------------------------------------------------------------------------#
 
 def write_line_positions(nextcur, var):
-    """
-    Write line x,y info to file containing Lorentz fitting commands for bplot
+    """Write line x,y info to file containing Lorentz fitting commands for bplot
+
     """
 
     curfile = open(nextcur, 'w')
@@ -527,15 +548,13 @@ def linefit_manual(spectrum, band):
 #-------------------------------------------------------------------------------#
 
 def effspec(telDir, standard, telnolines, mag, T, over):
+    """This flux calibration method was adapted to NIFS
     """
-    This flux calibration method was adapted to NIFS
-    """
-
 
     # define constants
-    c=2.99792458e8
+    c = 2.99792458e8
     h = 6.62618e-34
-    k=1.3807e-23
+    k = 1.3807e-23
 
     f0emp = lambda p, T: p[0]*np.log(T)**2+p[1]*np.log(T)+p[2]
     fnu = lambda x, T: (2.*h*(x**3)*(c**(-2)))/(np.exp((h*x)/(k*T))-1)
@@ -591,7 +610,3 @@ def effspec(telDir, standard, telnolines, mag, T, over):
     telheader[1].data = effspec
     telheader.writeto('c'+standard+'.fits',  output_verify='ignore')
     writeList('c'+standard, 'corrtellfile', telDir)
-
-#telDirList = ['/Users/kklemmer/CGCG448-020_SourceC_TEL/20090826/K/Tellurics/obs47']
-
-#start(telDirList, False, False, 'vega', False, False, True)
