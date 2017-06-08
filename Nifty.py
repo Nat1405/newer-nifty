@@ -175,7 +175,7 @@ def main():
     if red:
         if debug:
             a = raw_input('About to enter nifsReduce.py')
-        nifsReduce.start(obsDirList, calDirList, over, rstart, rstop)
+        nifsBaselineCalibration.start(obsDirList, calDirList, over, rstart, rstop)
 
     if tel:
         # reduce the telluric images
