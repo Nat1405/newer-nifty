@@ -125,7 +125,12 @@ def start(dir, tel, sort, over, copy, program, date):
     ############################################################################
 
     elif copy or date or program:
-        geminiSort.start(tel, sort, over, copy, program, date, path)
+        try:
+            import geminiSort
+        except ImportError:
+            print "\nI didn't find the geminiSort.py module."
+        else:
+            geminiSort.start(tel, sort, over, copy, program, date)
 
 
 

@@ -9,8 +9,31 @@ import nifsSort
 ##################################################################################################################
 
 
-def start(tel, sort, over, copy, program, date, path):
-    """Copy or sort data from internal Gemini Network."""
+def start(tel, sort, over, copy, program, date):
+    """Copy and sort data based on command line input. Data copied from Internal Gemini
+    network (used ONLY within Gemini).
+
+    Args:
+        tel (boolean):  Specified with -t at command line. If False no
+                        telluric corrections will be executed. Default: True.
+        over (boolean): Specified with -o at command line. If True
+                        old files will be overwritten during data reduction. Default: False.
+        sort (boolean): Specified with -s or --sort at command line. If False data will not be
+                        sorted. Default: True.
+        copy (boolean): Specified with -c or --copy at command line. If True data
+                        will be copied from Gemini network. Default: False.
+        program:        Specified with -p at command line. Eg GN-2013B-Q-109. Used only within Gemini network.
+        date:           Specified with -d at command line. YYYYMMDD. Used only within Gemini network.
+
+    """
+
+    FORMAT = '%(asctime)s %(message)s'
+    DATEFMT = datefmt()
+    logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
+    log = os.getcwd()+'/main.log'
+
+    path = os.getcwd()
+    
 
     # Copy from Gemini Internal Network AND sort. This will be executed IF ONLY -c True is
     # specified at command line. MUST provide a program id or date with -d or -p.
