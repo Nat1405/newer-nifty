@@ -84,10 +84,10 @@ OTHER COMMAND LINE OPTIONS
 -i   or   --hinter                       if specified then the removal of H lines from the telluric spectra will be done interactively
 -y  or   --continter		if specified then fitting a continuum to the telluric spectra will be done interactively
 -w  or   --telinter   	      if specified then the telluric correction will be done interactively. The interactive correction is done in IRAF and the non-interactive correction is done in Python
--n  or   --nosci  		if specified then the science data will not be reduced; this is useful when the science data has already been reduced and you want to add a telluric correction or produce a final merged cube
+-n  or   --sci  		if specified then the science data will not be reduced; this is useful when the science data has already been reduced and you want to add a telluric correction or produce a final merged cube
 -b   or   --scistart	    	to specify the starting step of the science data reductions; any integer value from 1 to 9 may be chosen; the default is one; SEE SCIENCE AND TELLURIC DATA REDUCTION STEPS BELOW
 -x   or  --scistop		to specify the stopping step of the science data reductions; any integer value from 1 to 9 may be chosen; the default is one; SEE SCIENCE AND TELLURIC DATA REDUCTION STEPS BELOW
--m  or  --nomerge		if specified then the data cubes produced in the science data reduction will not be merged
+-m  or  --merge		if specified then the data cubes produced in the science data reduction will not be merged
 
 
 BASELINE CALIBRATION REDUCTION STEPS (these are the steps in nifsReduce.py)

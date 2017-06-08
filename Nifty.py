@@ -64,8 +64,8 @@ def main():
     parser.add_option('-b', '--scistart', dest = 'start', type='int', action = 'store', help = 'choose the starting point of the science reduction; any integer from 1 to 9')
     parser.add_option('-x', '--scistop', dest = 'stop', type = 'int', action ='store', help = 'choose the stopping point of the science reduction; any integer from 1 to 9')
     parser.add_option('-w', '--telinter', dest = 'telinter', default = 'True', action = 'store_true', help = 'perform the telluric correction interactively. The interactive procedure is done in iraf and the non-interactive procedure is done in Python.')
-    parser.add_option('-n', '--nosci', dest = 'sci', default = 'True', action = 'store_false', help = 'don\'t reduce the science images')
-    parser.add_option('-m', '--nomerge', dest = 'merge', default= 'True', action = 'store_false', help = 'don\'t create a merged cube')
+    parser.add_option('-n', '--sci', dest = 'sci', default = 'True', action = 'store_false', help = 'reduce the science images')
+    parser.add_option('-m', '--merge', dest = 'merge', default= 'True', action = 'store_false', help = 'create a merged cube')
 
     (options, args) = parser.parse_args()
 

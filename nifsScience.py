@@ -50,35 +50,32 @@ from nifsTelluric import extrap1d, readCube, readSpec, telCor
 
 def start(obsDirList, calDirList, start, stop, tel, telinter, over):
     """
-    #--------------------------------------------------------------------#
-    #                                                                    #
-    #     SCIENCE                                                        #
-    #                                                                    #
-    #     This module contains all the functions needed to reduce        #
-    #     the NIFS science images.                                       #
-    #                                                                    #
-    #    COMMAND LINE OPTIONS                                            #
-    #    If you wish to skip this script for science data                #
-    #    enter -n in the command line                                    #
-    #    If you wish to skip this script for telluric data               #
-    #    enter -k in the command line                                    #
-    #    Specify a start value with -b (default is 1)                    #
-    #    Specify a stop value with -x (default is 9)                     #
-    #                                                                    #
-    #     INPUT:                                                         #
-    #     + Raw files                                                    #
-    #       - Science frames                                             #
-    #       - Sky frames                                                 #
-    #       - Reference file                                             #
-    #       - Bad Pixel Mask                                             #
-    #       - Flat field                                                 #
-    #       - Reduced arc frame                                          #
-    #       - Reduced ronchi mask                                        #
-    #                                                                    #
-    #     OUTPUT:                                                        #
-    #     - Reduced science frame: data cube. (ie c(a)tfbrgnSCI.fits)    #
-    #                                                                    #
-    #--------------------------------------------------------------------#
+     SCIENCE
+
+    This module contains all the functions needed to reduce
+    the NIFS science images.
+
+    COMMAND LINE OPTIONS
+    If you wish to skip this script for science data
+    enter -n in the command line
+    If you wish to skip this script for telluric data
+    enter -k in the command line
+    Specify a start value with -b (default is 1)
+    Specify a stop value with -x (default is 9)
+
+    INPUT:
+    + Raw files
+        - Science frames
+        - Sky frames
+        - Reference file
+        - Bad Pixel Mask
+        - Flat field
+        - Reduced arc frame
+        - Reduced ronchi mask
+
+    OUTPUT:
+        - Reduced science frame: data cube. (ie c(a)tfbrgnSCI.fits)
+
 
     Args:
         telDirList: [‘path/obj/date/grat/Tellurics/obsid’]

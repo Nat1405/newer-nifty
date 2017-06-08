@@ -170,7 +170,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
     path = os.getcwd()
 
-    # loop over the Calibrations directories and reduce the day cals in each one
+    # loop over the Calibrations directories and reduce the day calibrations in each one
     for calpath in calDirList:
         os.chdir(calpath)
         pwdDir = os.getcwd()+"/"
@@ -231,10 +231,13 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 6:
                 ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
+
             else:
                 print "No step associated to this value"
 
             valindex += 1
+
+
     os.chdir(path)
     return
 
@@ -468,12 +471,14 @@ def reduceArc(arclist, arc, log, over):
 
 def wavecal(arc, log, over):
     """ Determine the wavelength of the observation and set the arc coordinate
-        file.  If the user wishes to change the coordinate file to a different
-        one, they need only to change the "clist" variable to their line list
-        in the coordli= parameter in the nswavelength call.
+    file.
 
-        Uses  NSWAVELENGTH to calibrate arc data (after cutting and
-        optionally applying a flatfield with NSREDUCE in a previous step).
+    If the user wishes to change the coordinate file to a different
+    one, they need only to change the "clist" variable to their line list
+    in the coordli= parameter in the nswavelength call.
+
+    Uses  NSWAVELENGTH to calibrate arc data (after cutting and
+    optionally applying a flatfield with NSREDUCE in a previous step).
     """
 
     if os.path.exists("w"+arc+".fits"):
