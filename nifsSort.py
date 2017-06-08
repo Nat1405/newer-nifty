@@ -128,7 +128,8 @@ def start(dir, tel, sort, over, copy, program, date):
         try:
             import geminiSort
         except ImportError:
-            print "\nI didn't find the geminiSort.py module."
+            print "\nImportError: I didn't find the geminiSort.py module. Be sure to install it\
+                    to download from the Gemini Internal Network."
         else:
             geminiSort.start(tel, sort, over, copy, program, date)
 
