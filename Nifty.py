@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from optparse import OptionParser
 from optparse import OptionParser
 from pyraf import iraf
@@ -9,7 +10,7 @@ import logging, os
 #                                                                    #
 #                         Nifty.py                                   #
 #                                                                    #
-#     This is the python data reduction script for NIFS              #
+#     This is the python data reduction script for NIFS.             #
 #                                                                    #
 #     Calls the following scripts:                                   #
 #     nifsSort.py                                                    #
@@ -21,7 +22,9 @@ import logging, os
 #     To run:                                                        #
 #     python Main.py *command line options* (see below)              #
 #     EXAMPLE: python Main.py -d 20121212                            #
-#     Version 1 - June 2015   Marie Lemoine-Busserolle               #
+#                                                                    #
+#                                                                    #
+#     Version 1.1.0 - June 2015   Marie Lemoine-Busserolle           #
 #     mrlb05@googlemail.com                                          #
 #                                                                    #
 #--------------------------------------------------------------------#
@@ -190,11 +193,11 @@ def main():
             nifsFluxCalib.start(telDirList, continuuminter, hlineinter, hline, spectemp, mag, over)
 
     # reduce the science images
-    print ' I am starting to reduce the science images '
-    if debug:
-        a = raw_input('About to enter nifsScience to reduce science images.')
-    logging.info('I am starting to reduce the science images')
     if sci:
+        print ' I am starting to reduce the science images '
+        logging.info('I am starting to reduce the science images')
+        if debug:
+            a = raw_input('About to enter nifsScience to reduce science images.')
         nifsScience.start(obsDirList, calDirList, start, stop, tel, telinter, over)
 
     # merge all cubes

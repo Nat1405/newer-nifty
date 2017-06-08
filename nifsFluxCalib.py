@@ -78,15 +78,16 @@ def start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, o
         telDirList: list of telluric directories.
         continuuminter (boolean): Interactive continuum fitting. Specified with -y
                                   at command line. Default False.
-        hlineinter (boolean):  Interactive H line fitting. Specified with -i at
-                               command line. Default False.
-        hline_method (string): Method for removing H lines from the telluric spectra.
-                               Specified with -l or --hline at command line. Default is
-                               vega and choices are vega, linefit_auto, linefit_manual,
-                               vega_tweak, linefit_tweak, and none.
-        spectemp: spectral type or temperature. Specified at command line with -e or --stdspectemp.
-        mag: The IR magnitude of the standard star. Specified at command line with -f or --stdmag.
-        over: overwrite old files.
+        hlineinter (boolean):     Interactive H line fitting. Specified with -i at
+                                  command line. Default False.
+        hline_method (string):    Method for removing H lines from the telluric spectra.
+                                  Specified with -l or --hline at command line. Default is
+                                  vega and choices are vega, linefit_auto, linefit_manual,
+                                  vega_tweak, linefit_tweak, and none.
+        spectemp:                 Spectral type or temperature. Specified at command line with -e or --stdspectemp.
+        mag:                      The IR magnitude of the standard star.
+                                  Specified at command line with -f or --stdmag.
+        over:                     overwrite old files.
 
     """
 
@@ -649,3 +650,7 @@ def effspec(telDir, standard, telnolines, mag, T, over):
     telheader[1].data = effspec
     telheader.writeto('c'+standard+'.fits',  output_verify='ignore')
     writeList('c'+standard, 'corrtellfile', telDir)
+
+
+if __name__ == '__main__':
+    print "nifsFluxCalib"

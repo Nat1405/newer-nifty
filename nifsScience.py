@@ -244,7 +244,7 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
                 logging.info('Apply transformation ->tfbrgn')
 
             #################
-            ## Derive or apply telluric correction ->atfbrgn
+            ## Derive or apply telluric correction ->xtfbrgn and gxtfbrgn (for Tellurics) or ->atfbrgn (for Science)
             elif valindex == 8:
                 logging.info('Derive or apply telluric correction ->atfbrgn')
                 if kind=='Telluric':
@@ -470,7 +470,7 @@ def transform(objlist, log, over):
 
 def makeTelluric(objlist, log, over):
     """ Extracts 1-D spectra with iraf.nfextract() and combines them with iraf.gemcombine().
-    iraf.nfextract() is currently only done interactively. Output: -->atfbrgn
+    iraf.nfextract() is currently only done interactively. Output: -->xtfbrgn and gxtfbrgn
 
     NFEXTRACT - Extract NIFS spectra.
 
@@ -628,3 +628,6 @@ def makeCube(pre, objlist, tel, obsDir, log, over):
             iraf.nifcube (pre+image, outcubes = 'c'+pre+image, logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
+
+if __name__ == '__main__':
+    print "nifsScience"

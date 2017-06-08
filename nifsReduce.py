@@ -365,7 +365,18 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 def makeArcDark(arcdarklist, arcdark, calflat, over, log):
-    """" Prepare and combine the daytime arc darks."""
+    """" Prepare with iraf.nfprepare() and combine the daytime arc darks.
+
+    Processing with NFPREPARE will rename the data extension and add
+    variance and data quality extensions. By default (see NSHEADERS)
+    the extension names are SCI for science data, VAR for variance, and
+    DQ for data quality (0 = good). Generation of the data quality
+    plane (DQ) is important in order to fix hot and dark pixels on the
+    NIFS detector in subsequent steps in the data reduction process.
+    Various header keywords (used later) are also added in NFPREPARE.
+    NFPREPARE will also add an MDF file (extension MDF) describing the
+    NIFS image slicer pattern and how the IFU maps to the sky field.
+    """
 
     for image in arcdarklist:
         image = str(image).strip()
@@ -386,7 +397,29 @@ def makeArcDark(arcdarklist, arcdark, calflat, over, log):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def reduceArc(arclist, arc, log, over):
-    """ Flat field and cut the arc data."""
+    """ Flat field and cut the arc data with iraf.nfprepare() and
+    iraf.nsreduce().
+
+    Processing with NFPREPARE will rename the data extension and add
+    variance and data quality extensions. By default (see NSHEADERS)
+    the extension names are SCI for science data, VAR for variance, and
+    DQ for data quality (0 = good). Generation of the data quality
+    plane (DQ) is important in order to fix hot and dark pixels on the
+    NIFS detector in subsequent steps in the data reduction process.
+    Various header keywords (used later) are also added in NFPREPARE.
+    NFPREPARE will also add an MDF file (extension MDF) describing the
+    NIFS image slicer pattern and how the IFU maps to the sky field.
+
+    NSREDUCE - Process NearIR Spectral data (task resides in the GNIRS
+    package)
+
+    NSREDUCE is used for basic reduction of raw data - it provides a
+    single, unified interface to several tasks and also allows for
+    the subtraction of dark frames and dividing by the flat. For
+    NIFS reduction, NSREDUCE is used to call the NSCUT and NSAPPWAVE
+    routines.
+
+    """
 
     shiftima = open("shiftfile", "r").readlines()[0].strip()
     sflat_bpm = open("sflat_bpmfile", "r").readlines()[0].strip()
@@ -468,8 +501,21 @@ def wavecal(arc, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
-    """combine arc darks
+    """Spacial rectification. Combine arc darks. Calls iraf.nfsdist().
+
+    NFSDIST - Establish a spatial calibration
+
+    NFSDIST uses the information in the "Ronchi" Calibration images
+    to calibrate the spatial dimension of the NIFS IFU field. The
+    Ronchi frame is a dispersed flat field image with a slit-mask
+    in the field so that the illumination on the IFU is in a
+    pattern of ~10 different slitlets that are stackedin the
+    y-dimension on the field. Proper alignment of the slits across
+    the image slicer pattern can be used for spatial rectification
+    of the on-sky science data. The spatial solution determined by
+    NFSDIST is linked to the science data in NFFITCOORDS.
     """
+
     for image in ronchilist:
         image = str(image).strip()
         if over:
@@ -504,3 +550,6 @@ def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
     open("ronchifile", "w").write("rgn"+ronchiflat)
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
+
+if __name__ == '__main__':
+    print "nifsReduce"
