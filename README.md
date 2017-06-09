@@ -34,7 +34,7 @@ INSTALLATION
 
 Main.py
 nifsSort.py
-nifsReduce.py
+baselineCalibration.py
 nifsScience.py
 nifsFluxCalib.py
 nifsTelluric.py
@@ -90,7 +90,7 @@ OTHER COMMAND LINE OPTIONS
 -m  or  --merge		if specified then the data cubes produced in the science data reduction will not be merged
 
 
-BASELINE CALIBRATION REDUCTION STEPS (these are the steps in nifsReduce.py)
+BASELINE CALIBRATION REDUCTION STEPS (these are the steps in baselineCalibration.py)
 
 1      Determine the shift to the MDF file
 2      Produce a normalized spectral flatfield and bad pixel mask

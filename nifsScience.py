@@ -50,10 +50,13 @@ from nifsTelluric import extrap1d, readCube, readSpec, telCor
 
 def start(obsDirList, calDirList, start, stop, tel, telinter, over):
     """
-     SCIENCE
 
-    This module contains all the functions needed to reduce
-    the NIFS science images.
+    Science
+
+    Reduces nifs telluric and
+    science data and attempts a flux calibration.
+
+    There are 9 steps.
 
     COMMAND LINE OPTIONS
     If you wish to skip this script for science data
@@ -241,7 +244,8 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
                 logging.info('Apply transformation ->tfbrgn')
 
             #################
-            ## Derive or apply telluric correction ->xtfbrgn and gxtfbrgn (for Tellurics) or ->atfbrgn (for Science)
+            ## For telluric data derive telluric correction -> gxtfbrgn
+            ## For science data apply telluric correction -> atfbrgn
             elif valindex == 8:
                 logging.info('Derive or apply telluric correction ->atfbrgn')
                 if kind=='Telluric':
@@ -253,16 +257,16 @@ def start(obsDirList, calDirList, start, stop, tel, telinter, over):
                     applyTelluric(objlist, obsid, skylist, telinter, log, over)
 
             #################
-            ## Create a 3D cube -> catfbrgn
+            ## Create a 3D cube from science data-> catfbrgn
             elif valindex == 9:
-                if kind == "Telluric":
-                   print "No cube being made for tellurics"
-                elif telinter=='yes' and kind=='Object' and tel:
+                if kind=='Object' and telinter=='yes' and tel:
                     logging.info('Create a 3D cube -> catfbrgn')
                     makeCube('atfbrgn', objlist, tel, obsDir, log, over)
                 elif kind=='Object' and not tel and telinter=='yes':
                     logging.info('Create a 3D cube -> ctfbrgn')
                     makeCube('tfbrgn', objlist, tel, obsDir, log, over)
+                elif kind == "Telluric":
+                   print "No cube being made for tellurics"
 
             valindex += 1
 
