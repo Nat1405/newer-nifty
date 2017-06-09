@@ -33,8 +33,8 @@ INSTALLATION
 2. Nifty is composed of these necessary scripts (all need to be located in the same directory) which are found in this repo:
 
 Main.py
-nifsSort.py
-baselineCalibration.py
+sort.py
+calibration.py
 nifsScience.py
 nifsFluxCalib.py
 nifsTelluric.py
@@ -73,7 +73,7 @@ OTHER COMMAND LINE OPTIONS
 -e  or   --stdspectemp   	to specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000
 -f   or   --stdmag	      	to specify the K band magnitude of the standard star; e.g. 5.4
 				if you do not wish to do a flux calibration then enter -f -1
--l   or   --hline			to specify the method for removing the H lines from the telluric spectra; the default is vega
+-l   or   --hline_method			to specify the method for removing the H lines from the telluric spectra; the default is vega
 				the options are: none, vega, linefit_auto, linefit_manual, vega_tweak, and linefit_tweak
 				none: does no H line removal
 				vega: uses vega's spectrum to remove H lines with the iraf task "telluric"
@@ -90,7 +90,7 @@ OTHER COMMAND LINE OPTIONS
 -m  or  --merge		if specified then the data cubes produced in the science data reduction will not be merged
 
 
-BASELINE CALIBRATION REDUCTION STEPS (these are the steps in baselineCalibration.py)
+BASELINE CALIBRATION REDUCTION STEPS (these are the steps in calibration.py)
 
 1      Determine the shift to the MDF file
 2      Produce a normalized spectral flatfield and bad pixel mask
@@ -116,7 +116,7 @@ NOTES:
 
 OBJECT AND SKY FRAMES
 
-If the sorting script does not create a skylist in the object or telluric observation directories this means that the offsets between sky frames and object frames were smaller than expected. A skylist can be manually created and saved in the appropriate directory, or the limit placed on the offset can be changed. In nifsSort.py the limit set on "rad" can be lowered in lines 194, 245, and 492 for object sky images and in lines 198, 249, and 495 for telluric sky images.
+If the sorting script does not create a skylist in the object or telluric observation directories this means that the offsets between sky frames and object frames were smaller than expected. A skylist can be manually created and saved in the appropriate directory, or the limit placed on the offset can be changed. In sort.py the limit set on "rad" can be lowered in lines 194, 245, and 492 for object sky images and in lines 198, 249, and 495 for telluric sky images.
 
 TELLURIC CORRECTION
 

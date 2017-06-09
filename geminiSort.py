@@ -1,4 +1,4 @@
-import nifsSort
+import sort
 
 ##################################################################################################################
 #                                                                                                                #
@@ -33,7 +33,7 @@ def start(tel, sort, over, copy, program, date):
     log = os.getcwd()+'/main.log'
 
     path = os.getcwd()
-    
+
 
     # Copy from Gemini Internal Network AND sort. This will be executed IF ONLY -c True is
     # specified at command line. MUST provide a program id or date with -d or -p.
@@ -61,7 +61,7 @@ def start(tel, sort, over, copy, program, date):
                 telSort(telDirList, obsDirList)
             # Exit if a program or date was not probided with -p or -d at command line.
             else:
-                print "\n Error in nifsSort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
+                print "\n Error in sort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
                 raise SystemExit
 
     # Copy from Gemini Internal network and DON'T sort. This will be executed IF -c True and -s False are specified at command line. MUST provide a program id or date with -d or -p.
@@ -80,7 +80,7 @@ def start(tel, sort, over, copy, program, date):
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
         # Exit if a program or date was not provided with -p or -d at command line.
         else:
-            print "\n Error in nifsSort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
+            print "\n Error in sort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
             raise SystemExit
 
     # Sort data ALREADY copied from Gemini Network. Specified if -s and -c are NOT specified at command line.

@@ -2,7 +2,8 @@
 from optparse import OptionParser
 from optparse import OptionParser
 from pyraf import iraf
-import nifsSort, baselineCalibration, nifsFluxCalib, nifsScience, nifsMerge
+import sort as sortScript
+import calibration, nifsFluxCalib, nifsScience, nifsMerge
 from nifsDefs import datefmt
 import logging, os
 
@@ -13,8 +14,8 @@ import logging, os
 #     This is the python data reduction script for NIFS.             #
 #                                                                    #
 #     Calls the following scripts:                                   #
-#     nifsSort.py                                                    #
-#     baselineCalibration.py                                         #
+#     sort.py                                                    #
+#     calibration.py                                                 #
 #     nifsScience.py                                                 #
 #     nifsMerge.py                                                   #
 #     nifsDefs.py                                                    #
@@ -30,7 +31,7 @@ import logging, os
 #--------------------------------------------------------------------#
 
 
-#Bonjour!:)
+
 def main():
 
     # Format logging options
@@ -58,7 +59,7 @@ def main():
     parser.add_option('-t', '--telcorr', dest = 'tel', default= 'True', action = 'store_false', help = 'don\'t perform telluric correction')
     parser.add_option('-e', '--stdspectemp', dest = 'spectemp', action = 'store', help = 'specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000')
     parser.add_option('-f', '--stdmag', dest = 'mag', action = 'store', help = 'specify the IR magnitude of the standard star; if you do not wish to do a flux calibration then enter -f x')
-    parser.add_option('-l', '--hline', dest = 'hline', type = 'string', action = 'store', help = 'choose a method for removing H lines from the telluric spectra. The default is vega and the choices are vega, linefit_auto, linefit_manual, vega_tweak, linefit_tweak, and none')
+    parser.add_option('-l', '--hline_method', dest = 'hline_method', type = 'string', action = 'store', help = 'choose a method for removing H lines from the telluric spectra. The default is vega and the choices are vega, linefit_auto, linefit_manual, vega_tweak, linefit_tweak, and none')
     parser.add_option('-i', '--hinter', dest = 'hinter', default = 'False', action = 'store_true', help = 'do the h line fitting interactively')
     parser.add_option('-y', '--continter', dest = 'continter', default = 'False', action = 'store_true', help = 'do the continuum fitting in the flux calibration interactively')
     parser.add_option('-a', '--redstart', dest = 'rstart',  type='int', action = 'store', help = 'choose the starting point of the daycal reduction; any integer from 1 to 6')
@@ -97,7 +98,7 @@ def main():
 
     # set the stopping step of science reduction to 9
     if not options.stop:
-        stop = 9
+        stop = 10
     else:
         stop = options.stop
 
@@ -120,12 +121,12 @@ def main():
     logging.info('Stopping point is %s', stop)
 
     # set the H line removal method
-    if not options.hline:
-       hline = 'vega'
+    if not options.hline_method:
+       hline_method = 'vega'
     else:
-        hline = options.hline
-        print 'H line removal method is', hline
-        logging.info('H line removal method is %s', hline)
+        hline_method = options.hline_method
+        print 'H line removal method is', hline_method
+        logging.info('H line removal method is %s', hline_method)
 
 
     # set yes or no for interactive the h line removal, telluric correction, and continuum fitting
@@ -161,8 +162,8 @@ def main():
     print 'I am sorting the data'
     logging.info(' I am sorting the data ')
     if debug:
-        a = raw_input('About to enter nifsSort.py.')
-    obsDirList, calDirList, telDirList = nifsSort.start(dir, tel, sort, over, copy, program, date)
+        a = raw_input('About to enter sort.py.')
+    obsDirList, calDirList, telDirList = sortScript.start(dir, tel, sort, over, copy, program, date)
 
     logging.info('obsDirList : %s', obsDirList)
     logging.info('telDirList : %s', telDirList)
@@ -174,8 +175,8 @@ def main():
     logging.info('I am reducing the calibration data. ')
     if red:
         if debug:
-            a = raw_input('About to enter baselineCalibration.py')
-        baselineCalibration.start(obsDirList, calDirList, over, rstart, rstop)
+            a = raw_input('About to enter calibration.py')
+        calibration.start(obsDirList, calDirList, over, rstart, rstop)
 
     if tel:
         # reduce the telluric images
@@ -184,7 +185,10 @@ def main():
         print ' I am starting to reduce the telluric images '
         logging.info('I am starting to reduce the telluric images')
         if telred:
-            nifsScience.start(telDirList, calDirList, start, stop, tel, telinter, over)
+            nifsScience.start(
+                telDirList, calDirList, start, stop, tel, telinter, fluxcal,
+                continuuminter, hlineinter, hline_method, spectemp, mag ,over
+                )
 
         # create telluric correction spectrum and blackbody spectrum
         if debug:
@@ -192,7 +196,7 @@ def main():
         print ' I am starting to create telluric correction spectrum and blackbody spectrum'
         logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')
         if fluxcal:
-            nifsFluxCalib.start(telDirList, continuuminter, hlineinter, hline, spectemp, mag, over)
+            nifsFluxCalib.start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, over)
 
     # reduce the science images
     if sci:
