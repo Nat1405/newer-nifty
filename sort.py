@@ -362,6 +362,8 @@ def sortObs(allfilelist, skylist, telskylist, dir):
                 if date in tempDir:
                     # create a Tellurics directory in objDir/YYYYMMDD/grating
                     if not os.path.exists(objDir+'/'+grat+'/Tellurics'):
+                        print os.getcwd()
+                        print allfilelist[i]
                         os.mkdir(objDir+'/'+grat+'/Tellurics')
                     # create an obsid (eg. obs25) directory in the Tellurics directory
                     if not os.path.exists(objDir+'/'+grat+'/Tellurics/obs'+obsid):
