@@ -380,7 +380,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
         if obsclass=='acq' and obsclass2=='science':
             # create an Acquisitions directory in objDir/YYYYMMDD/grating
             if not os.path.exists(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/'):
-                os.mkdir(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
+                os.makedirs(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
             shutil.copy(Raw+'/'+allfilelist[i], path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
 
     os.chdir(path)
