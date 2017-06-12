@@ -1,3 +1,5 @@
+"""This module contains a whole bunch of stuff to sort"""
+
 from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
