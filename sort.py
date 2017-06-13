@@ -274,6 +274,8 @@ def sortObs(allfilelist, skylist, telskylist, dir):
     """Sorts the science images, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass, when not using the Gemini network.
     """
 
+    print "Currently sorting:"
+
     objDirList = []
     obsDirList = []
     telDirList = []
@@ -331,7 +333,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
             elif not obsDirList or not obsDirList[-1]==objDir+'/'+date+'/'+grat+'/obs'+obsid:
                 obsDirList.append(objDir+'/'+date+'/'+grat+'/obs'+obsid)
 
-    # copy science, telluric, and acquisition images to the appropriate folder
+    # copy science and acquisition images to the appropriate folder
     for i in range(len(allfilelist)):
         header = pyfits.open(Raw+'/'+allfilelist[i])
 
@@ -349,6 +351,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
 
 
         if obsclass=='science':
+            print allfilelist[i]
             objDir = path+'/'+obj
             shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
             # create an objlist in the relevant directory
@@ -358,34 +361,90 @@ def sortObs(allfilelist, skylist, telskylist, dir):
             if allfilelist[i] in skylist:
                 writeList(allfilelist[i], 'skylist', objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
 
-        if obsclass=='partnerCal':
-            for objDir in objDirList:
-                tempDir = objDir.split(os.sep)
-                if date in tempDir:
-                    # create a Tellurics directory in objDir/YYYYMMDD/grating
-                    if not os.path.exists(objDir+'/'+grat+'/Tellurics'):
-                        print os.getcwd()
-                        print allfilelist[i]
-                        os.mkdir(objDir+'/'+grat+'/Tellurics')
-                    # create an obsid (eg. obs25) directory in the Tellurics directory
-                    if not os.path.exists(objDir+'/'+grat+'/Tellurics/obs'+obsid):
-                        os.mkdir(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-                        telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-                    elif not telDirList or not telDirList[-1]==objDir+'/'+grat+'/Tellurics/obs'+obsid:
-                        telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-                    shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
-                    # create an objlist in the relevant directory
-                    if allfilelist[i] not in telskylist:
-                        writeList(allfilelist[i], 'tellist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
-                    # create a skylist in the relevant directory
-                    if allfilelist[i] in telskylist:
-                        writeList(allfilelist[i], 'skylist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
-
         if obsclass=='acq' and obsclass2=='science':
+            print allfilelist[i]
             # create an Acquisitions directory in objDir/YYYYMMDD/grating
             if not os.path.exists(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/'):
                 os.makedirs(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
             shutil.copy(Raw+'/'+allfilelist[i], path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
+
+    # Copy telluric images to the appropriate folder.
+    #
+    # Note: Because the 'OBJECT' of a telluric file header is different then the
+    # science target, we need to sort by
+    for i in range(len(allfilelist)):
+        header = pyfits.open(Raw+'/'+allfilelist[i])
+
+        obstype = header[0].header['OBSTYPE'].strip()    # determines which files are ARCS
+        obsid = header[0].header['OBSID'][-3:].replace('-','')
+        grat = header[0].header['GRATING'][0:1]  # this is so we can trim the string using indexing
+        date = header[0].header[ 'DATE'].replace('-','')         # 1st CAL sorting criterion
+        obsclass = header[0].header['OBSCLASS']  # used to sort out the acqs and acqCals in the trap
+        obj = header[0].header['OBJECT'].replace(' ', '')
+
+        if i!=len(allfilelist)-1:
+            header2 = pyfits.open(Raw+'/'+allfilelist[i+1])
+            obsclass2 = header2[0].header['OBSCLASS']
+            obj2 = header2[0].header['OBJECT'].replace(' ','')
+
+        if obsclass=='partnerCal':
+            print allfilelist[i]
+            for objDir in objDirList:
+                tempDir = objDir.split(os.sep)
+                # Match tellurics with science based on first 4 chunks of observation id
+                if date in tempDir:
+                    for science_directory in obsDirList:
+                        # Try to match by object; if not match by skyframe
+                        try:
+                            sciImageList = open(science_directory + '/' + 'objlist', "r").readlines()
+                        except IOError:
+                            sciImageList = open(science_directory + '/' + 'skylist', "r").readlines()
+                        sciImageList = [image.strip() for image in sciImageList]
+                        science_image = sciImageList[0]
+                        science_header = pyfits.open(science_directory +'/'+ science_image + '.fits')
+                        science_obs_id = science_header[0].header['OBSID']
+                        # Look at obs id up to the number after 'Q'. Ie a short obsid
+                        # Eg science_obs_id = GN2016AQ6
+                        science_obs_id = "".join(science_obs_id.split('-')[:4])
+
+                        # Grab telluric short obsid as well
+                        telluric_obsid = header[0].header['OBSID']
+                        telluric_obsid = "".join(telluric_obsid.split('-')[:4])
+
+                        if science_obs_id == telluric_obsid :
+                            # Update header variables to be from science_image
+                            obj = science_header[0].header['OBJECT'].replace(' ', '')
+
+                            objDir = path + '/' + obj + '/' + date
+
+                            # Create a date directory. This is important for "Lost" telluric data.
+
+                            if not os.path.exists(objDir):
+                                os.mkdir(objDir)
+
+                            if not os.path.exists(objDir + '/' + grat):
+                                os.mkdir(objDir + '/' + grat)
+
+                            # create a Tellurics directory in objDir/YYYYMMDD/grating
+
+                            if not os.path.exists(objDir+'/'+grat+'/Tellurics'):
+                                print os.getcwd()
+                                print allfilelist[i]
+                                os.mkdir(objDir+'/'+grat+'/Tellurics')
+                            # create an obsid (eg. obs25) directory in the Tellurics directory
+                            if not os.path.exists(objDir+'/'+grat+'/Tellurics/obs'+obsid):
+                                os.mkdir(objDir+'/'+grat+'/Tellurics/obs'+obsid)
+                                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
+                            elif not telDirList or not telDirList[-1]==objDir+'/'+grat+'/Tellurics/obs'+obsid:
+                                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
+                            shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
+                            # create an objlist in the relevant directory
+                            if allfilelist[i] not in telskylist:
+                                writeList(allfilelist[i], 'tellist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
+                            # create a skylist in the relevant directory
+                            if allfilelist[i] in telskylist:
+                                writeList(allfilelist[i], 'skylist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
+
 
     os.chdir(path)
 
@@ -421,6 +480,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
     # sort lamps on flats
     for entry in flatlist:
+        print entry
         header = pyfits.open(entry)
         obsid = header[0].header['OBSID']
         for objDir in objDirList:
@@ -436,6 +496,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
     # sort lamps off flats
     for entry in flatdarklist:
+        print entry
         os.chdir(Raw)
         header = pyfits.open(entry)
         obsid = header[0].header['OBSID']
@@ -452,6 +513,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
     # sort ronchi flats
     for entry in ronchilist:
+        print entry
         os.chdir(Raw)
         header = pyfits.open(entry)
         obsid = header[0].header['OBSID']
@@ -468,6 +530,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
     # sort arc darks
     for entry in arclist:
+        print entry
         header = pyfits.open(entry)
         obsid = header[0].header['OBSID']
         date = header[0].header['DATE'].replace('-','')
@@ -481,6 +544,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
     # sort arc darks
     for entry in arcdarklist:
+        print entry
         header = pyfits.open(entry)
         obsid = header[0].header['OBSID']
         for objDir in objDirList:
@@ -611,7 +675,11 @@ def telSort(telDirList, obsDirList):
         for obsDir in obsDirList:
             os.chdir(obsDir)
             if date in obsDir:
-                sciImageList = open('objlist', "r").readlines()
+                print os.getcwd()
+                try:
+                    sciImageList = open('objlist', "r").readlines()
+                except IOError:
+                    sciImageList = open('skylist', "r").readlines()
                 sciImageList = [image.strip() for image in sciImageList]
                 for image in sciImageList:
                     diffList=[]
@@ -632,6 +700,7 @@ def telSort(telDirList, obsDirList):
                         sciheader = pyfits.open(image+'.fits')
                         sciObsid = 'obs'+ sciheader[0].header['OBSID'][-3:].replace('-','')
                         if not os.path.exists(os.path.split(tellist[0][0])[0]+'/'+telobs+'/objtellist'):
+                            print tellist
                             writeList(sciObsid, 'objtellist', os.path.split(tellist[0][0])[0]+'/'+telobs)
                         else:
                             objtellist = open(os.path.split(tellist[0][0])[0]+'/'+telobs+'/objtellist', 'r').readlines()

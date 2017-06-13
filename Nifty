@@ -181,7 +181,8 @@ def main():
     if tel:
         # reduce the telluric images
         if debug:
-            a = raw_input('About to enter nifsScience to reduce Telluric images.')
+            a = raw_input('About to enter nifsScience to reduce Telluric images,\
+                           create telluric correction spectrum and blackbody spectrum.')
         print ' I am starting to reduce the telluric images '
         logging.info('I am starting to reduce the telluric images')
         if telred:
