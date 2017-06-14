@@ -1,4 +1,4 @@
-import sort
+from sort import *
 
 ##################################################################################################################
 #                                                                                                                #
@@ -66,13 +66,13 @@ def start(tel, sort, over, copy, program, date):
 
     # Copy from Gemini Internal network and DON'T sort. This will be executed IF -c True and -s False are specified at command line. MUST provide a program id or date with -d or -p.
     elif copy and not sort:
-        # When a program is given (looks for program using http://fits/xmlfilelist/summary/NIFS)
+        # When a program is given (looks for program using /net/mko-nfs/sci/dataflow)
         if program:
             allfilelist, filelist, skylist, telskylist = getProgram(program, date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
             allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
-        # When a date is given (looks for data using http://fits/xmlfilelist/summary/NIFS)
+        # When a date is given (looks for data using /net/mko-nfs/sci/dataflow)
         elif date:
             allfilelist, filelist, skylist, telskylist = getScience(date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
@@ -327,10 +327,10 @@ def getProgram(program, date, over):
     telskylist = []
 
     if date:
-        url = 'http://fits/xmlfilelist/summary/NIFS/'+program+'/'+date+'/OBJECT'
+        url = '/net/mko-nfs/sci/dataflow/'+program+'/'+date+'/OBJECT'
     else:
         # internal site where observations can be found
-        url = 'http://fits/xmlfilelist/summary/NIFS/'+program+'/OBJECT'
+        url = '/net/mko-nfs/sci/dataflow/'+program+'/OBJECT'
 
     # find and create a list of all the .fits files from a given night
     allfilelist = checkQAPIreq(getUrlFiles(url, 'file'))

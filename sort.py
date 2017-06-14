@@ -180,12 +180,14 @@ def makeSortFiles(dir):
         Raw = path+'/Raw'
 
     os.chdir(Raw)
+    print Raw
 
     # make a list of all the files in the Raw directory
     rawfiles = glob.glob('N*.fits')
 
     # sort the files into lists (allfilelist and cal lists)
     for entry in rawfiles:
+        print entry
         header = pyfits.open(entry)
 
         obstype = header[0].header['OBSTYPE'].strip()    # determines which files are ARCS
@@ -277,6 +279,9 @@ def sortObs(allfilelist, skylist, telskylist, dir):
     print "Currently sorting:"
 
     objDirList = []
+    # obsDirList is list of two part data. First part (list) tracks lists of times of each science directory.
+    # Second part holds paths to those science directories.
+    # Eg: [[[5,6,7], '/path/to/first/dir'], [[3,4,5], '/path/to/second/dir']...]
     obsDirList = []
     telDirList = []
 
@@ -317,6 +322,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
         date = header[0].header[ 'DATE'].replace('-','')         # 1st CAL sorting criterion
         obsclass = header[0].header['OBSCLASS']  # used to sort out the acqs and acqCals in the trap
         obj = header[0].header['OBJECT'].replace(' ','')
+        time = timeCalc(Raw+'/'+entry)
 
         if obsclass=='science':
             objDir = path+'/'+obj
@@ -329,10 +335,15 @@ def sortObs(allfilelist, skylist, telskylist, dir):
             # create a directory for each obsid (eg. obs25) in objDir/YYYYMMDD/grating/
             if not os.path.exists(objDir+'/'+date+'/'+grat+'/obs'+obsid):
                 os.mkdir(objDir+'/'+date+'/'+grat+'/obs'+obsid)
-                obsDirList.append(objDir+'/'+date+'/'+grat+'/obs'+obsid)
-            elif not obsDirList or not obsDirList[-1]==objDir+'/'+date+'/'+grat+'/obs'+obsid:
-                obsDirList.append(objDir+'/'+date+'/'+grat+'/obs'+obsid)
+                obsDirList.append([[time], objDir+'/'+date+'/'+grat+'/obs'+obsid])
 
+            elif not obsDirList or not obsDirList[-1][1]==objDir+'/'+date+'/'+grat+'/obs'+obsid:
+                obsDirList.append([[time], objDir+'/'+date+'/'+grat+'/obs'+obsid])
+            elif obsDirList[-1][1] == objDir+'/'+date+'/'+grat+'/obs'+obsid:
+                print "Appending more times"
+                obsDirList[-1][0].append(time)
+
+    print obsDirList
     # copy science and acquisition images to the appropriate folder
     for i in range(len(allfilelist)):
         header = pyfits.open(Raw+'/'+allfilelist[i])
@@ -344,6 +355,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
         obsclass = header[0].header['OBSCLASS']  # used to sort out the acqs and acqCals in the trap
         obj = header[0].header['OBJECT'].replace(' ', '')
 
+        # Only grab the most recent aquisition image
         if i!=len(allfilelist)-1:
             header2 = pyfits.open(Raw+'/'+allfilelist[i+1])
             obsclass2 = header2[0].header['OBSCLASS']
@@ -369,9 +381,8 @@ def sortObs(allfilelist, skylist, telskylist, dir):
             shutil.copy(Raw+'/'+allfilelist[i], path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
 
     # Copy telluric images to the appropriate folder.
-    #
     # Note: Because the 'OBJECT' of a telluric file header is different then the
-    # science target, we need to sort by
+    # science target, we need to sort by date, grating AND most recent time.
     for i in range(len(allfilelist)):
         header = pyfits.open(Raw+'/'+allfilelist[i])
 
@@ -381,83 +392,68 @@ def sortObs(allfilelist, skylist, telskylist, dir):
         date = header[0].header[ 'DATE'].replace('-','')         # 1st CAL sorting criterion
         obsclass = header[0].header['OBSCLASS']  # used to sort out the acqs and acqCals in the trap
         obj = header[0].header['OBJECT'].replace(' ', '')
+        telluric_time = timeCalc(Raw+'/'+allfilelist[i])
 
-        if i!=len(allfilelist)-1:
-            header2 = pyfits.open(Raw+'/'+allfilelist[i+1])
-            obsclass2 = header2[0].header['OBSCLASS']
-            obj2 = header2[0].header['OBJECT'].replace(' ','')
 
         if obsclass=='partnerCal':
+            print 'sorting a telluric: '
             print allfilelist[i]
             timeList = []
-            for objDir in objDirList:
-                tempDir = objDir.split(os.sep)
-                # Match tellurics with science based on first 4 chunks of observation id
-                if date in tempDir:
-                    for science_directory in obsDirList:
-                        # Try to match by object; if not match by skyframe
-                        try:
-                            sciImageList = open(science_directory + '/' + 'objlist', "r").readlines()
-                        except IOError:
-                            sciImageList = open(science_directory + '/' + 'skylist', "r").readlines()
-                        sciImageList = [image.strip() for image in sciImageList]
-                        science_image = sciImageList[0]
-                        science_header = pyfits.open(science_directory +'/'+ science_image + '.fits')
-                        science_obs_id = science_header[0].header['OBSID']
-                        # Look at obs id up to the number after 'Q'. Ie a short obsid
-                        # Eg science_obs_id = GN2016AQ6
-                        science_obs_id = "".join(science_obs_id.split('-')[:4])
-
-                        # Grab telluric short obsid as well
-                        telluric_obsid = header[0].header['OBSID']
-                        telluric_obsid = "".join(telluric_obsid.split('-')[:4])
-
-                        # Check to make sure observation ids match up.
-                        if science_obs_id == telluric_obsid:
-                            # Update header variables to be from science_image
-                            obj = science_header[0].header['OBJECT'].replace(' ', '')
-
-                            objDir = path + '/' + obj + '/' + date
-                            templist = []
-                            time = abs(timeCalc(Raw + allfilelist[i]) - timeCalc(Raw + science_image + '.fits'))
-                            templist.append(time)
-                            templist.append(objDir)
-                            templist.append(grat)
-                            templist.append(obsid)
-                            timeList.append(templist)
-            print timeList
-            min_difference_object = min(timeList)
-            objDir = min_difference_object[1]
-            grat = min_difference_object[2]
-            obsid = min_difference_object[3]
-
-            # Create a date directory. This is important for "Lost" telluric data.
-
-            if not os.path.exists(objDir):
-                os.mkdir(objDir)
-
-            if not os.path.exists(objDir + '/' + grat):
-                os.mkdir(objDir + '/' + grat)
-
-            # create a Tellurics directory in objDir/YYYYMMDD/grating
-
-            if not os.path.exists(objDir+'/'+grat+'/Tellurics'):
-                os.mkdir(objDir+'/'+grat+'/Tellurics')
-            # create an obsid (eg. obs25) directory in the Tellurics directory
-            if not os.path.exists(objDir+'/'+grat+'/Tellurics/obs'+obsid):
-                os.mkdir(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-            elif not telDirList or not telDirList[-1]==objDir+'/'+grat+'/Tellurics/obs'+obsid:
-                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-            shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
-            # create an objlist in the relevant directory
-            if allfilelist[i] not in telskylist:
-                writeList(allfilelist[i], 'tellist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
-            # create a skylist in the relevant directory
-            if allfilelist[i] in telskylist:
-                writeList(allfilelist[i], 'skylist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
+            for k in range(len(obsDirList)):
+                # Make sure date and gratings match
+                tempDir = obsDirList[k][1].split(os.sep)
+                if date in tempDir and grat in tempDir:
+                    # Open the times of all science images in science_directory
+                    times = obsDirList[k][0]
+                    print times
+                    # Find difference in each time from the telluric image we're trying to sort
+                    diffList = []
+                    for b in range(len(times)):
+                        difference = abs(telluric_time-obsDirList[k][0][b])
+                        templist = []
+                        templist.append(difference)
+                        templist.append(obsDirList[k][1])
+                        diffList.append(templist)
+                    # Find the science image with the smallest difference;
+                    print diffList
+                    minDiff = min(diffList)
+                    # Pass that time and path out of the for loop
+                    timeList.append(minDiff)
+            # Out of the for loop, compare min times from different directories.
+            if timeList:
+                closest_time = min(timeList)
+                # Copy the telluric image to the path of that science image.
+                path_to_science_dir = closest_time[1]
+                path_to_tellurics = os.path.split(path_to_science_dir)[0]
+                print path_to_tellurics
 
 
+
+                # create a Tellurics directory in objDir/YYYYMMDD/grating
+
+                if not os.path.exists(path_to_tellurics + '/Tellurics'):
+                    os.mkdir(path_to_tellurics + '/Tellurics')
+                # create an obsid (eg. obs25) directory in the Tellurics directory
+                if not os.path.exists(path_to_tellurics+'/Tellurics/obs'+obsid):
+                    os.mkdir(path_to_tellurics+'/Tellurics/obs'+obsid)
+                    telDirList.append(path_to_tellurics+'/Tellurics/obs'+obsid)
+                elif not telDirList or not telDirList[-1]==path_to_tellurics+'/Tellurics/obs'+obsid:
+                    telDirList.append(path_to_tellurics+'/Tellurics/obs'+obsid)
+                shutil.copy(Raw+'/'+allfilelist[i], path_to_tellurics+'/Tellurics/obs'+obsid+'/')
+                # create an objlist in the relevant directory
+                if allfilelist[i] not in telskylist:
+                    writeList(allfilelist[i], 'tellist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
+                # create a skylist in the relevant directory
+                if allfilelist[i] in telskylist:
+                    writeList(allfilelist[i], 'skylist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
+
+    # Last, modify obsDirList to a format telSort can use.
+    tempList = []
+    for i in range(len(obsDirList)):
+        tempList.append(obsDirList[i][1])
+    obsDirList = tempList
+    print tempList
+    print "Exiting sortObs"
     os.chdir(path)
 
     return objDirList, obsDirList, telDirList
