@@ -389,6 +389,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
 
         if obsclass=='partnerCal':
             print allfilelist[i]
+            timeList = []
             for objDir in objDirList:
                 tempDir = objDir.split(os.sep)
                 # Match tellurics with science based on first 4 chunks of observation id
@@ -411,39 +412,50 @@ def sortObs(allfilelist, skylist, telskylist, dir):
                         telluric_obsid = header[0].header['OBSID']
                         telluric_obsid = "".join(telluric_obsid.split('-')[:4])
 
-                        if science_obs_id == telluric_obsid :
+                        # Check to make sure observation ids match up.
+                        if science_obs_id == telluric_obsid:
                             # Update header variables to be from science_image
                             obj = science_header[0].header['OBJECT'].replace(' ', '')
 
                             objDir = path + '/' + obj + '/' + date
+                            templist = []
+                            time = abs(timeCalc(Raw + allfilelist[i]) - timeCalc(Raw + science_image + '.fits'))
+                            templist.append(time)
+                            templist.append(objDir)
+                            templist.append(grat)
+                            templist.append(obsid)
+                            timeList.append(templist)
+            print timeList
+            min_difference_object = min(timeList)
+            objDir = min_difference_object[1]
+            grat = min_difference_object[2]
+            obsid = min_difference_object[3]
 
-                            # Create a date directory. This is important for "Lost" telluric data.
+            # Create a date directory. This is important for "Lost" telluric data.
 
-                            if not os.path.exists(objDir):
-                                os.mkdir(objDir)
+            if not os.path.exists(objDir):
+                os.mkdir(objDir)
 
-                            if not os.path.exists(objDir + '/' + grat):
-                                os.mkdir(objDir + '/' + grat)
+            if not os.path.exists(objDir + '/' + grat):
+                os.mkdir(objDir + '/' + grat)
 
-                            # create a Tellurics directory in objDir/YYYYMMDD/grating
+            # create a Tellurics directory in objDir/YYYYMMDD/grating
 
-                            if not os.path.exists(objDir+'/'+grat+'/Tellurics'):
-                                print os.getcwd()
-                                print allfilelist[i]
-                                os.mkdir(objDir+'/'+grat+'/Tellurics')
-                            # create an obsid (eg. obs25) directory in the Tellurics directory
-                            if not os.path.exists(objDir+'/'+grat+'/Tellurics/obs'+obsid):
-                                os.mkdir(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-                                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-                            elif not telDirList or not telDirList[-1]==objDir+'/'+grat+'/Tellurics/obs'+obsid:
-                                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
-                            shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
-                            # create an objlist in the relevant directory
-                            if allfilelist[i] not in telskylist:
-                                writeList(allfilelist[i], 'tellist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
-                            # create a skylist in the relevant directory
-                            if allfilelist[i] in telskylist:
-                                writeList(allfilelist[i], 'skylist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
+            if not os.path.exists(objDir+'/'+grat+'/Tellurics'):
+                os.mkdir(objDir+'/'+grat+'/Tellurics')
+            # create an obsid (eg. obs25) directory in the Tellurics directory
+            if not os.path.exists(objDir+'/'+grat+'/Tellurics/obs'+obsid):
+                os.mkdir(objDir+'/'+grat+'/Tellurics/obs'+obsid)
+                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
+            elif not telDirList or not telDirList[-1]==objDir+'/'+grat+'/Tellurics/obs'+obsid:
+                telDirList.append(objDir+'/'+grat+'/Tellurics/obs'+obsid)
+            shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
+            # create an objlist in the relevant directory
+            if allfilelist[i] not in telskylist:
+                writeList(allfilelist[i], 'tellist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
+            # create a skylist in the relevant directory
+            if allfilelist[i] in telskylist:
+                writeList(allfilelist[i], 'skylist', objDir+'/'+grat+'/Tellurics/obs'+obsid+'/')
 
 
     os.chdir(path)
@@ -648,14 +660,22 @@ def telSort(telDirList, obsDirList):
         tellist = []
         for telDir in telDirList:
             if date in telDir:
-                timeList=[]
+
                 os.chdir(telDir)
+                telImageList = open(telDir + '/' + 'tellist', "r").readlines()
+                telImageList = [image.strip() for image in telImageList]
+                telluric_image = telImageList[0]
+                telluric_header = pyfits.open(telDir +'/'+ telluric_image + '.fits')
+                telluric_grating = telluric_header[0].header['GRATING'][0:1]
+
+                timeList=[]
                 if os.path.exists('./objtellist'):
                     os.remove('./objtellist')
                 templist = []
                 imageList=glob.glob('N*.fits')
                 templist.append(telDir)
                 templist.append(imageList)
+                templist.append(telluric_grating)
                 tellist.append(templist)
 
             # create a list of the start and stop times for each observation called timeList
@@ -664,34 +684,46 @@ def telSort(telDirList, obsDirList):
             templist=[]
             os.chdir(tellist[a][0])
             telheader = pyfits.open(tellist[a][1][0])
-            telobs = 'obs'+ telheader[0].header['OBSID'][-3:].replace('-','')
             start=timeCalc(tellist[a][1][0])
             stop=timeCalc(tellist[a][1][-1])
-            templist.append(telobs)
+            templist.append(os.getcwd())
             templist.append(start)
             templist.append(stop)
+            templist.append(tellist[a][2])
             timeList.append(templist)
 
         for obsDir in obsDirList:
             os.chdir(obsDir)
             if date in obsDir:
                 print os.getcwd()
+
+
+
                 try:
                     sciImageList = open('objlist', "r").readlines()
                 except IOError:
                     sciImageList = open('skylist', "r").readlines()
                 sciImageList = [image.strip() for image in sciImageList]
+
+                # Open image and get science image grating from header
+
+                science_image = sciImageList[0]
+                science_header = pyfits.open('./'+ science_image + '.fits')
+                science_grating = science_header[0].header['GRATING'][0:1]
+
                 for image in sciImageList:
                     diffList=[]
                     imageTime = timeCalc(image+'.fits')
                     for b in range(len(timeList)):
-                        if abs(imageTime-timeList[b][1]) <= 5400 or abs(imageTime-timeList[b][2]) <=5400:
-                            if abs(imageTime-timeList[b][1]) < abs(imageTime-timeList[b][2]):
-                                diff = abs(imageTime-timeList[b][1])
-                            else:
-                                diff = abs(imageTime-timeList[b][2])
-                            diffList.append(timeList[b][0])
-                            diffList.append(diff)
+                        # Check to make sure same grating is being used
+                        if timeList[b][3] == science_grating:
+                            if abs(imageTime-timeList[b][1]) <= 5400 or abs(imageTime-timeList[b][2]) <=5400:
+                                if abs(imageTime-timeList[b][1]) < abs(imageTime-timeList[b][2]):
+                                    diff = abs(imageTime-timeList[b][1])
+                                else:
+                                    diff = abs(imageTime-timeList[b][2])
+                                diffList.append(timeList[b][0])
+                                diffList.append(diff)
 
                     # find and record the telluric observation that is closest in time to the science image
                     if diffList:
@@ -699,15 +731,16 @@ def telSort(telDirList, obsDirList):
                         telobs = diffList[diffList.index(minDiff)-1]
                         sciheader = pyfits.open(image+'.fits')
                         sciObsid = 'obs'+ sciheader[0].header['OBSID'][-3:].replace('-','')
-                        if not os.path.exists(os.path.split(tellist[0][0])[0]+'/'+telobs+'/objtellist'):
+                        if not os.path.exists(telobs+'/objtellist'):
                             print tellist
-                            writeList(sciObsid, 'objtellist', os.path.split(tellist[0][0])[0]+'/'+telobs)
+                            print telobs
+                            writeList(sciObsid, 'objtellist', telobs)
                         else:
-                            objtellist = open(os.path.split(tellist[0][0])[0]+'/'+telobs+'/objtellist', 'r').readlines()
+                            objtellist = open(telobs+'/objtellist', 'r').readlines()
                             objtellist = [item.strip() for item in objtellist]
                             if sciObsid not in objtellist:
-                                writeList(sciObsid, 'objtellist', os.path.split(tellist[0][0])[0]+'/'+telobs)
-                        writeList(image, 'objtellist', os.path.split(tellist[0][0])[0]+'/'+telobs)
+                                writeList(sciObsid, 'objtellist', telobs)
+                        writeList(image, 'objtellist', telobs)
     os.chdir(path)
 
     return
