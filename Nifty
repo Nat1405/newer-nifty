@@ -3,8 +3,9 @@ from optparse import OptionParser
 from optparse import OptionParser
 from pyraf import iraf
 import sort as sortScript
-import calibration, nifsFluxCalib, nifsScience, nifsMerge
-from nifsDefs import datefmt
+import merge as mergeScript
+import calibrate, nifsFluxCalib, reduce
+from defs import datefmt
 import logging, os
 
 #--------------------------------------------------------------------#
@@ -14,18 +15,20 @@ import logging, os
 #     This is the python data reduction script for NIFS.             #
 #                                                                    #
 #     Calls the following scripts:                                   #
-#     sort.py                                                    #
-#     calibration.py                                                 #
-#     nifsScience.py                                                 #
-#     nifsMerge.py                                                   #
-#     nifsDefs.py                                                    #
+#     sort.py                                                        #
+#     calibrate.py                                                   #
+#     reduce.py                                                      #
+#     merge.py                                                       #
+#                                                                    #
+#     Extra definitions in                                           #
+#     defs.py                                                    #
 #                                                                    #
 #     To run:                                                        #
 #     python Main.py *command line options* (see below)              #
 #     EXAMPLE: python Main.py -d 20121212                            #
 #                                                                    #
 #                                                                    #
-#     Version 1.1.0 - June 2015   Marie Lemoine-Busserolle           #
+#     Version 1.1.1 - June 2017   Marie Lemoine-Busserolle           #
 #     mrlb05@googlemail.com                                          #
 #                                                                    #
 #--------------------------------------------------------------------#
@@ -90,29 +93,35 @@ def main():
     fluxcal = options.fluxcal
     telinter = options.telinter
 
-    # set the starting step of science reduction to 1
-    if not options.start:
-        start = 1
-    else:
-        start = options.start
+    # If a date or program is provided set copy to True
 
-    # set the stopping step of science reduction to 9
-    if not options.stop:
-        stop = 10
-    else:
-        stop = options.stop
+    if date or program:
+        copy = True
 
-    # set the starting step of calibration reduction to 1
+
+    # Set the starting step of calibrate reduction to 1
     if not options.rstart:
         rstart = 1
     else:
         rstart = options.rstart
 
-    # set the stopping step of calibration reduction to 6
+    # Set the stopping step of calibrate reduction to 6
     if not options.rstop:
         rstop = 6
     else:
         rstop = options.rstop
+
+    # Set the starting step of science reduction to 1
+    if not options.start:
+        start = 1
+    else:
+        start = options.start
+
+    # Set the stopping step of science reduction to 9
+    if not options.stop:
+        stop = 10
+    else:
+        stop = options.stop
 
     print 'Starting point is', start
     logging.info('Starting point is %s', start)
@@ -120,7 +129,7 @@ def main():
     print 'Starting point is', stop
     logging.info('Stopping point is %s', stop)
 
-    # set the H line removal method
+    # Set the H line removal method
     if not options.hline_method:
        hline_method = 'vega'
     else:
@@ -129,7 +138,7 @@ def main():
         logging.info('H line removal method is %s', hline_method)
 
 
-    # set yes or no for interactive the h line removal, telluric correction, and continuum fitting
+    # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
     if options.hinter==True:
         hlineinter = 'yes'
     else:
@@ -155,14 +164,12 @@ def main():
         fluxcal = 'yes'
     else:
         fluxcal = 'no'
-    print 'Flux calibration is performed  ? ', fluxcal
-    logging.info('Flux calibration is performed ? %s', fluxcal)
+    print 'Flux calibrate is performed  ? ', fluxcal
+    logging.info('Flux calibrate is performed ? %s', fluxcal)
 
-    # sort the data and calibrations
+    # Sort the data and calibrations
     print 'I am sorting the data'
     logging.info(' I am sorting the data ')
-    if debug:
-        a = raw_input('About to enter sort.py.')
     obsDirList, calDirList, telDirList = sortScript.start(dir, tel, sort, over, copy, program, date)
 
     logging.info('obsDirList : %s', obsDirList)
@@ -175,46 +182,50 @@ def main():
     logging.info('I am reducing the calibration data. ')
     if red:
         if debug:
-            a = raw_input('About to enter calibration.py')
-        calibration.start(obsDirList, calDirList, over, rstart, rstop)
+            a = raw_input('About to enter calibrate.py')
+        calibrate.start(obsDirList, calDirList, over, rstart, rstop)
 
     if tel:
-        # reduce the telluric images
+        # Reduce the telluric images
         if debug:
-            a = raw_input('About to enter nifsScience to reduce Telluric images,\
+            a = raw_input('About to enter reduce to reduce Telluric images,\
                            create telluric correction spectrum and blackbody spectrum.')
         print ' I am starting to reduce the telluric images '
         logging.info('I am starting to reduce the telluric images')
         if telred:
-            nifsScience.start(
+            reduce.start(
                 telDirList, calDirList, start, stop, tel, telinter, fluxcal,
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over
                 )
 
-        # create telluric correction spectrum and blackbody spectrum
-        if debug:
-            a = raw_input('About to enter nifsFluxCalib.')
-        print ' I am starting to create telluric correction spectrum and blackbody spectrum'
-        logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')
-        if fluxcal:
-            nifsFluxCalib.start(telDirList, continuuminter, hlineinter, hline_method, spectemp, mag, over)
-
-    # reduce the science images
+    # Reduce the science images
     if sci:
         print ' I am starting to reduce the science images '
         logging.info('I am starting to reduce the science images')
         if debug:
-            a = raw_input('About to enter nifsScience to reduce science images.')
-        nifsScience.start(obsDirList, calDirList, start, stop, tel, telinter, over)
+            a = raw_input('About to enter reduce to reduce science images.')
+        reduce.start(obsDirList, calDirList, start, stop, tel, telinter, over)
 
-    # merge all cubes
+    # Merge all cubes
     if merge:
         print ' I am starting to merge all cubes '
         logging.info('I am starting to merge all cubes')
         if debug:
-            a = raw_input('About to enter nifsMerge to merge cubes.')
-        nifsMerge.start(obsDirList, over)
+            a = raw_input('About to enter merge to merge cubes.')
+        mergeScript.start(obsDirList, over)
         print obsDirList
+
+    logging.info('###############################')
+    logging.info('#                             #')
+    logging.info('#              FIN            #')
+    logging.info('#                             #')
+    logging.info('###############################')
+
+    print '###############################'
+    print '#                             #'
+    print '#             FIN             #'
+    print '#                             #'
+    print '###############################'
 
     return
 

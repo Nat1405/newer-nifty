@@ -39,7 +39,7 @@ nifsScience.py
 nifsFluxCalib.py
 nifsTelluric.py
 nifsMerge.py
-nifsDefs.py
+defs.py
 
 The following files need to be located in the same directory as the scripts:
 
