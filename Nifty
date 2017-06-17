@@ -168,7 +168,7 @@ def main():
     logging.info('Flux calibrate is performed ? %s', fluxcal)
 
     # Sort the data and calibrations
-    print 'I am sorting the data'
+    print '\n\nI am sorting the data.\n'
     logging.info(' I am sorting the data ')
     obsDirList, calDirList, telDirList = sortScript.start(dir, tel, sort, over, copy, program, date)
 
