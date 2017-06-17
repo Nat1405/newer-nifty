@@ -1,83 +1,41 @@
 import logging
 from pyraf import iraf
-iraf.gemini()
-iraf.nifs()
-iraf.gnirs()
-iraf.gemtools()
 from pyraf import iraffunctions
 import pyfits
 import logging, os
 from defs import datefmt, listit, checkLists
 
-#--------------------------------------------------------------------#
-#                                                                    #
-#     REDUCE                                                         #
-#                                                                    #
-#     This module contains all the functions needed to reduce        #
-#     the NIFS calibrations (reducing the images is done in the      #
-#     science reduction scripts). The reduction steps were made      #
-#     according to                                                   #
-#                                                                    #
-#   http://www.gemini.edu/sciops/instruments/nifs/NIFS_Basecalib.py  #
-#                                                                    #
-#     COMMAND LINE OPTIONS                                           #
-#     If you wish to skip this step enter -r in the command line     #
-#     Specify a start value with -a (default is 1)                   #
-#     Specify a stop value with -z (default is 6)                    #
-#                                                                    #
-#     INPUT:                                                         #
-#     + Raw files                                                    #
-#       - Flats (lamps on)                                           #
-#       - Flats (lamps off)                                          #
-#       - Arcs                                                       #
-#       - Darks                                                      #
-#       - Ronchi masks                                               #
-#                                                                    #
-#     OUTPUT:                                                        #
-#     - Shift file. (ie sCALFLAT.fits)                               #
-#     - Bad Pixel Mask. (ie rgnCALFLAT_sflat_bmp.pl)                 #
-#     - Flat field. (ie rgnCALFLAT_flat.fits)                        #
-#     - Reduced arc frame. (ie wrgnARC.fits)                         #
-#     - Reduced ronchi mask. (ie. rgnRONCHI.fits)                    #
-#     - Reduced dark frame. (ie. rgnARCDARK.fits)                    #
-#                                                                    #
-#--------------------------------------------------------------------#
-
 def start(obsDirList, calDirList, over, start, stop):
     """
-    #--------------------------------------------------------------------#
-    #                                                                    #
-    #     REDUCE                                                         #
-    #                                                                    #
-    #     This module contains all the functions needed to reduce        #
-    #     the NIFS calibrations (reducing the images is done in the      #
-    #     science reduction scripts). The reduction steps were made      #
-    #     according to                                                   #
-    #                                                                    #
-    #   http://www.gemini.edu/sciops/instruments/nifs/NIFS_Basecalib.py  #
-    #                                                                    #
-    #     COMMAND LINE OPTIONS                                           #
-    #     If you wish to skip this step enter -r in the command line     #
-    #     Specify a start value with -a (default is 1)                   #
-    #     Specify a stop value with -z (default is 6)                    #
-    #                                                                    #
-    #     INPUT FILES:                                                   #
-    #     + Raw files                                                    #
-    #       - Flats (lamps on)                                           #
-    #       - Flats (lamps off)                                          #
-    #       - Arcs                                                       #
-    #       - Darks                                                      #
-    #       - Ronchi masks                                               #
-    #                                                                    #
-    #     OUTPUT FILES:                                                  #
-    #     - Shift file. (ie sCALFLAT.fits)                               #
-    #     - Bad Pixel Mask. (ie rgnCALFLAT_sflat_bmp.pl)                 #
-    #     - Flat field. (ie rgnCALFLAT_flat.fits)                        #
-    #     - Reduced arc frame. (ie wrgnARC.fits)                         #
-    #     - Reduced ronchi mask. (ie. rgnRONCHI.fits)                    #
-    #     - Reduced dark frame. (ie. rgnARCDARK.fits)                    #
-    #                                                                    #
-    #--------------------------------------------------------------------#
+         Calibrate
+
+         This module contains all the functions needed to reduce
+         the NIFS calibrations (reducing the images is done in the
+         science reduction scripts). The reduction steps were made
+         according to
+
+      http://www.gemini.edu/sciops/instruments/nifs/NIFS_Basecalib.py
+
+         COMMAND LINE OPTIONS
+         If you wish to skip this step enter -r in the command line
+         Specify a start value with -a (default is 1)
+         Specify a stop value with -z (default is 6)
+
+         INPUT FILES:
+         + Raw files
+           - Flats (lamps on)
+           - Flats (lamps off)
+           - Arcs
+           - Darks
+           - Ronchi masks
+
+         OUTPUT FILES:
+         - Shift file. (ie sCALFLAT.fits)
+         - Bad Pixel Mask. (ie rgnCALFLAT_sflat_bmp.pl)
+         - Flat field. (ie rgnCALFLAT_flat.fits)
+         - Reduced arc frame. (ie wrgnARC.fits)
+         - Reduced ronchi mask. (ie. rgnRONCHI.fits)
+         - Reduced dark frame. (ie. rgnARCDARK.fits)
 
     Args:
         obsDirList: list of paths to science observations. ['path/obj/date/grat/obsid']
@@ -88,54 +46,54 @@ def start(obsDirList, calDirList, over, start, stop):
 
     Directory structure after calibration:
 
---->cwd/
-    --->Nifty files (eg Main.py, sort.py, main.log)
-        --->objectname/ (Science target name- found from .fits file headers).
-            --->date/ (YYYYMMDD)
-                --->Calibrations/
-                    --->N*.fits (raw .fits image files)
-                    --->nN*.fits
-                    --->nN*.fits
-                    --->nN*.fits
-                    --->nN*.fits
-                    --->gnN*.fits
-                    --->gnN*.fits
-                    --->gnN*.fits
-                    --->gnN*.fits
-                    --->rgnN*.fits
-                    --->rgnN*.fits
-                    --->rgnN*.fits
-                    --->rgnN*_sflat.fits
-                    --->rgnN*_sflat.bpm.pl
-                    --->rgnN*_flat.fits
-                    --->brgnN*.fits (Possible. May not appear.)
-                    --->wrgnN*.fits
-                    --->arcdarkfile (textfile storing raw image name)
-                    --->arcdarklist (list of .fits files)
-                    --->arclist (list of .fits files)
-                    --->database/
-                    --->idrgn_SCI_[i]_
-                    --->idwrgn_SCI_[i]_
-                    --->flatdarklist (list of .fits files)
-                    --->flatlist (list of .fits files)
-                    --->ronchilist (list of .fits files)
-                    --->sN*.fits (raw .fits file. Eg sN20100410S0362.fits)
-                    --->ronchifile (textfile storing name of raw file)
-                    --->shiftfile (textfile storing name of raw shiftfile).
-                    --->flatfile (textfile storing name of raw _flat image)
-                    --->sflatfile (textile storing name of raw _sflat image)
-                    --->sflat_bpmfile (storing name of sflat_bpm.pl)
-                --->grating_or_filter/ (eg, K, H)
-                    --->ot_observation_name/ (Science images)
+    --->cwd/
+        --->Nifty files (eg Main.py, sort.py, main.log)
+            --->objectname/ (Science target name- found from .fits file headers).
+                --->date/ (YYYYMMDD)
+                    --->Calibrations/
                         --->N*.fits (raw .fits image files)
-                        --->objlist (text file of image names. N*\n)
-                        --->skylist (text file of image names. N*\n)
-                    --->Tellurics/
-                        --->ot_observation_name/
-                        -->N*.fits (raw .fits image files)
-                        --->objtellist (text file. See format above)
-                        --->skylist (text file of image names. N*\n)
-                        --->tellist (text file of image names. N*\n)
+                        --->nN*.fits
+                        --->nN*.fits
+                        --->nN*.fits
+                        --->nN*.fits
+                        --->gnN*.fits
+                        --->gnN*.fits
+                        --->gnN*.fits
+                        --->gnN*.fits
+                        --->rgnN*.fits
+                        --->rgnN*.fits
+                        --->rgnN*.fits
+                        --->rgnN*_sflat.fits
+                        --->rgnN*_sflat.bpm.pl
+                        --->rgnN*_flat.fits
+                        --->brgnN*.fits (Possible. May not appear.)
+                        --->wrgnN*.fits
+                        --->arcdarkfile (textfile storing raw image name)
+                        --->arcdarklist (list of .fits files)
+                        --->arclist (list of .fits files)
+                        --->database/
+                        --->idrgn_SCI_[i]_
+                        --->idwrgn_SCI_[i]_
+                        --->flatdarklist (list of .fits files)
+                        --->flatlist (list of .fits files)
+                        --->ronchilist (list of .fits files)
+                        --->sN*.fits (raw .fits file. Eg sN20100410S0362.fits)
+                        --->ronchifile (textfile storing name of raw file)
+                        --->shiftfile (textfile storing name of raw shiftfile).
+                        --->flatfile (textfile storing name of raw _flat image)
+                        --->sflatfile (textile storing name of raw _sflat image)
+                        --->sflat_bpmfile (storing name of sflat_bpm.pl)
+                    --->grating_or_filter/ (eg, K, H)
+                        --->ot_observation_name/ (Science images)
+                            --->N*.fits (raw .fits image files)
+                            --->objlist (text file of image names. N*\n)
+                            --->skylist (text file of image names. N*\n)
+                        --->Tellurics/
+                            --->ot_observation_name/
+                            -->N*.fits (raw .fits image files)
+                            --->objtellist (text file. See format above)
+                            --->skylist (text file of image names. N*\n)
+                            --->tellist (text file of image names. N*\n)
 
     """
 
@@ -160,6 +118,11 @@ def start(obsDirList, calDirList, over, start, stop):
     print '#                             #'
     print '###############################'
 
+    # Set up iraf
+    iraf.gemini()
+    iraf.nifs()
+    iraf.gnirs()
+    iraf.gemtools()
     # Unlearn the used tasks
     iraf.unlearn(iraf.gemini,iraf.gemtools,iraf.gnirs,iraf.nifs)
 

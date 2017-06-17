@@ -1,21 +1,17 @@
 #!/bin/bash
 
-echo Testing configuration 1
+var1=$(find ./NGC3227 -mindepth 1 -type f -name "*.fits" -exec printf x \; | wc -c)
 
-./Nifty -q ~/data/auto_tests/just_q_18
+var2=$(find ./NGC4235 -mindepth 1 -type f -name "*.fits" -exec printf x \; | wc -c)
 
-echo "Done config 1"
+var3=$(find ./IRC+10216 -mindepth 1 -type f -name "*.fits" -exec printf x \; | wc -c)
 
-echo Testing configuration 2
+var4=$(find ~/data/auto_tests/all_three -mindepth 1 -type f -name "*.fits" -exec printf x \; | wc -c)
 
-./Nifty -q ~/data/auto_tests/just_q_6
+var5=$(($var1+$var2+$var3))
 
-echo "Done config 2"
-
-echo Testing configuration 3
-
-./Nifty -q ~/data/auto_tests/all_three
-
-echo "Done config 3"
-
-
+if [ "$var5" -eq "$var4" ]; then
+  echo "Number of files matches."
+else
+  echo "They are not equal"
+fi

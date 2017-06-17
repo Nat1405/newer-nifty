@@ -1,0 +1,97 @@
+2017/06/16 08:02:55  Login file is main.log
+2017/06/16 08:02:55  Starting point is 1
+2017/06/16 08:02:55  Stopping point is 10
+2017/06/16 08:02:55  H line removal method is set to interactive ? no
+2017/06/16 08:02:55  telluric continuum fitting is set to interactive ? no
+2017/06/16 08:02:55  telluric correction is set to interactive ? no
+2017/06/16 08:02:55  Flux calibrate is performed ? no
+2017/06/16 08:02:55   I am sorting the data 
+2017/06/16 08:07:21  obsDirList : ['/Users/ncomeau/research/newer-nifty/IRC+10216/20160224/J/obs344', '/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/obs68', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160227/K/obs328', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160227/K/obs364', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/obs99', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/obs60', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160228/H/obs359', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160418/K/obs383', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/obs92', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/obs92']
+2017/06/16 08:07:21  telDirList : ['/Users/ncomeau/research/newer-nifty/IRC+10216/20160224/J/Tellurics/obs346', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160224/J/Tellurics/obs58', '/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/Tellurics/obs66', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160227/K/Tellurics/obs330', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160227/K/Tellurics/obs365', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/Tellurics/obs101', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/Tellurics/obs97', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160228/H/Tellurics/obs361', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160418/K/Tellurics/obs370', '/Users/ncomeau/research/newer-nifty/IRC+10216/20160418/K/Tellurics/obs375', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs114', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs116', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs120', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs46', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs90', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs124', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs126', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs94']
+2017/06/16 08:07:21  I am reducing the calibration data. 
+2017/06/16 09:12:08  Login file is main.log
+2017/06/16 09:12:08  Starting point is 1
+2017/06/16 09:12:08  Stopping point is 10
+2017/06/16 09:12:08  H line removal method is set to interactive ? no
+2017/06/16 09:12:08  telluric continuum fitting is set to interactive ? no
+2017/06/16 09:12:08  telluric correction is set to interactive ? no
+2017/06/16 09:12:08  Flux calibrate is performed ? no
+2017/06/16 09:12:08   I am sorting the data 
+2017/06/16 09:14:33  obsDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/obs68', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/obs99', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/obs60', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/obs92', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/obs92']
+2017/06/16 09:14:33  telDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/Tellurics/obs66', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/Tellurics/obs101', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/Tellurics/obs97', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs114', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs116', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs120', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs46', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs90', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs124', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs126', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs94']
+2017/06/16 09:14:33  I am reducing the calibration data. 
+2017/06/16 09:34:45  Login file is main.log
+2017/06/16 09:34:45  Starting point is 1
+2017/06/16 09:34:45  Stopping point is 10
+2017/06/16 09:34:45  H line removal method is set to interactive ? no
+2017/06/16 09:34:45  telluric continuum fitting is set to interactive ? no
+2017/06/16 09:34:45  telluric correction is set to interactive ? no
+2017/06/16 09:34:45  Flux calibrate is performed ? no
+2017/06/16 09:34:45   I am sorting the data 
+2017/06/16 09:37:28  obsDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/obs68', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/obs99', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/obs60', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/obs92', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/obs92']
+2017/06/16 09:37:28  telDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/Tellurics/obs66', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/Tellurics/obs101', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/Tellurics/obs97', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs114', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs116', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs120', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs46', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs90', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs124', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs126', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs94']
+2017/06/16 09:37:28  I am reducing the calibration data. 
+2017/06/16 09:54:31  ###############################
+2017/06/16 09:54:31  #                             #
+2017/06/16 09:54:31  # Start Calibration Reduction #
+2017/06/16 09:54:31  #                             #
+2017/06/16 09:54:31  ###############################
+2017/06/16 09:54:43  Login file is main.log
+2017/06/16 09:54:43  Starting point is 1
+2017/06/16 09:54:43  Stopping point is 10
+2017/06/16 09:54:43  H line removal method is set to interactive ? no
+2017/06/16 09:54:43  telluric continuum fitting is set to interactive ? no
+2017/06/16 09:54:43  telluric correction is set to interactive ? no
+2017/06/16 09:54:43  Flux calibrate is performed ? no
+2017/06/16 09:54:43   I am sorting the data 
+2017/06/16 09:57:01  obsDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/obs68', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/obs99', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/obs60', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/obs92', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/obs92']
+2017/06/16 09:57:01  telDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/Tellurics/obs66', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/Tellurics/obs101', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/Tellurics/obs97', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs114', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs116', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs120', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs46', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs90', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs124', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs126', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs94']
+2017/06/16 09:57:01  I am reducing the calibration data. 
+2017/06/16 10:05:42  Login file is main.log
+2017/06/16 10:05:42  Starting point is 1
+2017/06/16 10:05:42  Stopping point is 10
+2017/06/16 10:05:42  H line removal method is set to interactive ? no
+2017/06/16 10:05:42  telluric continuum fitting is set to interactive ? no
+2017/06/16 10:05:42  telluric correction is set to interactive ? no
+2017/06/16 10:05:42  Flux calibrate is performed ? no
+2017/06/16 10:05:42   I am sorting the data 
+2017/06/16 10:08:06  obsDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/obs68', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/obs99', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/obs60', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/obs92', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/obs92']
+2017/06/16 10:08:06  telDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/Tellurics/obs66', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/Tellurics/obs101', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/Tellurics/obs97', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs114', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs116', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs120', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs46', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs90', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs124', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs126', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs94']
+2017/06/16 10:08:06  I am reducing the calibration data. 
+2017/06/16 10:13:45  ###############################
+2017/06/16 10:13:45  #                             #
+2017/06/16 10:13:45  # Start Calibration Reduction #
+2017/06/16 10:13:45  #                             #
+2017/06/16 10:13:45  ###############################
+2017/06/16 10:15:31  Login file is main.log
+2017/06/16 10:15:31  Starting point is 1
+2017/06/16 10:15:31  Stopping point is 10
+2017/06/16 10:15:31  H line removal method is set to interactive ? no
+2017/06/16 10:15:31  telluric continuum fitting is set to interactive ? no
+2017/06/16 10:15:31  telluric correction is set to interactive ? no
+2017/06/16 10:15:31  Flux calibrate is performed ? no
+2017/06/16 10:15:31   I am sorting the data 
+2017/06/16 10:15:31  ###############################
+2017/06/16 10:15:31  #                             #
+2017/06/16 10:15:31  #  Start sorting and copying  #
+2017/06/16 10:15:31  #                             #
+2017/06/16 10:15:31  ###############################
+2017/06/16 10:17:57  obsDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/obs68', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/obs99', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/obs60', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/obs92', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/obs92']
+2017/06/16 10:17:57  telDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/Tellurics/obs66', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/Tellurics/obs101', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/Tellurics/obs97', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs114', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs116', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs120', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs46', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs90', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs124', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs126', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs94']
+2017/06/16 10:17:57  I am reducing the calibration data. 
+2017/06/16 10:24:16  Login file is main.log
+2017/06/16 10:24:16  Starting point is 1
+2017/06/16 10:24:16  Stopping point is 10
+2017/06/16 10:24:16  H line removal method is set to interactive ? no
+2017/06/16 10:24:16  telluric continuum fitting is set to interactive ? no
+2017/06/16 10:24:16  telluric correction is set to interactive ? no
+2017/06/16 10:24:16  Flux calibrate is performed ? no
+2017/06/16 10:24:16   I am sorting the data 
+2017/06/16 10:24:16  ###############################
+2017/06/16 10:24:16  #                             #
+2017/06/16 10:24:16  #  Start sorting and copying  #
+2017/06/16 10:24:16  #                             #
+2017/06/16 10:24:16  ###############################
+2017/06/16 10:26:37  obsDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/obs68', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/obs99', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/obs60', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/obs44', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/obs92', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/obs92']
+2017/06/16 10:26:37  telDirList : ['/Users/ncomeau/research/newer-nifty/NGC3227/20160226/K/Tellurics/obs66', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/K/Tellurics/obs101', '/Users/ncomeau/research/newer-nifty/NGC3227/20160228/J/Tellurics/obs97', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs114', '/Users/ncomeau/research/newer-nifty/NGC4235/20160422/K/Tellurics/obs116', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs120', '/Users/ncomeau/research/newer-nifty/NGC4235/20160423/K/Tellurics/obs46', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs90', '/Users/ncomeau/research/newer-nifty/NGC4235/20160424/J/Tellurics/obs124', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs126', '/Users/ncomeau/research/newer-nifty/NGC4235/20160425/J/Tellurics/obs94']
+2017/06/16 10:26:37  I am reducing the calibration data. 

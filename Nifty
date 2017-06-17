@@ -4,7 +4,7 @@ from optparse import OptionParser
 from pyraf import iraf
 import sort as sortScript
 import merge as mergeScript
-import calibrate, nifsFluxCalib, reduce
+import calibrate, reduce
 from defs import datefmt
 import logging, os
 

@@ -73,6 +73,18 @@ def start(dir, tel, sort, over, copy, program, date):
     logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     log = os.getcwd()+'/main.log'
 
+    logging.info('###############################')
+    logging.info('#                             #')
+    logging.info('#  Start sorting and copying  #')
+    logging.info('#                             #')
+    logging.info('###############################')
+
+    print '###############################'
+    print '#                             #'
+    print '#  Start sorting and copying  #'
+    print '#                             #'
+    print '###############################'
+
     path = os.getcwd()
 
     # Exit if -q and -c True are specified at command line (cannot copy from Gemini AND use local raw data).
@@ -161,7 +173,7 @@ def makeSortFiles(dir):
 
     """Creates lists of file names necessary for sorting the files into the proper directories."""
 
-    allfilelist = []
+    allfilelist = [] # List of tellurics, science frames, aquisitions... But not calibrations!
     flatlist = []
     flatdarklist = []
     ronchilist = []
@@ -180,14 +192,15 @@ def makeSortFiles(dir):
         Raw = path+'/Raw'
 
     os.chdir(Raw)
-    print Raw
+    print "Raw file directory is: ", Raw
+
+    print "I am making lists of each type of file."
 
     # make a list of all the files in the Raw directory
     rawfiles = glob.glob('N*.fits')
 
     # sort the files into lists (allfilelist and cal lists)
     for entry in rawfiles:
-        print entry
         header = pyfits.open(entry)
 
         obstype = header[0].header['OBSTYPE'].strip()    # determines which files are ARCS
@@ -201,7 +214,9 @@ def makeSortFiles(dir):
 
 
         if obstype == 'OBJECT' and (obsclass == 'science' or obsclass == 'acq' or obsclass == 'acqCal' or obsclass == 'partnerCal'):
-            allfilelist.append(entry)
+            # Append [filename, copied]. copied is 1 if not copied, 0 if copied.
+            templist = [entry, 1, obsclass]
+            allfilelist.append(templist)
             # differentiating between on target and sky frames
             rad = math.sqrt(poff**2 + qoff**2)
             # if the offsets are outside a circle of 5.0 units in radius
@@ -267,6 +282,22 @@ def makeSortFiles(dir):
 
     os.chdir(path)
 
+    print "Length allfilelist: ", len(allfilelist)
+    print "Length arclist: ", len(arclist)
+    print "Length arcdarklist: ", len(arcdarklist)
+    print "Length flatlist: ", len(flatlist)
+    print "Length flatdarklist: ", len(flatdarklist)
+    print "Length ronchilist: ", len(ronchilist)
+    print "Length skylist: ", len(skylist)
+    print "Length telskylist: ", len(telskylist)
+
+    number_files_to_be_copied = len(allfilelist)
+
+    number_calibration_files_to_be_copied = len(arclist) + len(arcdarklist) +\
+                         len(flatlist) + len(flatdarklist) + len(ronchilist)
+
+    print "Number of files to be processed: ", number_files_to_be_copied + number_calibration_files_to_be_copied
+
     return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList
 
 #----------------------------------------------------------------------------------------#
@@ -276,7 +307,10 @@ def sortObs(allfilelist, skylist, telskylist, dir):
     """Sorts the science images, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass, when not using the Gemini network.
     """
 
-    print "Currently sorting:"
+    number_files_to_be_copied = len(allfilelist)
+
+    print "\n\nMaking new directories and copying files. In this step I will process " + str(number_files_to_be_copied) +\
+            " files."
 
     objDirList = []
     # obsDirList is list of two part data. First part (list) tracks lists of times of each science directory.
@@ -291,8 +325,11 @@ def sortObs(allfilelist, skylist, telskylist, dir):
     else:
         Raw = path+'/Raw'
 
+    # Make directories to put files in
+    print "Making new directories."
+
     for entry in allfilelist:
-        header = pyfits.open(Raw+'/'+entry)
+        header = pyfits.open(Raw+'/'+entry[0])
 
         objname = header[0].header['OBJECT'].replace(' ', '')
         obsclass = header[0].header['OBSCLASS']
@@ -314,7 +351,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
 
 
     for entry in allfilelist:
-        header = pyfits.open(Raw+'/'+entry)
+        header = pyfits.open(Raw+'/'+entry[0])
 
         obstype = header[0].header['OBSTYPE'].strip()    # determines which files are ARCS
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -322,7 +359,7 @@ def sortObs(allfilelist, skylist, telskylist, dir):
         date = header[0].header[ 'DATE'].replace('-','')         # 1st CAL sorting criterion
         obsclass = header[0].header['OBSCLASS']  # used to sort out the acqs and acqCals in the trap
         obj = header[0].header['OBJECT'].replace(' ','')
-        time = timeCalc(Raw+'/'+entry)
+        time = timeCalc(Raw+'/'+entry[0])
 
         if obsclass=='science':
             objDir = path+'/'+obj
@@ -340,12 +377,14 @@ def sortObs(allfilelist, skylist, telskylist, dir):
             elif not obsDirList or not obsDirList[-1][1]==objDir+'/'+date+'/'+grat+'/obs'+obsid:
                 obsDirList.append([[time], objDir+'/'+date+'/'+grat+'/obs'+obsid])
             elif obsDirList[-1][1] == objDir+'/'+date+'/'+grat+'/obs'+obsid:
-                print "Appending more times"
                 obsDirList[-1][0].append(time)
 
-    # copy science and acquisition images to the appropriate folder
+
+    # Copy science and acquisition images to the appropriate directory
+    print "Copying Science and Acquisitions.\nNow copying: "
+
     for i in range(len(allfilelist)):
-        header = pyfits.open(Raw+'/'+allfilelist[i])
+        header = pyfits.open(Raw+'/'+allfilelist[i][0])
 
         obstype = header[0].header['OBSTYPE'].strip()    # determines which files are ARCS
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -356,34 +395,38 @@ def sortObs(allfilelist, skylist, telskylist, dir):
 
         # Only grab the most recent aquisition image
         if i!=len(allfilelist)-1:
-            header2 = pyfits.open(Raw+'/'+allfilelist[i+1])
+            header2 = pyfits.open(Raw+'/'+allfilelist[i+1][0])
             obsclass2 = header2[0].header['OBSCLASS']
             obj2 = header2[0].header['OBJECT'].replace(' ','')
 
 
         if obsclass=='science':
-            print allfilelist[i]
+            print allfilelist[i][0]
             objDir = path+'/'+obj
-            shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
+            shutil.copy(Raw+'/'+allfilelist[i][0], objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
+            # Update status flag to show entry was copied
+            allfilelist[i][1] = 0
             # create an objlist in the relevant directory
-            if allfilelist[i] not in skylist:
-                writeList(allfilelist[i], 'objlist', objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
+            if allfilelist[i][0] not in skylist:
+                writeList(allfilelist[i][0], 'objlist', objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
             # create a skylist in the relevant directory
-            if allfilelist[i] in skylist:
-                writeList(allfilelist[i], 'skylist', objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
+            if allfilelist[i][0] in skylist:
+                writeList(allfilelist[i][0], 'skylist', objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
 
         if obsclass=='acq' and obsclass2=='science':
-            print allfilelist[i]
+            print allfilelist[i][0]
             # create an Acquisitions directory in objDir/YYYYMMDD/grating
             if not os.path.exists(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/'):
                 os.makedirs(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
-            shutil.copy(Raw+'/'+allfilelist[i], path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
+            shutil.copy(Raw+'/'+allfilelist[i][0], path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
+            allfilelist[i][1] = 0
 
     # Copy telluric images to the appropriate folder.
     # Note: Because the 'OBJECT' of a telluric file header is different then the
     # science target, we need to sort by date, grating AND most recent time.
+    print "Copying tellurics data.\nNow copying: "
     for i in range(len(allfilelist)):
-        header = pyfits.open(Raw+'/'+allfilelist[i])
+        header = pyfits.open(Raw+'/'+allfilelist[i][0])
 
         obstype = header[0].header['OBSTYPE'].strip()    # determines which files are ARCS
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -391,12 +434,11 @@ def sortObs(allfilelist, skylist, telskylist, dir):
         date = header[0].header[ 'DATE'].replace('-','')         # 1st CAL sorting criterion
         obsclass = header[0].header['OBSCLASS']  # used to sort out the acqs and acqCals in the trap
         obj = header[0].header['OBJECT'].replace(' ', '')
-        telluric_time = timeCalc(Raw+'/'+allfilelist[i])
+        telluric_time = timeCalc(Raw+'/'+allfilelist[i][0])
 
 
         if obsclass=='partnerCal':
-            print 'sorting a telluric: '
-            print allfilelist[i]
+            print allfilelist[i][0]
             timeList = []
             for k in range(len(obsDirList)):
                 # Make sure date and gratings match
@@ -433,21 +475,30 @@ def sortObs(allfilelist, skylist, telskylist, dir):
                     telDirList.append(path_to_tellurics+'/Tellurics/obs'+obsid)
                 elif not telDirList or not telDirList[-1]==path_to_tellurics+'/Tellurics/obs'+obsid:
                     telDirList.append(path_to_tellurics+'/Tellurics/obs'+obsid)
-                shutil.copy(Raw+'/'+allfilelist[i], path_to_tellurics+'/Tellurics/obs'+obsid+'/')
+                shutil.copy(Raw+'/'+allfilelist[i][0], path_to_tellurics+'/Tellurics/obs'+obsid+'/')
+                allfilelist[i][1] = 0
                 # create an objlist in the relevant directory
                 if allfilelist[i] not in telskylist:
-                    writeList(allfilelist[i], 'tellist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
+                    writeList(allfilelist[i][0], 'tellist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
                 # create a skylist in the relevant directory
                 if allfilelist[i] in telskylist:
-                    writeList(allfilelist[i], 'skylist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
+                    writeList(allfilelist[i][0], 'skylist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
 
-    # Last, modify obsDirList to a format telSort can use.
+    # Modify obsDirList to a format telSort can use.
     tempList = []
     for i in range(len(obsDirList)):
         tempList.append(obsDirList[i][1])
     obsDirList = tempList
-    print tempList
-    print "Exiting sortObs"
+
+    # Check to which entries were not copied
+
+    for i in range(len(allfilelist)):
+        # Check the copied flag. If not 0, print the entry.
+        if allfilelist[i][1] != 0:
+            print allfilelist[i][0], allfilelist[i][2],  " was not copied."
+
+    print "Done sorting and copying science and tellurics. Moving on to Calibrations.\n\n"
+
     os.chdir(path)
 
     return objDirList, obsDirList, telDirList
@@ -481,6 +532,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                     os.remove('./'+list)
 
     # sort lamps on flats
+    print "\nSorting flats:"
     for entry in flatlist:
         print entry
         header = pyfits.open(entry)
@@ -497,6 +549,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                         writeList(entry, 'flatlist', path)
 
     # sort lamps off flats
+    print "\nSorting lamps off flats:"
     for entry in flatdarklist:
         print entry
         os.chdir(Raw)
@@ -514,6 +567,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                         writeList(entry, 'flatdarklist', path)
 
     # sort ronchi flats
+    print "\nSorting ronchi flats:"
     for entry in ronchilist:
         print entry
         os.chdir(Raw)
@@ -531,6 +585,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                         writeList(entry, 'ronchilist', path)
 
     # sort arc darks
+    print "\nSorting arcs:"
     for entry in arclist:
         print entry
         header = pyfits.open(entry)
@@ -545,6 +600,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                 writeList(entry, 'arclist', path)
 
     # sort arc darks
+    print "\nSorting arc darks:"
     for entry in arcdarklist:
         print entry
         header = pyfits.open(entry)
