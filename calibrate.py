@@ -255,6 +255,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
 
     """
 
+    # Update headers add mask definition file as a binary file
     for image in flatlist:
         image = str(image).strip()
         if os.path.exists('n'+image+'.fits'):
@@ -267,6 +268,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
             iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_int='yes',fl_corr='no',fl_nonl='no', logfile=log)
     flatlist = checkLists(flatlist, '.', 'n', '.fits')
 
+    # Do same for flatdarklist
     for image in flatdarklist:
         image = str(image).strip()
         if os.path.exists('n'+image+'.fits'):
@@ -279,6 +281,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
             iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_int='yes',fl_corr='no',fl_nonl='no', logfile=log)
     flatdarklist = checkLists(flatdarklist, '.', 'n', '.fits')
 
+    # Combine prepared flats
     if os.path.exists('gn'+calflat+'.fits'):
         if over:
             iraf.delete("gn"+calflat+".fits")
@@ -288,6 +291,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
     else:
         iraf.gemcombine(listit(flatlist,"n"),output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
 
+    # Combine dark flats
     if os.path.exists('gn'+flatdark+'.fits'):
         if over:
             iraf.delete("gn"+flatdark+".fits")
@@ -401,21 +405,36 @@ def reduceArc(arclist, arc, log, over):
                 iraf.delete("n"+image+".fits")
             else:
                 print "Output file exists and -over not set - skipping combine_ima"
-                return
+                continue
         iraf.nfprepare(image, rawpath="", shiftimage=shiftima, fl_vardq="yes", bpm=sflat_bpm, logfile=log)
 
-        if os.path.exists("gn"+image+".fits"):
-            if over:
-                iraf.delete("gn"+image+".fits")
-            else:
-                print "Output file exists and -over not set - skipping apply_flat_arc"
-                return
+    if os.path.exists("gn"+arc+".fits"):
+        if over:
+            iraf.delete("gn"+arc+".fits")
+        else:
+            print "Output file exists and -over not set - skipping apply_flat_arc"
+
     arclist = checkLists(arclist, '.', 'n', '.fits')
 
     if len(arclist)>1:
-        iraf.gemcombine(listit(arclist,"n"),output="gn"+arc,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+        if os.path.exists("gn"+arc+".fits"):
+            if over:
+                iraf.delete("gn"+arc+".fits")
+                iraf.gemcombine(listit(arclist,"n"),output="gn"+arc,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+            else:
+                print "Output file exists and -over not set - skipping apply_flat_arc"
+        else:
+            iraf.gemcombine(listit(arclist,"n"),output="gn"+arc,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+
     else:
-        iraf.copy("n"+arc+".fits", "gn"+arc+".fits")
+        if os.path.exists("gn"+arc+".fits"):
+            if over:
+                iraf.delete("gn"+arc+".fits")
+                iraf.copy("n"+arc+".fits", "gn"+arc+".fits")
+            else:
+                print "Output file exists and -over not set - skipping apply_flat_arc"
+        else:
+            iraf.copy("n"+arc+".fits", "gn"+arc+".fits")
 
     if os.path.exists("rgn"+image+".fits"):
         if over:

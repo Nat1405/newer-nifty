@@ -174,11 +174,15 @@ def main():
 
     logging.info('obsDirList : %s', obsDirList)
     logging.info('telDirList : %s', telDirList)
-    print 'obsDirList : ', obsDirList
-    print 'telDirList : ', telDirList
+    print '\nobsDirList : '
+    for i in range(len(obsDirList)):
+        print obsDirList[i]
+    print '\ntelDirList : '
+    for i in range(len(telDirList)):
+        print telDirList[i]
 
     # Reduce the calibration data
-    print ' I am reducing the calibration data. '
+    print '\nI am reducing the calibration data. '
     logging.info('I am reducing the calibration data. ')
     if red:
         if debug:
@@ -188,8 +192,8 @@ def main():
     if tel:
         # Reduce the telluric images
         if debug:
-            a = raw_input('About to enter reduce to reduce Telluric images,\
-                           create telluric correction spectrum and blackbody spectrum.')
+            a = raw_input('About to enter reduce to reduce Telluric images, ',\
+                           'create telluric correction spectrum and blackbody spectrum.')
         print ' I am starting to reduce the telluric images '
         logging.info('I am starting to reduce the telluric images')
         if telred:

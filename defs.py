@@ -267,18 +267,19 @@ def checkEntry(entry, entryType, filelist):
 
 #-----------------------------------------------------------------------------#
 
-def checkLists(list, path, prefix, suffix):
+def checkLists(original_list, path, prefix, suffix):
     """Check that all files made it through an iraf step. """
 
-    for image in list:
+    new_list = []
+    for image in original_list:
         image = image.strip()
         if os.path.exists(path+'/'+prefix+image+suffix):
-            pass
+            new_list.append(image)
         else:
-            list.remove(image)
-            print image+'.fits not being processed due to error in image.'
+            print '\n', image, '.fits not being processed due to error in image.\n'
+            pass
 
-    return list
+    return new_list
 
 #-----------------------------------------------------------------------------#
 
