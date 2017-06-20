@@ -424,6 +424,7 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
             if allfilelist[i][0] in skylist:
                 writeList(allfilelist[i][0], 'skylist', objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
 
+
         if obsclass=='acq' and obsclass2=='science':
             print allfilelist[i][0]
             # create an Acquisitions directory in objDir/YYYYMMDD/grating
@@ -491,10 +492,10 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
                 number_files_that_were_copied += 1
                 allfilelist[i][1] = 0
                 # create an objlist in the relevant directory
-                if allfilelist[i] not in telskylist:
+                if allfilelist[i][0] not in telskylist:
                     writeList(allfilelist[i][0], 'tellist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
                 # create a skylist in the relevant directory
-                if allfilelist[i] in telskylist:
+                if allfilelist[i][0] in telskylist:
                     writeList(allfilelist[i][0], 'skylist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
 
     # Modify obsDirList to a format telSort can use.

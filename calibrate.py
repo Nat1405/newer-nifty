@@ -1,3 +1,6 @@
+################################################################################
+#                        Import some useful python modules                     #
+################################################################################
 import logging
 from pyraf import iraf
 from pyraf import iraffunctions
@@ -7,25 +10,22 @@ from defs import datefmt, listit, checkLists
 
 def start(obsDirList, calDirList, over, start, stop):
     """
-         Calibrate
+         nifsBaselineCalibration
 
          This module contains all the functions needed to reduce
-         the NIFS calibrations (reducing the images is done in the
-         science reduction scripts). The reduction steps were made
-         according to
-
-      http://www.gemini.edu/sciops/instruments/nifs/NIFS_Basecalib.py
+         NIFS GENERAL BASELINE CALIBRATIONS
 
          COMMAND LINE OPTIONS
          If you wish to skip this step enter -r in the command line
          Specify a start value with -a (default is 1)
          Specify a stop value with -z (default is 6)
 
-         INPUT FILES:
+         INPUT FILES FOR EACH BASELINE CALIBRATION:
+
          + Raw files
-           - Flats (lamps on)
-           - Flats (lamps off)
-           - Arcs
+           - Flats images (lamps on)
+           - Flats images (lamps off)
+           - Arcs images
            - Darks
            - Ronchi masks
 
@@ -97,7 +97,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
     """
 
-
+    # Enable optional debugging pauses
     debug = False
 
     # Set up the logging file
@@ -106,33 +106,47 @@ def start(obsDirList, calDirList, over, start, stop):
     logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     log = os.getcwd()+'/main.log'
 
-    logging.info('###############################')
-    logging.info('#                             #')
-    logging.info('# Start Calibration Reduction #')
-    logging.info('#                             #')
-    logging.info('###############################')
+    logging.info('#################################################')
+    logging.info('#                                               #')
+    logging.info('# Start the NIFS Baseline Calibration Reduction #')
+    logging.info('#                                               #')
+    logging.info('#################################################')
 
-    print '###############################'
-    print '#                             #'
-    print '# Start Calibration Reduction #'
-    print '#                             #'
-    print '###############################'
+    print '\n#################################################'
+    print '#                                               #'
+    print '# Start the NIFS Baseline Calibration Reduction #'
+    print '#                                               #'
+    print '#################################################\n'
 
-    # Set up iraf
+    # Set up/prepare IRAF
     iraf.gemini()
     iraf.nifs()
     iraf.gnirs()
     iraf.gemtools()
-    # Unlearn the used tasks
+
+    # Reset to default parameters the used IRAF tasks
     iraf.unlearn(iraf.gemini,iraf.gemtools,iraf.gnirs,iraf.nifs)
 
-    # Prepare the package for NIFS
+    # Prepare the IRAF package for NIFS
+	# NSHEADERS lists the header parameters used by the various tasks in the
+	# NIFS package (excluding headers values which have values fixed by IRAF or
+	# FITS conventions)
     iraf.nsheaders("nifs",logfile=log)
 
+    # Before doing anything involving image display the environment variable
+    # stdimage must be set to the correct frame buffer size for the display
+    # servers (as described in the dev$graphcap file under the section "STDIMAGE
+    # devices") or to the correct image display device. The task GDEVICES is
+    # helpful for determining this information for the display servers.
     iraf.set(stdimage='imt2048')
+
+    # Set clobber to 'yes' for the script. This still does not make the gemini
+    # tasks overwrite files, so you will likely have to remove files if you
+    # re-run the script.
     user_clobber=iraf.envget("clobber")
     iraf.reset(clobber='yes')
 
+    # Store current working directory so we can get back later
     path = os.getcwd()
 
     # loop over the Calibrations directories and reduce the day calibrations in each one
