@@ -51,7 +51,7 @@ def start(obsDirList, calDirList, over, start, stop):
             --->objectname/ (Science target name- found from .fits file headers).
                 --->date/ (YYYYMMDD)
                     --->Calibrations/
-                        --->N*.fits (raw .fits image files)
+                        --->N*.fits (calibration .fits files)
                         --->nN*.fits
                         --->nN*.fits
                         --->nN*.fits
@@ -66,9 +66,9 @@ def start(obsDirList, calDirList, over, start, stop):
                         --->rgnN*_sflat.fits
                         --->rgnN*_sflat.bpm.pl
                         --->rgnN*_flat.fits
-                        --->brgnN*.fits (Possible. May not appear.)
+                        --->brgnN*.fits
                         --->wrgnN*.fits
-                        --->arcdarkfile (textfile storing raw image name)
+                        --->arcdarkfile (text file storing name of the arcdark file)
                         --->arcdarklist (list of .fits files)
                         --->arclist (list of .fits files)
                         --->database/
@@ -90,7 +90,7 @@ def start(obsDirList, calDirList, over, start, stop):
                             --->skylist (text file of image names. N*\n)
                         --->Tellurics/
                             --->ot_observation_name/
-                            -->N*.fits (raw .fits image files)
+                            -->N*.fits (telluric .fits files)
                             --->objtellist (text file. See format above)
                             --->skylist (text file of image names. N*\n)
                             --->tellist (text file of image names. N*\n)

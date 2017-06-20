@@ -4,7 +4,8 @@ from optparse import OptionParser
 from pyraf import iraf
 import sort as sortScript
 import merge as mergeScript
-import calibrate, reduce
+import nifs_baseline_calibration as calibrateScript
+import reduce as reduceScript
 from defs import datefmt
 import logging, os
 
@@ -15,13 +16,13 @@ import logging, os
 #     This is the python data reduction script for NIFS.             #
 #                                                                    #
 #     Calls the following scripts:                                   #
-#     sort.py                                                        #
-#     calibrate.py                                                   #
-#     reduce.py                                                      #
-#     merge.py                                                       #
+#     nifs_sort.py                                                   #
+#     nifs_baseline_calibration.py                                   #
+#     nifs_reduce.py                                                 #
+#     nifs_merge.py                                                  #
 #                                                                    #
 #     Extra definitions in                                           #
-#     defs.py                                                    #
+#     nifs_defs.py                                                   #
 #                                                                    #
 #     To run:                                                        #
 #     python Main.py *command line options* (see below)              #
@@ -187,7 +188,7 @@ def main():
     if red:
         if debug:
             a = raw_input('About to enter calibrate.py')
-        calibrate.start(obsDirList, calDirList, over, rstart, rstop)
+        calibrateScript.start(obsDirList, calDirList, over, rstart, rstop)
 
     if tel:
         # Reduce the telluric images
@@ -197,7 +198,7 @@ def main():
         print ' I am starting to reduce the telluric images '
         logging.info('I am starting to reduce the telluric images')
         if telred:
-            reduce.start(
+            reduceScript.start(
                 telDirList, calDirList, start, stop, tel, telinter, fluxcal,
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over
                 )
@@ -208,7 +209,7 @@ def main():
         logging.info('I am starting to reduce the science images')
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
-        reduce.start(obsDirList, calDirList, start, stop, tel, telinter, over)
+        reduceScript.start(obsDirList, calDirList, start, stop, tel, telinter, over)
 
     # Merge all cubes
     if merge:
