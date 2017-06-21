@@ -187,7 +187,7 @@ def start(obsDirList, calDirList, over, start, stop):
             stop = int(raw_input("\nPlease enter a valid stop value (1 to 6, default 6): "))
 
         # Print the current directory of calibrations being processed
-        print "Current working on calibrations in: ", calpath
+        print "\nCurrently working on calibrations in: \n", calpath
 
         while valindex <= stop :
 
@@ -199,7 +199,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
             if valindex == 1:
                 getShift(calflat, over, log)
-                print "STEP 1: Determine the shift to the MDF - COMPLETED"
+                print "\nSTEP 1: Determine the shift to the MDF - COMPLETED\n"
 
             ############################################################################
             ##  STEP 2: Create Flat Field image and BPM (Bad Pixels Mask) image       ##
@@ -209,7 +209,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 2:
                 makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
-                print "STEP 2: Create Flat Field image and BPM image - COMPLETED"
+                print "\nSTEP 2: Create Flat Field image and BPM image - COMPLETED\n"
 
             ############################################################################
             ##  STEP 3: NFPREPARE and Combine arc darks                                ##
@@ -217,14 +217,14 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 3:
                 makeArcDark(arcdarklist, arcdark, calflat, over, log)
-                print "STEP 3: NFPREPARE and Combine arc darks - COMPLETED"
+                print "\nSTEP 3: NFPREPARE and Combine arc darks - COMPLETED\n"
 
             ############################################################################
             ##  STEP 4: NFPREPARE, Combine and flat field arcs                        ##
             ############################################################################
             elif valindex == 4:
                 reduceArc(arclist, arc, log, over)
-                print " STEP 4: NFPREPARE, Combine and flat field arcs - COMPLETED"
+                print "\nSTEP 4: NFPREPARE, Combine and flat field arcs - COMPLETED\n"
 
             ###########################################################################
             ##  Step 5: Determine the wavelength solution and create the wavelength  ##
@@ -233,7 +233,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 5:
                 wavecal(arc, log, over)
-                print " Step 5: Determine the wavelength solution and create the wavelenght ref. arc - COMPLETED"
+                print "\nStep 5: Determine the wavelength solution and create the wavelenght ref. arc - COMPLETED\n"
 
             #####################################################################################
             ##  Step 6: Trace the spatial curvature and spectral distortion in the Ronchi flat  #
@@ -241,14 +241,15 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 6:
                 ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
-                print "Step 6 :Trace the spatial curvature and spectral distortion in the Ronchi flat - COMPLETED"
+                print "\nStep 6: Trace the spatial curvature and spectral distortion in the Ronchi flat - COMPLETED\n"
 
             else:
-                print "No step associated to this value"
+                print "\nERROR in nifs_baseline_calibration: step ", valindex, " is not valid.\n"
+                raise SystemExit
 
             valindex += 1
 
-
+    # Return to directory script was begun from.
     os.chdir(path)
     return
 
@@ -268,7 +269,8 @@ def getShift(calflat, over, log):
         calflat: The first lamps-on flat from flatlist
     """
 
-    # Implement overwriting
+    # This code structure checks if iraf output files already exist. If output files exist and
+    # over (overwrite) is specified, iraf output is overwritten.
     if os.path.exists('s'+calflat+'.fits'):
         if over:
             os.remove('s'+calflat+'.fits')
@@ -361,7 +363,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
     else:
         iraf.nsreduce ("gn"+calflat,fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
 
-    # NSREDUCE on lamps off flat iamges "gn"+flatdark+".fits" to extract the slices and apply an approximate wavelength calibration
+    # NSREDUCE on lamps off flat iamges "gn"+flatdark+".fits" to extract the slices and apply an approximate wavelength calibration.
     if os.path.exists('rgn'+flatdark+'.fits'):
         if over:
             iraf.delete("rgn"+flatdark+".fits")
@@ -379,13 +381,13 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
         iraf.delete("rgn"+calflat+"_sflat_bpm.pl")
     iraf.nsflat("rgn"+calflat,darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat", darkfile="rgn"+flatdark+"_dark",fl_save_dark='yes',process="fit", thr_flo=0.15,thr_fup=1.55,fl_vardq='yes',logfile=log)
 
-    # Renormalize the slices to account for slice-to-slice variations using NSSLITFUNCTION - make the final flat field image
+    # Renormalize the slices to account for slice-to-slice variations using NSSLITFUNCTION - make the final flat field image.
 
     if over:
         iraf.delete("rgn"+calflat+"_flat.fits")
     iraf.nsslitfunction("rgn"+calflat,"rgn"+calflat+"_flat", flat="rgn"+calflat+"_sflat",dark="rgn"+flatdark+"_dark",combine="median", order=3,fl_vary='no',logfile=log)
 
-    # Put the name of the final flat field and BPM into text files of fixed name to be used by the pipeline.
+    # Put the name of the final flat field and bad pixel mask (BPM) into text files of fixed name to be used by the pipeline later.
 
     open("flatfile", "w").write("rgn"+calflat+"_flat")              # Final flat field
     open("sflatfile", "w").write("rgn"+calflat+"_sflat")            # Flat field before renormalization (before nsslitfunction)
@@ -407,7 +409,7 @@ def makeArcDark(arcdarklist, arcdark, calflat, over, log):
     NIFS image slicer pattern and how the IFU maps to the sky field.
     """
 
-    # Update arc darks images with offset value and generate variance and data quality extensions
+    # Update arc darks images with offset value and generate variance and data quality extensions.
     for image in arcdarklist:
         image = str(image).strip()
         if over:
@@ -415,7 +417,7 @@ def makeArcDark(arcdarklist, arcdark, calflat, over, log):
         iraf.nfprepare(image, rawpath='./', shiftimage="s"+calflat, bpm="rgn"+calflat+"_sflat_bpm.pl",fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
     arcdarklist = checkLists(arcdarklist, '.', 'n', '.fits')
 
-    # Combine arc darks images "n"+image+".fits", output combined file will have the name of the first arc dark file.
+    # Combine arc darks images "n"+image+".fits". Output combined file will have the name of the first arc dark file.
     if over:
         iraf.delete("gn"+arcdark+".fits")
     if len(arcdarklist) > 1:
@@ -454,18 +456,17 @@ def reduceArc(arclist, arc, log, over):
 
     """
 
-    # Store the name of the shift image in "shiftima"
+    # Store the name of the shift image in "shiftima".
     shiftima = open("shiftfile", "r").readlines()[0].strip()
-    # Store the name of the bad pixel mask in "sflat_bpm"
+    # Store the name of the bad pixel mask in "sflat_bpm".
     sflat_bpm = open("sflat_bpmfile", "r").readlines()[0].strip()
-    # Store the name of the first flat image in flatfile in "flat"
+    # Store the name of the first flat image in flatfile in "flat".
     flat = open("flatfile", "r").readlines()[0].strip()
-    # Store the name of the first arc dark image in arcdarkfile in "dark"
+    # Store the name of the first arc dark image in arcdarkfile in "dark".
     dark = open("arcdarkfile", "r").readlines()[0].strip()
 
     # Update arc images with offset value and generate variance and data
-    # quality extensions.
-    # Results in "n"+image+".fits"
+    # quality extensions. Results in "n"+image+".fits"
     for image in arclist:
         image = str(image).strip()
         if os.path.exists("n"+image+".fits"):
@@ -480,7 +481,7 @@ def reduceArc(arclist, arc, log, over):
     # exist remove corresponding arc images from arclist.
     arclist = checkLists(arclist, '.', 'n', '.fits')
 
-    # Combine arc images "n"+image+".fits", output combined file will have the name of the first arc file.
+    # Combine arc images "n"+image+".fits". Output combined file will have the name of the first arc file.
     if len(arclist)>1:
         if os.path.exists("gn"+arc+".fits"):
             if over:
@@ -501,8 +502,8 @@ def reduceArc(arclist, arc, log, over):
         else:
             iraf.copy("n"+arc+".fits", "gn"+arc+".fits")
 
-    # NSREDUCE on arc images "gn"+arc+".fits" to extract the slices and apply an approximate wavelength calibration.
-    # Results in "rgn"+image+".fits"
+    # NSREDUCE on arc images "gn"+arc+".fits" to extract the slices and apply an approximate
+    # wavelength calibration. Results in "rgn"+image+".fits"
     if os.path.exists("rgn"+arc+".fits"):
         if over:
             iraf.delete("rgn"+arc+".fits")
@@ -563,7 +564,7 @@ def wavecal(arc, log, over):
     hdulist = pyfits.open("rgn"+arc+".fits")
     band = hdulist[0].header['GRATING'][0:1]
 
-    # Variable to set interactive mode. This is done for non-standard wavelength configurations.
+    # Variable to set interactive mode. Default False (True for non-standard wavelength configurations ).
     interactive = 'no'
 
     if band == "Z":
@@ -577,6 +578,8 @@ def wavecal(arc, log, over):
         my_thresh=100.0
         interactive = 'yes'
 
+    # Output : A series of files in a ‘database/’ directory containing the wavelength
+    # solutions of each slice. And a reduced arc frame (Eg: wrgnARC.fits).
     iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter=interactive,nfound=10,nlost=10,logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
