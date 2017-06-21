@@ -202,7 +202,7 @@ def makeSortFiles(dir):
     os.chdir(Raw)
     print "Raw file directory is: ", Raw
 
-    print "I am making lists of each type of file."
+    print "\nI am making lists of each type of file."
 
     # make a list of all the files in the Raw directory
     rawfiles = glob.glob('N*.fits')
