@@ -600,7 +600,7 @@ def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
     NFSDIST is linked to the science data in NFFITCOORDS.
     """
 
-    # Update ronchi flat images with offset value and generate variance and data quality extensions
+    # Update ronchi flat images with offset value and generate variance and data quality extensions.
     for image in ronchilist:
         image = str(image).strip()
         if over:
@@ -609,7 +609,7 @@ def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
     ronchilist = checkLists(ronchilist, '.', 'n', '.fits')
 
     # Combine ronchi flat images "n"+image+".fits". Output combined file will
-    # have the name of the first ronchi file.
+    # have the name of the first ronchi flat file.
     if over:
         iraf.delete("gn"+ronchiflat+".fits")
     if len(ronchilist) > 1:
