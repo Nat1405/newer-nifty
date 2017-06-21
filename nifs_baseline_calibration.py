@@ -1,5 +1,5 @@
 ################################################################################
-#                        Import some useful Python modules                     #
+#                Import some useful Python utilities/modules                    #
 ################################################################################
 import logging
 from pyraf import iraf
@@ -27,8 +27,8 @@ def start(obsDirList, calDirList, over, start, stop):
            - Flats images (lamps on)
            - Flats images (lamps off)
            - Arcs images
-           - Darks
-           - Ronchi masks
+           - Arcs Darks images
+           - Ronchi masks images
 
          OUTPUT FILES:
          - Shift file. (ie sCALFLAT.fits)
@@ -131,7 +131,7 @@ def start(obsDirList, calDirList, over, start, stop):
     # Prepare the IRAF package for NIFS
     # NSHEADERS lists the header parameters used by the various tasks in the
     # NIFS package (excluding headers values which have values fixed by IRAF or
-    # FITS conventions)
+    # FITS conventions).
     iraf.nsheaders("nifs",logfile=log)
 
     # Before doing anything involving image display the environment variable
@@ -147,37 +147,42 @@ def start(obsDirList, calDirList, over, start, stop):
     user_clobber=iraf.envget("clobber")
     iraf.reset(clobber='yes')
 
-    # Store current working directory so we can get back later
+    # Store current working directory for later use.
     path = os.getcwd()
 
     ################################################################################
     # Define Variables, Reduction Lists AND identify/run number of reduction steps #
     ################################################################################
 
-    # Loop over the Calibrations directories and reduce the day calibrations in each one
+    # Loop over the Calibrations directories and reduce the day calibrations in each one.
     for calpath in calDirList:
         os.chdir(calpath)
         pwdDir = os.getcwd()+"/"
         iraffunctions.chdir(pwdDir)
 
-        # Define the cals lists and images
+        # Create lists of each type of calibration from textfiles in Calibrations directory.
         flatlist = open('flatlist', "r").readlines()
         flatdarklist = open("flatdarklist", "r").readlines()
         arcdarklist = open("arcdarklist", "r").readlines()
         arclist = open("arclist", "r").readlines()
         ronchilist = open("ronchilist", "r").readlines()
 
+        # Store the name of the first image of each calibration-type-list in
+        # a variable for later use (Eg: calflat). Do this partly because tasks like gemcombine will
+        # merge a list of files (Eg: "n"+flatlist) and the output will have the same
+        # name as the first file in the list (Eg: calflat).
         calflat = (flatlist[0].strip()).rstrip('.fits')
         flatdark = (flatdarklist[0].strip()).rstrip('.fits')
         arcdark = (arcdarklist[0].strip()).rstrip('.fits')
         arc = (arclist[0].strip()).rstrip('.fits')
         ronchiflat = (ronchilist[0].strip()).rstrip('.fits')
 
-        # Check start and stop values for reduction steps
+        # Check start and stop values for reduction steps. Ask user for a correction if
+        # input is not valid.
         valindex = start
         while valindex > stop  or valindex < 1 or stop > 6:
             print "\nProblem with start/stop step values in nifs_baseline_calibration."
-            print "\nStep 1 to 6 are valid options."
+            print "\nSteps 1 to 6 are valid options."
             valindex = int(raw_input("\nPlease enter a valid start value (1 to 6, default 1): "))
             stop = int(raw_input("\nPlease enter a valid stop value (1 to 6, default 6): "))
 
