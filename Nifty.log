@@ -1,0 +1,86 @@
+------------------------------------------------------------------------------
+NSHEADERS -- Wed Jun 21 13:04:10 HST 2017
+ 
+Set header values from gnirs$data/nifs.dat
+                   for nifs.
+ 
+NSHEADERS exit status: good.
+------------------------------------------------------------------------------
+NSHEADERS -- Wed Jun 21 13:06:29 HST 2017
+ 
+Set header values from gnirs$data/nifs.dat
+                   for nifs.
+ 
+NSHEADERS exit status: good.
+-------------------------------------------------------------------------------
+NFPREPARE -- Wed Jun 21 13:06:29 HST 2017
+ 
+Processing 1 files
+NFPREPARE: Will measure MDF offset using N20100410S0362
+           (OBSTYPE=FLAT)
+NFPREPARE: Both shiftx and shifty are INDEF.  The shift for MDF will be
+           measured using cross-correlation.
+           You should verify that the measured shift is correct by
+           examining the cut data.
+           NOTE that it is important to ensure that the same shift is used
+           for all data processed together, including calibration frames.
+           So, if you use the automatic shift, either process all the data
+           in just one call to nfprepare or use the shiftimage parameter
+           (or shiftx and shifty directly) to copy the shift from a 
+           previously processed image on subsequent calls to nfprepare.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+WARNING - NFPREPARE: Not correcting for non-linearity.
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+------------------------------------------------------------------------------
+NSHEADERS -- Wed Jun 21 13:07:46 HST 2017
+ 
+Set header values from gnirs$data/nifs.dat
+                   for nifs.
+ 
+NSHEADERS exit status: good.
+-------------------------------------------------------------------------------
+NFPREPARE -- Wed Jun 21 13:07:46 HST 2017
+ 
+Processing 1 files
+NFPREPARE: Will measure MDF offset using N20100410S0362
+           (OBSTYPE=FLAT)
+NFPREPARE: Both shiftx and shifty are INDEF.  The shift for MDF will be
+           measured using cross-correlation.
+           You should verify that the measured shift is correct by
+           examining the cut data.
+           NOTE that it is important to ensure that the same shift is used
+           for all data processed together, including calibration frames.
+           So, if you use the automatic shift, either process all the data
+           in just one call to nfprepare or use the shiftimage parameter
+           (or shiftx and shifty directly) to copy the shift from a 
+           previously processed image on subsequent calls to nfprepare.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+------------------------------------------------------------------------------
+NSHEADERS -- Wed Jun 21 13:11:14 HST 2017
+ 
+Set header values from gnirs$data/nifs.dat
+                   for nifs.
+ 
+NSHEADERS exit status: good.
+-------------------------------------------------------------------------------
+NFPREPARE -- Wed Jun 21 13:11:14 HST 2017
+ 
+Processing 1 files
+NFPREPARE: Will measure MDF offset using N20100410S0362
+           (OBSTYPE=FLAT)
+NFPREPARE: Both shiftx and shifty are INDEF.  The shift for MDF will be
+           measured using cross-correlation.
+           You should verify that the measured shift is correct by
+           examining the cut data.
+           NOTE that it is important to ensure that the same shift is used
+           for all data processed together, including calibration frames.
+           So, if you use the automatic shift, either process all the data
+           in just one call to nfprepare or use the shiftimage parameter
+           (or shiftx and shifty directly) to copy the shift from a 
+           previously processed image on subsequent calls to nfprepare.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.

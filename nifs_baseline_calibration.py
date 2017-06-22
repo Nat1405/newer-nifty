@@ -1,5 +1,5 @@
 ################################################################################
-#                Import some useful Python utilities/modules                    #
+#                Import some useful Python utilities/modules                   #
 ################################################################################
 import logging
 from pyraf import iraf
@@ -11,15 +11,15 @@ from defs import datefmt, listit, checkLists
 
 def start(obsDirList, calDirList, over, start, stop):
     """
-         nifsBaselineCalibration
+         nifs_baseline_calibration
 
          This module contains all the functions needed to reduce
          NIFS GENERAL BASELINE CALIBRATIONS
 
          COMMAND LINE OPTIONS
          If you wish to skip this step enter -r in the command line
-         Specify a start value with -a (default is 1)
-         Specify a stop value with -z (default is 6)
+         Specify a start value with -a (default is 1) in command line
+         Specify a stop value with -z (default is 6) in command line
 
          INPUT FILES FOR EACH BASELINE CALIBRATION:
 
@@ -39,11 +39,11 @@ def start(obsDirList, calDirList, over, start, stop):
          - Reduced dark frame. (ie. rgnARCDARK.fits)
 
     Args:
-        obsDirList: list of paths to science observations. ['path/obj/date/grat/obsid']
-        calDirList: list of paths to calibrations. ['path/obj/date/calibrations']
-        over (boolean): overwrite old files. Default: False.
-        start (int): int; starting step of daycal reduction. Specified at command line with -a. Default: 1.
-        stop (int); stopping step of daycal reduction. Specified at command line with -z. Default: 6.
+        obsDirList:      list of paths to science observations. ['path/obj/date/grat/obsid']
+        calDirList:      list of paths to calibrations. ['path/obj/date/calibrations']
+        over (boolean):  overwrite old files. Default: False.
+        start (int):     starting step of daycal reduction. Specified at command line with -a. Default: 1.
+        stop (int):      stopping step of daycal reduction. Specified at command line with -z. Default: 6.
 
     Directory structure after Calibration:
 
@@ -92,11 +92,15 @@ def start(obsDirList, calDirList, over, start, stop):
                         --->Tellurics/
                             --->ot_observation_name/
                             -->N*.fits (telluric .fits files)
-                            --->objtellist (text file. See format above)
+                            --->objtellist (text file matching telluric and science data.
+                                            See comments in telSort() for more info.)
                             --->skylist (text file of image names. N*\n)
                             --->tellist (text file of image names. N*\n)
 
     """
+
+    # Store current working directory for later use.
+    path = os.getcwd()
 
     # Enable optional debugging pauses
     debug = False
@@ -104,8 +108,8 @@ def start(obsDirList, calDirList, over, start, stop):
     # Set up the logging file
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
-    logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
-    log = os.getcwd()+'/main.log'
+    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
+    log = os.getcwd()+'/Nifty.log'
 
     logging.info('#################################################')
     logging.info('#                                               #')
@@ -146,9 +150,6 @@ def start(obsDirList, calDirList, over, start, stop):
     # re-run the script.
     user_clobber=iraf.envget("clobber")
     iraf.reset(clobber='yes')
-
-    # Store current working directory for later use.
-    path = os.getcwd()
 
     ################################################################################
     # Define Variables, Reduction Lists AND identify/run number of reduction steps #
@@ -578,7 +579,7 @@ def wavecal(arc, log, over):
         my_thresh=100.0
         interactive = 'yes'
 
-    # Output : A series of files in a ‘database/’ directory containing the wavelength
+    # Output : A series of files in a "database/" directory containing the wavelength
     # solutions of each slice. And a reduced arc frame (Eg: wrgnARC.fits).
     iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter=interactive,nfound=10,nlost=10,logfile=log)
 
