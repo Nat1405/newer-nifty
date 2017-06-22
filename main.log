@@ -128,3 +128,69 @@
 2017/06/21 13:24:44  #                                  #
 2017/06/21 13:24:44  ####################################
 
+2017/06/22 10:04:05  Login file is main.log
+2017/06/22 10:04:05  Starting point is 1
+2017/06/22 10:04:05  Stopping point is 10
+2017/06/22 10:04:05  H line removal method is set to interactive ? no
+2017/06/22 10:04:05  telluric continuum fitting is set to interactive ? no
+2017/06/22 10:04:05  telluric correction is set to interactive ? no
+2017/06/22 10:04:05  Flux calibrate is performed ? no
+2017/06/22 10:04:05   I am sorting the data 
+2017/06/22 10:04:05  ####################################
+2017/06/22 10:04:05  #                                  #
+2017/06/22 10:04:05  #  Start NIFS sorting and copying  #
+2017/06/22 10:04:05  #                                  #
+2017/06/22 10:04:05  ####################################
+
+2017/06/22 10:04:20  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/22 10:04:21  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/22 10:04:21  I am reducing the calibration data. 
+2017/06/22 10:04:21  #################################################
+2017/06/22 10:04:21  #                                               #
+2017/06/22 10:04:21  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 10:04:21  #                                               #
+2017/06/22 10:04:21  #################################################
+2017/06/22 10:06:11  Login file is main.log
+2017/06/22 10:06:11  Starting point is 1
+2017/06/22 10:06:11  Stopping point is 10
+2017/06/22 10:06:11  H line removal method is set to interactive ? no
+2017/06/22 10:06:11  telluric continuum fitting is set to interactive ? no
+2017/06/22 10:06:11  telluric correction is set to interactive ? no
+2017/06/22 10:06:11  Flux calibrate is performed ? no
+2017/06/22 10:06:11   I am sorting the data 
+2017/06/22 10:06:11  ####################################
+2017/06/22 10:06:11  #                                  #
+2017/06/22 10:06:11  #  Start NIFS sorting and copying  #
+2017/06/22 10:06:11  #                                  #
+2017/06/22 10:06:11  ####################################
+
+2017/06/22 10:06:17  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/22 10:06:17  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/22 10:06:17  I am reducing the calibration data. 
+2017/06/22 10:06:17  #################################################
+2017/06/22 10:06:17  #                                               #
+2017/06/22 10:06:17  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 10:06:17  #                                               #
+2017/06/22 10:06:17  #################################################
+2017/06/22 10:16:00  Login file is main.log
+2017/06/22 10:16:00  Starting point is 1
+2017/06/22 10:16:00  Stopping point is 10
+2017/06/22 10:16:00  H line removal method is set to interactive ? no
+2017/06/22 10:16:00  telluric continuum fitting is set to interactive ? no
+2017/06/22 10:16:00  telluric correction is set to interactive ? no
+2017/06/22 10:16:00  Flux calibrate is performed ? no
+2017/06/22 10:16:00   I am sorting the data 
+2017/06/22 10:16:00  ####################################
+2017/06/22 10:16:00  #                                  #
+2017/06/22 10:16:00  #  Start NIFS sorting and copying  #
+2017/06/22 10:16:00  #                                  #
+2017/06/22 10:16:00  ####################################
+
+2017/06/22 10:16:09  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/22 10:16:09  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/22 10:16:09  I am reducing the calibration data. 
+2017/06/22 10:16:09  #################################################
+2017/06/22 10:16:09  #                                               #
+2017/06/22 10:16:09  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 10:16:09  #                                               #
+2017/06/22 10:16:09  #################################################
