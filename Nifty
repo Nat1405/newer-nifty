@@ -210,8 +210,8 @@ def main():
         logging.info('I am starting to reduce the telluric images')
         if telred:
             reduceScript.start(
-                telDirList, calDirList, start, stop, tel, telinter, fluxcal,
-                continuuminter, hlineinter, hline_method, spectemp, mag ,over
+                telDirList, calDirList, start, stop, tel, telinter, fluxcal,\
+                continuuminter, hlineinter, hline_method, spectemp, mag ,over\
                 )
 
     # Reduce the science images
