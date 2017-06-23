@@ -1144,8 +1144,6 @@ def telSort(telDirList, obsDirList):
             # Check that directory obsname matches header obsname.
             temp_obs_name = 'obs' + science_header[0].header['OBSID'][-3:].replace('-','')
             if science_observation_name != temp_obs_name:
-                print "\nWARNING: Problem with science ", science_observation_name, \
-                " observation name data in headers and directory do not match.\n"
                 print "\n#####################################################################"
                 print "#####################################################################"
                 print ""
@@ -1160,8 +1158,6 @@ def telSort(telDirList, obsDirList):
             if os.path.exists('../Tellurics/'):
                 os.chdir('../Tellurics/')
             else:
-                print "\nWARNING: Tellurics directory for science ", science_observation_name, \
-                      " does not exist.\n"
                 print "\n#####################################################################"
                 print "#####################################################################"
                 print ""
@@ -1199,8 +1195,6 @@ def telSort(telDirList, obsDirList):
 
             if not found_telluric_flag:
                 os.chdir('../')
-                print "\nWARNING: no tellurics data found for science ", science_observation_name, \
-                " .\n."
                 print "\n#####################################################################"
                 print "#####################################################################"
                 print ""

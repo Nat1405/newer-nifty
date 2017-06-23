@@ -18972,3 +18972,206 @@ rgnN20160705S0236[SCI,29][2034,*]  7/7     7/7      -0.616      -0.615  -0.0164 
 
 NFSDIST Exit status good
 ------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+NSHEADERS -- Fri Jun 23 11:06:31 HST 2017
+ 
+Set header values from gnirs$data/nifs.dat
+                   for nifs.
+ 
+NSHEADERS exit status: good.
+-------------------------------------------------------------------------------
+NFPREPARE -- Fri Jun 23 11:06:31 HST 2017
+ 
+Processing 1 files
+NFPREPARE: Will measure MDF offset using N20160420S0375
+           (OBSTYPE=FLAT)
+NFPREPARE: Both shiftx and shifty are INDEF.  The shift for MDF will be
+           measured using cross-correlation.
+           You should verify that the measured shift is correct by
+           examining the cut data.
+           NOTE that it is important to ensure that the same shift is used
+           for all data processed together, including calibration frames.
+           So, if you use the automatic shift, either process all the data
+           in just one call to nfprepare or use the shiftimage parameter
+           (or shiftx and shifty directly) to copy the shift from a 
+           previously processed image on subsequent calls to nfprepare.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+WARNING - NFPREPARE: Not correcting for non-linearity.
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+------------------------------------------------------------------------------
+NSOFFSET -- Fri Jun 23 11:06:43 HST 2017
+ 
+NSOFFSET: Calculating cross correlation (please wait).
+NSOFFSET: Integer offset for nifs$data/nifs-mdf is 2.
+NSOFFSET: Final offset for nifs$data/nifs-mdf is 2.0.
+NSOFFSET: Shifting nifs-mdf-6937_8.fits[1] in Y by 2.0 pixels.
+ 
+NSOFFSET exit status: good.
+-------------------------------------------------------------------------------
+ 
+  n      input file -->      output file
+  1  N20160420S0375 -->  sN20160420S0375 
+                 filter     focal plane       input BPM    RN  gain     sat
+               ZJ_G0601        3.0_Mask            none   6.3   2.4   50000 
+ 
+NFPREPARE exit status:  good.
+----------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+NFPREPARE -- Fri Jun 23 11:07:13 HST 2017
+ 
+WARNING - NFPREPARE: Non-linear pixels not flagged.
+NFPREPARE: Shift from sN20160420S0375[0]
+Processing 1 files
+NFPREPARE: Bad pixel mask not specified.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+WARNING - NFPREPARE: Not correcting for non-linearity.
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+NFPREPARE: Shifting MDF in Y by 2.0 pixels (subtracted from y_ccd)
+ 
+  n      input file -->      output file
+  1 ./N20160420S0375 -->  nN20160420S0375 
+                 filter     focal plane       input BPM    RN  gain     sat
+               ZJ_G0601        3.0_Mask            none   6.3   2.4   50000 
+ 
+NFPREPARE exit status:  good.
+----------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+NFPREPARE -- Fri Jun 23 11:07:32 HST 2017
+ 
+WARNING - NFPREPARE: Non-linear pixels not flagged.
+NFPREPARE: Shift from sN20160420S0375[0]
+Processing 1 files
+NFPREPARE: Bad pixel mask not specified.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+WARNING - NFPREPARE: Not correcting for non-linearity.
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+NFPREPARE: Shifting MDF in Y by 2.0 pixels (subtracted from y_ccd)
+ 
+  n      input file -->      output file
+  1 ./N20160420S0376 -->  nN20160420S0376 
+                 filter     focal plane       input BPM    RN  gain     sat
+               ZJ_G0601        3.0_Mask            none   6.3   2.4   50000 
+ 
+NFPREPARE exit status:  good.
+----------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+NFPREPARE -- Fri Jun 23 11:07:51 HST 2017
+ 
+WARNING - NFPREPARE: Non-linear pixels not flagged.
+NFPREPARE: Shift from sN20160420S0375[0]
+Processing 1 files
+NFPREPARE: Bad pixel mask not specified.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+WARNING - NFPREPARE: Not correcting for non-linearity.
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+NFPREPARE: Shifting MDF in Y by 2.0 pixels (subtracted from y_ccd)
+ 
+  n      input file -->      output file
+  1 ./N20160420S0377 -->  nN20160420S0377 
+                 filter     focal plane       input BPM    RN  gain     sat
+               ZJ_G0601        3.0_Mask            none   6.3   2.4   50000 
+ 
+NFPREPARE exit status:  good.
+----------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+NFPREPARE -- Fri Jun 23 11:08:10 HST 2017
+ 
+WARNING - NFPREPARE: Non-linear pixels not flagged.
+NFPREPARE: Shift from sN20160420S0375[0]
+Processing 1 files
+NFPREPARE: Bad pixel mask not specified.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+WARNING - NFPREPARE: Not correcting for non-linearity.
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+NFPREPARE: Shifting MDF in Y by 2.0 pixels (subtracted from y_ccd)
+ 
+  n      input file -->      output file
+  1 ./N20160420S0378 -->  nN20160420S0378 
+                 filter     focal plane       input BPM    RN  gain     sat
+               ZJ_G0601        3.0_Mask            none   6.3   2.4   50000 
+ 
+NFPREPARE exit status:  good.
+----------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+NFPREPARE -- Fri Jun 23 11:08:29 HST 2017
+ 
+WARNING - NFPREPARE: Non-linear pixels not flagged.
+NFPREPARE: Shift from sN20160420S0375[0]
+Processing 1 files
+NFPREPARE: Bad pixel mask not specified.
+----------------------------------------------------------------------------
+NFPREPARE: Subtracting reference pixels.
+WARNING - NFPREPARE: Not correcting for non-linearity.
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
+NFPAD exit status:  good.
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+NFPAD: Padding NIFS data in the y-dimension for extended slices
+NFPAD: Input file is a non-MEF NIFS frame
