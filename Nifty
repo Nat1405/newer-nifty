@@ -38,6 +38,17 @@ import logging, os
 
 def main():
 
+    print "\n####################################"
+    print "#                                  #"
+    print "#              NIFTY               #"
+    print "#   NIFS Date Reduction Pipeline   #"
+    print "#          Version 1.1.1           #"
+    print "#     Marie Lemoine-Busserolle     #"
+    print "# Gemini Observatory, Hilo, Hawaii #"
+    print "#                                  #"
+    print "####################################\n"
+
+
     # Format logging options
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()

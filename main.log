@@ -194,3 +194,563 @@
 2017/06/22 10:16:09  # Start the NIFS Baseline Calibration Reduction #
 2017/06/22 10:16:09  #                                               #
 2017/06/22 10:16:09  #################################################
+2017/06/22 13:32:53  Login file is main.log
+2017/06/22 13:32:53  Starting point is 1
+2017/06/22 13:32:53  Stopping point is 10
+2017/06/22 13:32:53  H line removal method is set to interactive ? no
+2017/06/22 13:32:53  telluric continuum fitting is set to interactive ? no
+2017/06/22 13:32:53  telluric correction is set to interactive ? no
+2017/06/22 13:32:53  Flux calibrate is performed ? no
+2017/06/22 13:32:53   I am sorting the data 
+2017/06/22 13:32:53  ####################################
+2017/06/22 13:32:53  #                                  #
+2017/06/22 13:32:53  #  Start NIFS sorting and copying  #
+2017/06/22 13:32:53  #                                  #
+2017/06/22 13:32:53  ####################################
+
+2017/06/22 13:33:29  Login file is main.log
+2017/06/22 13:33:29  Starting point is 1
+2017/06/22 13:33:29  Stopping point is 10
+2017/06/22 13:33:29  H line removal method is set to interactive ? no
+2017/06/22 13:33:29  telluric continuum fitting is set to interactive ? no
+2017/06/22 13:33:29  telluric correction is set to interactive ? no
+2017/06/22 13:33:29  Flux calibrate is performed ? no
+2017/06/22 13:33:29   I am sorting the data 
+2017/06/22 13:33:29  ####################################
+2017/06/22 13:33:29  #                                  #
+2017/06/22 13:33:29  #  Start NIFS sorting and copying  #
+2017/06/22 13:33:29  #                                  #
+2017/06/22 13:33:29  ####################################
+
+2017/06/22 13:33:58  Login file is main.log
+2017/06/22 13:33:58  Starting point is 1
+2017/06/22 13:33:58  Stopping point is 10
+2017/06/22 13:33:58  H line removal method is set to interactive ? no
+2017/06/22 13:33:58  telluric continuum fitting is set to interactive ? no
+2017/06/22 13:33:58  telluric correction is set to interactive ? no
+2017/06/22 13:33:58  Flux calibrate is performed ? no
+2017/06/22 13:33:58   I am sorting the data 
+2017/06/22 13:33:58  ####################################
+2017/06/22 13:33:58  #                                  #
+2017/06/22 13:33:58  #  Start NIFS sorting and copying  #
+2017/06/22 13:33:58  #                                  #
+2017/06/22 13:33:58  ####################################
+
+2017/06/22 13:34:30  Login file is main.log
+2017/06/22 13:34:30  Starting point is 1
+2017/06/22 13:34:30  Stopping point is 10
+2017/06/22 13:34:30  H line removal method is set to interactive ? no
+2017/06/22 13:34:30  telluric continuum fitting is set to interactive ? no
+2017/06/22 13:34:30  telluric correction is set to interactive ? no
+2017/06/22 13:34:30  Flux calibrate is performed ? no
+2017/06/22 13:34:30   I am sorting the data 
+2017/06/22 13:34:30  ####################################
+2017/06/22 13:34:30  #                                  #
+2017/06/22 13:34:30  #  Start NIFS sorting and copying  #
+2017/06/22 13:34:30  #                                  #
+2017/06/22 13:34:30  ####################################
+
+2017/06/22 13:42:26  Login file is main.log
+2017/06/22 13:42:26  Starting point is 1
+2017/06/22 13:42:26  Stopping point is 10
+2017/06/22 13:42:26  H line removal method is set to interactive ? no
+2017/06/22 13:42:26  telluric continuum fitting is set to interactive ? no
+2017/06/22 13:42:26  telluric correction is set to interactive ? no
+2017/06/22 13:42:26  Flux calibrate is performed ? no
+2017/06/22 13:42:26   I am sorting the data 
+2017/06/22 13:42:26  ####################################
+2017/06/22 13:42:26  #                                  #
+2017/06/22 13:42:26  #  Start NIFS sorting and copying  #
+2017/06/22 13:42:26  #                                  #
+2017/06/22 13:42:26  ####################################
+
+2017/06/22 13:56:17  Login file is main.log
+2017/06/22 13:56:17  Starting point is 1
+2017/06/22 13:56:17  Stopping point is 10
+2017/06/22 13:56:17  H line removal method is set to interactive ? no
+2017/06/22 13:56:17  telluric continuum fitting is set to interactive ? no
+2017/06/22 13:56:17  telluric correction is set to interactive ? no
+2017/06/22 13:56:17  Flux calibrate is performed ? no
+2017/06/22 13:56:17   I am sorting the data 
+2017/06/22 13:56:17  ####################################
+2017/06/22 13:56:17  #                                  #
+2017/06/22 13:56:17  #  Start NIFS sorting and copying  #
+2017/06/22 13:56:17  #                                  #
+2017/06/22 13:56:17  ####################################
+
+2017/06/22 14:28:14  Login file is main.log
+2017/06/22 14:28:14  Starting point is 1
+2017/06/22 14:28:14  Stopping point is 10
+2017/06/22 14:28:14  H line removal method is set to interactive ? no
+2017/06/22 14:28:14  telluric continuum fitting is set to interactive ? no
+2017/06/22 14:28:14  telluric correction is set to interactive ? no
+2017/06/22 14:28:14  Flux calibrate is performed ? no
+2017/06/22 14:28:14   I am sorting the data 
+2017/06/22 14:28:14  ####################################
+2017/06/22 14:28:14  #                                  #
+2017/06/22 14:28:14  #  Start NIFS sorting and copying  #
+2017/06/22 14:28:14  #                                  #
+2017/06/22 14:28:14  ####################################
+
+2017/06/22 14:31:39  Login file is main.log
+2017/06/22 14:31:39  Starting point is 1
+2017/06/22 14:31:39  Stopping point is 10
+2017/06/22 14:31:39  H line removal method is set to interactive ? no
+2017/06/22 14:31:39  telluric continuum fitting is set to interactive ? no
+2017/06/22 14:31:39  telluric correction is set to interactive ? no
+2017/06/22 14:31:39  Flux calibrate is performed ? no
+2017/06/22 14:31:39   I am sorting the data 
+2017/06/22 14:31:39  ####################################
+2017/06/22 14:31:39  #                                  #
+2017/06/22 14:31:39  #  Start NIFS sorting and copying  #
+2017/06/22 14:31:39  #                                  #
+2017/06/22 14:31:39  ####################################
+
+2017/06/22 14:31:52  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/22 14:31:52  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/22 14:31:52  I am reducing the calibration data. 
+2017/06/22 14:31:52  #################################################
+2017/06/22 14:31:52  #                                               #
+2017/06/22 14:31:52  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 14:31:52  #                                               #
+2017/06/22 14:31:52  #################################################
+2017/06/22 14:57:32  Login file is main.log
+2017/06/22 14:57:32  Starting point is 1
+2017/06/22 14:57:32  Stopping point is 10
+2017/06/22 14:57:32  H line removal method is set to interactive ? no
+2017/06/22 14:57:32  telluric continuum fitting is set to interactive ? no
+2017/06/22 14:57:32  telluric correction is set to interactive ? no
+2017/06/22 14:57:32  Flux calibrate is performed ? no
+2017/06/22 14:57:32   I am sorting the data 
+2017/06/22 14:57:32  ####################################
+2017/06/22 14:57:32  #                                  #
+2017/06/22 14:57:32  #  Start NIFS sorting and copying  #
+2017/06/22 14:57:32  #                                  #
+2017/06/22 14:57:32  ####################################
+
+2017/06/22 14:57:40  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/22 14:57:40  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/22 14:57:40  I am reducing the calibration data. 
+2017/06/22 14:57:40  #################################################
+2017/06/22 14:57:40  #                                               #
+2017/06/22 14:57:40  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 14:57:40  #                                               #
+2017/06/22 14:57:40  #################################################
+2017/06/22 15:51:45  Login file is main.log
+2017/06/22 15:51:45  Starting point is 1
+2017/06/22 15:51:45  Stopping point is 10
+2017/06/22 15:51:45  H line removal method is set to interactive ? no
+2017/06/22 15:51:45  telluric continuum fitting is set to interactive ? no
+2017/06/22 15:51:45  telluric correction is set to interactive ? no
+2017/06/22 15:51:45  Flux calibrate is performed ? no
+2017/06/22 15:51:45   I am sorting the data 
+2017/06/22 15:51:45  ####################################
+2017/06/22 15:51:45  #                                  #
+2017/06/22 15:51:45  #  Start NIFS sorting and copying  #
+2017/06/22 15:51:45  #                                  #
+2017/06/22 15:51:45  ####################################
+
+2017/06/22 15:52:56  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 15:52:56  telDirList : []
+2017/06/22 15:52:56  I am reducing the calibration data. 
+2017/06/22 15:52:56  #################################################
+2017/06/22 15:52:56  #                                               #
+2017/06/22 15:52:56  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 15:52:56  #                                               #
+2017/06/22 15:52:56  #################################################
+2017/06/22 16:11:53  Login file is main.log
+2017/06/22 16:11:53  Starting point is 1
+2017/06/22 16:11:53  Stopping point is 10
+2017/06/22 16:11:53  H line removal method is set to interactive ? no
+2017/06/22 16:11:53  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:11:53  telluric correction is set to interactive ? no
+2017/06/22 16:11:53  Flux calibrate is performed ? no
+2017/06/22 16:11:53   I am sorting the data 
+2017/06/22 16:11:53  ####################################
+2017/06/22 16:11:53  #                                  #
+2017/06/22 16:11:53  #  Start NIFS sorting and copying  #
+2017/06/22 16:11:53  #                                  #
+2017/06/22 16:11:53  ####################################
+
+2017/06/22 16:12:07  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/22 16:12:07  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/22 16:12:07  I am reducing the calibration data. 
+2017/06/22 16:12:07  #################################################
+2017/06/22 16:12:07  #                                               #
+2017/06/22 16:12:07  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:12:07  #                                               #
+2017/06/22 16:12:07  #################################################
+2017/06/22 16:12:39  Login file is main.log
+2017/06/22 16:12:39  Starting point is 1
+2017/06/22 16:12:39  Stopping point is 10
+2017/06/22 16:12:39  H line removal method is set to interactive ? no
+2017/06/22 16:12:39  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:12:39  telluric correction is set to interactive ? no
+2017/06/22 16:12:39  Flux calibrate is performed ? no
+2017/06/22 16:12:39   I am sorting the data 
+2017/06/22 16:12:39  ####################################
+2017/06/22 16:12:39  #                                  #
+2017/06/22 16:12:39  #  Start NIFS sorting and copying  #
+2017/06/22 16:12:39  #                                  #
+2017/06/22 16:12:39  ####################################
+
+2017/06/22 16:22:17  Login file is main.log
+2017/06/22 16:22:17  Starting point is 1
+2017/06/22 16:22:17  Stopping point is 10
+2017/06/22 16:22:17  H line removal method is set to interactive ? no
+2017/06/22 16:22:17  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:22:17  telluric correction is set to interactive ? no
+2017/06/22 16:22:17  Flux calibrate is performed ? no
+2017/06/22 16:22:17   I am sorting the data 
+2017/06/22 16:22:17  ####################################
+2017/06/22 16:22:17  #                                  #
+2017/06/22 16:22:17  #  Start NIFS sorting and copying  #
+2017/06/22 16:22:17  #                                  #
+2017/06/22 16:22:17  ####################################
+
+2017/06/22 16:30:30  Login file is main.log
+2017/06/22 16:30:30  Starting point is 1
+2017/06/22 16:30:30  Stopping point is 10
+2017/06/22 16:30:30  H line removal method is set to interactive ? no
+2017/06/22 16:30:30  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:30:30  telluric correction is set to interactive ? no
+2017/06/22 16:30:30  Flux calibrate is performed ? no
+2017/06/22 16:30:30   I am sorting the data 
+2017/06/22 16:30:30  ####################################
+2017/06/22 16:30:30  #                                  #
+2017/06/22 16:30:30  #  Start NIFS sorting and copying  #
+2017/06/22 16:30:30  #                                  #
+2017/06/22 16:30:30  ####################################
+
+2017/06/22 16:31:09  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:31:09  telDirList : []
+2017/06/22 16:31:09  I am reducing the calibration data. 
+2017/06/22 16:31:09  #################################################
+2017/06/22 16:31:09  #                                               #
+2017/06/22 16:31:09  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:31:09  #                                               #
+2017/06/22 16:31:09  #################################################
+2017/06/22 16:33:57  Login file is main.log
+2017/06/22 16:33:57  Starting point is 1
+2017/06/22 16:33:57  Stopping point is 10
+2017/06/22 16:33:57  H line removal method is set to interactive ? no
+2017/06/22 16:33:57  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:33:57  telluric correction is set to interactive ? no
+2017/06/22 16:33:57  Flux calibrate is performed ? no
+2017/06/22 16:33:57   I am sorting the data 
+2017/06/22 16:33:57  ####################################
+2017/06/22 16:33:57  #                                  #
+2017/06/22 16:33:57  #  Start NIFS sorting and copying  #
+2017/06/22 16:33:57  #                                  #
+2017/06/22 16:33:57  ####################################
+
+2017/06/22 16:34:30  Login file is main.log
+2017/06/22 16:34:30  Starting point is 1
+2017/06/22 16:34:30  Stopping point is 10
+2017/06/22 16:34:30  H line removal method is set to interactive ? no
+2017/06/22 16:34:30  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:34:30  telluric correction is set to interactive ? no
+2017/06/22 16:34:30  Flux calibrate is performed ? no
+2017/06/22 16:34:30   I am sorting the data 
+2017/06/22 16:34:30  ####################################
+2017/06/22 16:34:30  #                                  #
+2017/06/22 16:34:30  #  Start NIFS sorting and copying  #
+2017/06/22 16:34:30  #                                  #
+2017/06/22 16:34:30  ####################################
+
+2017/06/22 16:35:17  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:35:17  telDirList : []
+2017/06/22 16:35:17  I am reducing the calibration data. 
+2017/06/22 16:35:17  #################################################
+2017/06/22 16:35:17  #                                               #
+2017/06/22 16:35:17  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:35:17  #                                               #
+2017/06/22 16:35:17  #################################################
+2017/06/22 16:36:04  Login file is main.log
+2017/06/22 16:36:04  Starting point is 1
+2017/06/22 16:36:04  Stopping point is 10
+2017/06/22 16:36:04  H line removal method is set to interactive ? no
+2017/06/22 16:36:04  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:36:04  telluric correction is set to interactive ? no
+2017/06/22 16:36:04  Flux calibrate is performed ? no
+2017/06/22 16:36:04   I am sorting the data 
+2017/06/22 16:36:04  ####################################
+2017/06/22 16:36:04  #                                  #
+2017/06/22 16:36:04  #  Start NIFS sorting and copying  #
+2017/06/22 16:36:04  #                                  #
+2017/06/22 16:36:04  ####################################
+
+2017/06/22 16:36:44  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:36:44  telDirList : []
+2017/06/22 16:36:44  I am reducing the calibration data. 
+2017/06/22 16:36:44  #################################################
+2017/06/22 16:36:44  #                                               #
+2017/06/22 16:36:44  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:36:44  #                                               #
+2017/06/22 16:36:44  #################################################
+2017/06/22 16:37:32  Login file is main.log
+2017/06/22 16:37:32  Starting point is 1
+2017/06/22 16:37:32  Stopping point is 10
+2017/06/22 16:37:32  H line removal method is set to interactive ? no
+2017/06/22 16:37:32  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:37:32  telluric correction is set to interactive ? no
+2017/06/22 16:37:32  Flux calibrate is performed ? no
+2017/06/22 16:37:32   I am sorting the data 
+2017/06/22 16:37:32  ####################################
+2017/06/22 16:37:32  #                                  #
+2017/06/22 16:37:32  #  Start NIFS sorting and copying  #
+2017/06/22 16:37:32  #                                  #
+2017/06/22 16:37:32  ####################################
+
+2017/06/22 16:38:09  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:38:10  telDirList : []
+2017/06/22 16:38:10  I am reducing the calibration data. 
+2017/06/22 16:38:10  #################################################
+2017/06/22 16:38:10  #                                               #
+2017/06/22 16:38:10  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:38:10  #                                               #
+2017/06/22 16:38:10  #################################################
+2017/06/22 16:46:56  Login file is main.log
+2017/06/22 16:46:56  Starting point is 1
+2017/06/22 16:46:56  Stopping point is 10
+2017/06/22 16:46:56  H line removal method is set to interactive ? no
+2017/06/22 16:46:56  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:46:56  telluric correction is set to interactive ? no
+2017/06/22 16:46:56  Flux calibrate is performed ? no
+2017/06/22 16:46:56   I am sorting the data 
+2017/06/22 16:46:56  ####################################
+2017/06/22 16:46:56  #                                  #
+2017/06/22 16:46:56  #  Start NIFS sorting and copying  #
+2017/06/22 16:46:56  #                                  #
+2017/06/22 16:46:56  ####################################
+
+2017/06/22 16:47:33  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:47:33  telDirList : []
+2017/06/22 16:47:33  I am reducing the calibration data. 
+2017/06/22 16:47:33  #################################################
+2017/06/22 16:47:33  #                                               #
+2017/06/22 16:47:33  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:47:33  #                                               #
+2017/06/22 16:47:33  #################################################
+2017/06/22 16:48:15  Login file is main.log
+2017/06/22 16:48:15  Starting point is 1
+2017/06/22 16:48:15  Stopping point is 10
+2017/06/22 16:48:15  H line removal method is set to interactive ? no
+2017/06/22 16:48:15  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:48:15  telluric correction is set to interactive ? no
+2017/06/22 16:48:15  Flux calibrate is performed ? no
+2017/06/22 16:48:15   I am sorting the data 
+2017/06/22 16:48:15  ####################################
+2017/06/22 16:48:15  #                                  #
+2017/06/22 16:48:15  #  Start NIFS sorting and copying  #
+2017/06/22 16:48:15  #                                  #
+2017/06/22 16:48:15  ####################################
+
+2017/06/22 16:48:51  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:48:51  telDirList : []
+2017/06/22 16:48:51  I am reducing the calibration data. 
+2017/06/22 16:48:51  #################################################
+2017/06/22 16:48:51  #                                               #
+2017/06/22 16:48:51  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:48:51  #                                               #
+2017/06/22 16:48:51  #################################################
+2017/06/22 16:50:19  Login file is main.log
+2017/06/22 16:50:19  Starting point is 1
+2017/06/22 16:50:19  Stopping point is 10
+2017/06/22 16:50:19  H line removal method is set to interactive ? no
+2017/06/22 16:50:19  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:50:19  telluric correction is set to interactive ? no
+2017/06/22 16:50:19  Flux calibrate is performed ? no
+2017/06/22 16:50:19   I am sorting the data 
+2017/06/22 16:50:19  ####################################
+2017/06/22 16:50:19  #                                  #
+2017/06/22 16:50:19  #  Start NIFS sorting and copying  #
+2017/06/22 16:50:19  #                                  #
+2017/06/22 16:50:19  ####################################
+
+2017/06/22 16:50:54  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:50:54  telDirList : []
+2017/06/22 16:50:54  I am reducing the calibration data. 
+2017/06/22 16:50:54  #################################################
+2017/06/22 16:50:54  #                                               #
+2017/06/22 16:50:54  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:50:54  #                                               #
+2017/06/22 16:50:54  #################################################
+2017/06/22 16:54:14  Login file is main.log
+2017/06/22 16:54:14  Starting point is 1
+2017/06/22 16:54:14  Stopping point is 10
+2017/06/22 16:54:14  H line removal method is set to interactive ? no
+2017/06/22 16:54:14  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:54:14  telluric correction is set to interactive ? no
+2017/06/22 16:54:14  Flux calibrate is performed ? no
+2017/06/22 16:54:14   I am sorting the data 
+2017/06/22 16:54:14  ####################################
+2017/06/22 16:54:14  #                                  #
+2017/06/22 16:54:14  #  Start NIFS sorting and copying  #
+2017/06/22 16:54:14  #                                  #
+2017/06/22 16:54:14  ####################################
+
+2017/06/22 16:55:04  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:55:04  telDirList : []
+2017/06/22 16:55:04  I am reducing the calibration data. 
+2017/06/22 16:55:04  #################################################
+2017/06/22 16:55:04  #                                               #
+2017/06/22 16:55:04  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:55:04  #                                               #
+2017/06/22 16:55:04  #################################################
+2017/06/22 16:57:56  Login file is main.log
+2017/06/22 16:57:56  Starting point is 1
+2017/06/22 16:57:56  Stopping point is 10
+2017/06/22 16:57:56  H line removal method is set to interactive ? no
+2017/06/22 16:57:56  telluric continuum fitting is set to interactive ? no
+2017/06/22 16:57:56  telluric correction is set to interactive ? no
+2017/06/22 16:57:56  Flux calibrate is performed ? no
+2017/06/22 16:57:56   I am sorting the data 
+2017/06/22 16:57:56  ####################################
+2017/06/22 16:57:56  #                                  #
+2017/06/22 16:57:56  #  Start NIFS sorting and copying  #
+2017/06/22 16:57:56  #                                  #
+2017/06/22 16:57:56  ####################################
+
+2017/06/22 16:58:34  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 16:58:34  telDirList : []
+2017/06/22 16:58:34  I am reducing the calibration data. 
+2017/06/22 16:58:34  #################################################
+2017/06/22 16:58:34  #                                               #
+2017/06/22 16:58:34  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 16:58:34  #                                               #
+2017/06/22 16:58:34  #################################################
+2017/06/22 17:06:37  Login file is main.log
+2017/06/22 17:06:37  Starting point is 1
+2017/06/22 17:06:37  Stopping point is 10
+2017/06/22 17:06:37  H line removal method is set to interactive ? no
+2017/06/22 17:06:37  telluric continuum fitting is set to interactive ? no
+2017/06/22 17:06:37  telluric correction is set to interactive ? no
+2017/06/22 17:06:37  Flux calibrate is performed ? no
+2017/06/22 17:06:37   I am sorting the data 
+2017/06/22 17:06:37  ####################################
+2017/06/22 17:06:37  #                                  #
+2017/06/22 17:06:37  #  Start NIFS sorting and copying  #
+2017/06/22 17:06:37  #                                  #
+2017/06/22 17:06:37  ####################################
+
+2017/06/22 17:07:25  obsDirList : ['/Users/ncomeau/research/newer-nifty/hd165459/20160420/Z/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/J/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/H/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160420/K/obs18', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/Z/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/J/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13', '/Users/ncomeau/research/newer-nifty/hd165459/20160705/K/obs13']
+2017/06/22 17:07:25  telDirList : []
+2017/06/22 17:07:25  I am reducing the calibration data. 
+2017/06/22 17:07:25  #################################################
+2017/06/22 17:07:25  #                                               #
+2017/06/22 17:07:25  # Start the NIFS Baseline Calibration Reduction #
+2017/06/22 17:07:25  #                                               #
+2017/06/22 17:07:25  #################################################
+2017/06/22 18:11:20  I am starting to reduce the telluric images
+2017/06/22 18:11:20  I am starting to reduce the science images
+2017/06/23 10:19:13  Login file is main.log
+2017/06/23 10:19:13  Starting point is 1
+2017/06/23 10:19:13  Stopping point is 10
+2017/06/23 10:19:13  H line removal method is set to interactive ? no
+2017/06/23 10:19:13  telluric continuum fitting is set to interactive ? no
+2017/06/23 10:19:13  telluric correction is set to interactive ? no
+2017/06/23 10:19:13  Flux calibrate is performed ? no
+2017/06/23 10:19:13   I am sorting the data 
+2017/06/23 10:19:13  ####################################
+2017/06/23 10:19:13  #                                  #
+2017/06/23 10:19:13  #  Start NIFS sorting and copying  #
+2017/06/23 10:19:13  #                                  #
+2017/06/23 10:19:13  ####################################
+
+2017/06/23 10:19:28  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/23 10:19:28  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/23 10:19:28  I am reducing the calibration data. 
+2017/06/23 10:19:28  #################################################
+2017/06/23 10:19:28  #                                               #
+2017/06/23 10:19:28  # Start the NIFS Baseline Calibration Reduction #
+2017/06/23 10:19:28  #                                               #
+2017/06/23 10:19:28  #################################################
+2017/06/23 10:20:11  Login file is main.log
+2017/06/23 10:20:11  Starting point is 1
+2017/06/23 10:20:11  Stopping point is 10
+2017/06/23 10:20:11  H line removal method is set to interactive ? no
+2017/06/23 10:20:11  telluric continuum fitting is set to interactive ? no
+2017/06/23 10:20:11  telluric correction is set to interactive ? no
+2017/06/23 10:20:11  Flux calibrate is performed ? no
+2017/06/23 10:20:11   I am sorting the data 
+2017/06/23 10:20:11  ####################################
+2017/06/23 10:20:11  #                                  #
+2017/06/23 10:20:11  #  Start NIFS sorting and copying  #
+2017/06/23 10:20:11  #                                  #
+2017/06/23 10:20:11  ####################################
+
+2017/06/23 10:20:13  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/23 10:20:13  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K']
+2017/06/23 10:20:13  I am reducing the calibration data. 
+2017/06/23 10:20:13  #################################################
+2017/06/23 10:20:13  #                                               #
+2017/06/23 10:20:13  # Start the NIFS Baseline Calibration Reduction #
+2017/06/23 10:20:13  #                                               #
+2017/06/23 10:20:13  #################################################
+2017/06/23 10:20:57  Login file is main.log
+2017/06/23 10:20:57  Starting point is 1
+2017/06/23 10:20:57  Stopping point is 10
+2017/06/23 10:20:57  H line removal method is set to interactive ? no
+2017/06/23 10:20:57  telluric continuum fitting is set to interactive ? no
+2017/06/23 10:20:57  telluric correction is set to interactive ? no
+2017/06/23 10:20:57  Flux calibrate is performed ? no
+2017/06/23 10:20:57   I am sorting the data 
+2017/06/23 10:20:57  ####################################
+2017/06/23 10:20:57  #                                  #
+2017/06/23 10:20:57  #  Start NIFS sorting and copying  #
+2017/06/23 10:20:57  #                                  #
+2017/06/23 10:20:57  ####################################
+
+2017/06/23 10:21:06  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/23 10:21:06  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/23 10:21:06  I am reducing the calibration data. 
+2017/06/23 10:21:06  #################################################
+2017/06/23 10:21:06  #                                               #
+2017/06/23 10:21:06  # Start the NIFS Baseline Calibration Reduction #
+2017/06/23 10:21:06  #                                               #
+2017/06/23 10:21:06  #################################################
+2017/06/23 10:22:42  Login file is main.log
+2017/06/23 10:22:42  Starting point is 1
+2017/06/23 10:22:42  Stopping point is 10
+2017/06/23 10:22:42  H line removal method is set to interactive ? no
+2017/06/23 10:22:42  telluric continuum fitting is set to interactive ? no
+2017/06/23 10:22:42  telluric correction is set to interactive ? no
+2017/06/23 10:22:42  Flux calibrate is performed ? no
+2017/06/23 10:22:42   I am sorting the data 
+2017/06/23 10:22:42  ####################################
+2017/06/23 10:22:42  #                                  #
+2017/06/23 10:22:42  #  Start NIFS sorting and copying  #
+2017/06/23 10:22:42  #                                  #
+2017/06/23 10:22:42  ####################################
+
+2017/06/23 10:22:44  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/23 10:22:44  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109', '/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/23 10:22:44  I am reducing the calibration data. 
+2017/06/23 10:22:44  #################################################
+2017/06/23 10:22:44  #                                               #
+2017/06/23 10:22:44  # Start the NIFS Baseline Calibration Reduction #
+2017/06/23 10:22:44  #                                               #
+2017/06/23 10:22:44  #################################################
+2017/06/23 10:23:23  Login file is main.log
+2017/06/23 10:23:23  Starting point is 1
+2017/06/23 10:23:23  Stopping point is 10
+2017/06/23 10:23:23  H line removal method is set to interactive ? no
+2017/06/23 10:23:23  telluric continuum fitting is set to interactive ? no
+2017/06/23 10:23:23  telluric correction is set to interactive ? no
+2017/06/23 10:23:23  Flux calibrate is performed ? no
+2017/06/23 10:23:23   I am sorting the data 
+2017/06/23 10:23:23  ####################################
+2017/06/23 10:23:23  #                                  #
+2017/06/23 10:23:23  #  Start NIFS sorting and copying  #
+2017/06/23 10:23:23  #                                  #
+2017/06/23 10:23:23  ####################################
+
+2017/06/23 10:23:25  obsDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/obs107']
+2017/06/23 10:23:25  telDirList : ['/Users/ncomeau/research/newer-nifty/HD141004/20100401/K/Tellurics/obs109']
+2017/06/23 10:23:25  I am reducing the calibration data. 
+2017/06/23 10:23:25  #################################################
+2017/06/23 10:23:25  #                                               #
+2017/06/23 10:23:25  # Start the NIFS Baseline Calibration Reduction #
+2017/06/23 10:23:25  #                                               #
+2017/06/23 10:23:25  #################################################

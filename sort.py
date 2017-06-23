@@ -78,13 +78,13 @@ def start(dir, tel, sort, over, copy, program, date):
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     log = os.getcwd()+'/Nifty.log'
 
-    logging.info('####################################')
+    logging.info('\n####################################')
     logging.info('#                                  #')
     logging.info('#  Start NIFS sorting and copying  #')
     logging.info('#                                  #')
     logging.info('####################################\n')
 
-    print '####################################'
+    print '\n####################################'
     print '#                                  #'
     print '#  Start NIFS sorting and copying  #'
     print '#                                  #'
@@ -92,7 +92,7 @@ def start(dir, tel, sort, over, copy, program, date):
 
 
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
-    # Exit if -q <path to raw image files> and -c True are specified at command line (cannot copy from
+    # Exit if -q <path to raw frame files> and -c True are specified at command line (cannot copy from
     # Gemini North internal network AND use local raw data).
     if dir and copy:
         print "\n Error in sort. Cannot specify -q AND -c True (local raw files directory AND copy files from Gemini network).\n"
@@ -115,9 +115,9 @@ def start(dir, tel, sort, over, copy, program, date):
     # IF a local raw directory path is given with -q at command line, sort OR don't sort data.
     if dir:
         if sort:
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, scienceImageList = makeSortFiles(dir)
-            objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, scienceImageList, dir)
-            calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, scienceImageList, dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, sciImageList = makeSortFiles(dir)
+            objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, sciImageList, dir)
+            calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, sciImageList, dir)
             # If a telluric correction will be performed sort the science and telluric images based on time between observations.
             # This will NOT be executed if -t False is specified at command line.
             if tel:
@@ -125,7 +125,7 @@ def start(dir, tel, sort, over, copy, program, date):
         # IF NO sort, create lists of paths to data directories.
         # This will ONLY be executed IF -q <path to raw image files> AND -s False are specified at command line.
         elif not sort:
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, scienceImageList = makeSortFiles(dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, scienceframeList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
 
 
@@ -152,8 +152,6 @@ def start(dir, tel, sort, over, copy, program, date):
             raise SystemExit
         else:
             geminiSort.start(tel, sort, over, copy, program, date)
-
-
 
 
 
@@ -194,7 +192,7 @@ def makeSortFiles(dir):
     obsidDateList = [] # 2D list of date, observation id pairs.
     sciDateList = [] # List of unique dates by science (including sky) frames.
 
-    scienceImageList = [] # List of science observation directories.
+    sciImageList = [] # List of science observation directories.
 
     # Store current working directory for later use.
     path = os.getcwd()
@@ -250,7 +248,7 @@ def makeSortFiles(dir):
 
             # If the offsets are outside a circle of 5.0 units in radius, append to skylist.
             if obsclass == 'science':
-                scienceImageList.append(entry)
+                sciImageList.append(entry)
                 if rad > 3.0:
                     skylist.append(entry)
 
@@ -353,13 +351,13 @@ def makeSortFiles(dir):
 
     print "\nNumber of files to be processed: ", number_files_to_be_copied + number_calibration_files_to_be_copied
 
-    return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, scienceImageList
+    return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, sciImageList
 
 #----------------------------------------------------------------------------------------#
 
-def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
+def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
 
-    """Sorts the science images, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass, when not using the Gemini network.
+    """Sorts the science frames, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass, when not using the Gemini network.
     """
 
     # Store number of science, telluric, sky, telluric sky and acquisition frames in number_files_to_be_copied
@@ -375,7 +373,7 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
     # List of paths sorted by object and date. ['path/to/object1/date1', 'path/to/object1/date2'].
     objDirList = []
     # Create a 2D list obsDirList. Second part is a path to a science directory.
-    # First part is a list of calculated times of each image in that science directory.
+    # First part is a list of calculated times of each frame in that science directory.
     # Eg: [[[5400,6500,7200], '/path/to/first/science'], [[3400,4300,5200], '/path/to/second/science']...]
     obsDirList = []
     # List of paths to telluric directories.
@@ -450,7 +448,7 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
             # Append the time to an existing time list.
             #
             # Eg, before appending: [[[5400,6500,7200], '/path/to/first/science'], [[5200], '/path/to/second/science']]
-            # If we are processing the second image in /path/to/second/science/, obsDirList[-1][1] will equal /path/to/second/science.
+            # If we are processing the second frame in /path/to/second/science/, obsDirList[-1][1] will equal /path/to/second/science.
             # Then append the new time to the second entry.
             #
             # [[[5400,6500,7200], '/path/to/first/science'], [[5200, NEWTIMEHERE], '/path/to/second/science']]
@@ -459,7 +457,7 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
                 obsDirList[-1][0].append(time)
 
 
-    # Copy science and acquisition images to the appropriate directory.
+    # Copy science and acquisition frames to the appropriate directory.
     print "\nCopying Science and Acquisitions.\nNow copying: "
 
     for i in range(len(allfilelist)):
@@ -472,7 +470,7 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
         obsclass = header[0].header['OBSCLASS']
         obj = header[0].header['OBJECT'].replace(' ', '')
 
-        # Only grab the most recent aquisition image.
+        # Only grab the most recent aquisition frame.
         if i!=len(allfilelist)-1:
             header2 = pyfits.open(Raw+'/'+allfilelist[i+1][0])
             obsclass2 = header2[0].header['OBSCLASS']
@@ -506,7 +504,7 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
             number_files_that_were_copied += 1
             allfilelist[i][1] = 0
 
-    # Copy telluric images to the appropriate folder.
+    # Copy telluric frames to the appropriate folder.
     # Note: Because the 'OBJECT' of a telluric file header is different then the
     # science target, we need to sort by date, grating AND most recent time.
     print "\n\nCopying tellurics data.\nNow copying: "
@@ -529,9 +527,9 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
                 # Make sure date and gratings match.
                 tempDir = obsDirList[k][1].split(os.sep)
                 if date in tempDir and grat in tempDir:
-                    # Open the times of all science images in science_directory.
+                    # Open the times of all science frames in science_directory.
                     times = obsDirList[k][0]
-                    # Find difference in each time from the telluric image we're trying to sort.
+                    # Find difference in each time from the telluric frame we're trying to sort.
                     diffList = []
                     for b in range(len(times)):
                         difference = abs(telluric_time-obsDirList[k][0][b])
@@ -539,14 +537,14 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
                         templist.append(difference)
                         templist.append(obsDirList[k][1])
                         diffList.append(templist)
-                    # Find the science image with the smallest difference.
+                    # Find the science frame with the smallest difference.
                     minDiff = min(diffList)
                     # Pass that time and path out of the for loop.
                     timeList.append(minDiff)
             # Out of the for loop, compare min times from different directories.
             if timeList:
                 closest_time = min(timeList)
-                # Copy the telluric image to the path of that science image.
+                # Copy the telluric frame to the path of that science frame.
                 path_to_science_dir = closest_time[1]
                 path_to_tellurics = os.path.split(path_to_science_dir)[0]
 
@@ -586,8 +584,8 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
             print allfilelist[i][0], allfilelist[i][2],  " was not copied."
     print "\nEnd non-copied science, tellurics and acquisitions.\n"
 
-    # Check that all science images were copied.
-    count_from_raw_files = len(scienceImageList)
+    # Check that all science frames were copied.
+    count_from_raw_files = len(sciImageList)
 
     count = 0
     for science_directory in obsDirList:
@@ -609,24 +607,74 @@ def sortObs(allfilelist, skylist, telskylist, scienceImageList, dir):
 
 #----------------------------------------------------------------------------------------#
 
-def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, scienceImageList, dir):
+def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, sciImageList, dir):
 
     """Sort calibrations into the appropriate directory based on date.
     """
     calDirList = []
     filelist = ['arclist', 'arcdarklist', 'flatlist', 'ronchilist', 'flatdarklist']
 
+    # Save path for later use. The Raw part is for Gemini North network sorting.
     path1 = os.getcwd()
     if dir:
         Raw = dir
     else:
         Raw = path1+'/Raw'
 
+    # Set up some tests and checks.
     count = 0
     expected_count = len(arcdarklist) + len(arclist) + len(flatlist)\
           + len(flatdarklist) + len(ronchilist)
 
     print "\nI am attempting to sort ", expected_count, " files.\n"
+
+    # To make sure data was copied later in the pipeline:
+    # Add a small copied flag to each frame in calibration file lists.
+    new_flatlist = []
+    for i in range(len(flatlist)):
+        # Transform 1D list into 2D list of [[filename, 'copied']]
+        # "copied" is 1 for not copied and 0 for copied.
+        templist = []
+        templist.append(flatlist[i])
+        templist.append(1)
+        new_flatlist.append(templist)
+    flatlist = new_flatlist
+
+    new_flatdarklist = []
+    for i in range(len(flatdarklist)):
+        # Transform 1D list into 2D list.
+        templist = []
+        templist.append(flatdarklist[i])
+        templist.append(1)
+        new_flatdarklist.append(templist)
+    flatdarklist = new_flatdarklist
+
+    new_arclist = []
+    for i in range(len(arclist)):
+        # Transform 1D list into 2D list.
+        templist = []
+        templist.append(arclist[i])
+        templist.append(1)
+        new_arclist.append(templist)
+    arclist = new_arclist
+
+    new_arcdarklist = []
+    for i in range(len(arcdarklist)):
+        # Transform 1D list into 2D list.
+        templist = []
+        templist.append(arcdarklist[i])
+        templist.append(1)
+        new_arcdarklist.append(templist)
+    arcdarklist = new_arcdarklist
+
+    new_ronchilist = []
+    for i in range(len(ronchilist)):
+        # Transform 1D list into 2D list.
+        templist = []
+        templist.append(ronchilist[i])
+        templist.append(1)
+        new_ronchilist.append(templist)
+    ronchilist = new_ronchilist
 
     os.chdir(Raw)
 
@@ -637,52 +685,55 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
             calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations')
         else:
             calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations')
+            # If any of the text file lists exist remove them.
             for list in filelist:
                 if os.path.exists('./'+list):
                     os.remove('./'+list)
 
     # Sort lamps on flats.
     print "\nSorting flats:"
-    for entry in flatlist:
-        header = pyfits.open(entry)
+    for i in range(len(flatlist)):
+        header = pyfits.open(flatlist[i][0])
         obsid = header[0].header['OBSID']
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        shutil.copy('./'+entry, objDir+'/Calibrations/')
-                        print entry
+                        shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations/')
+                        flatlist[i][1] = 0
+                        print flatlist[i][0]
                         count += 1
                         path = objDir+'/Calibrations/'
                         # Create a flatlist in the relevent directory.
                         # Create a text file called flatlist to store the names of the
                         # lamps on flats for later use by the pipeline.
-                        writeList(entry, 'flatlist', path)
+                        writeList(flatlist[i][0], 'flatlist', path)
 
     # Sort lamps off flats.
     print "\nSorting lamps off flats:"
-    for entry in flatdarklist:
+    for i in range(len(flatdarklist)):
         os.chdir(Raw)
-        header = pyfits.open(entry)
+        header = pyfits.open(flatdarklist[i][0])
         obsid = header[0].header['OBSID']
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        shutil.copy('./'+entry, objDir+'/Calibrations/')
-                        print entry
+                        shutil.copy('./'+flatdarklist[i][0], objDir+'/Calibrations/')
+                        flatdarklist[i][1] = 0
+                        print flatdarklist[i][0]
                         count += 1
                         path = objDir+'/Calibrations/'
                         # Create a flatdarklist in the relevant directory.
-                        writeList(entry, 'flatdarklist', path)
+                        writeList(flatdarklist[i][0], 'flatdarklist', path)
 
     # Sort ronchi flats.
     print "\nSorting ronchi flats:"
-    for entry in ronchilist:
+    for i in range(len(ronchilist)):
         os.chdir(Raw)
-        header = pyfits.open(entry)
+        header = pyfits.open(ronchilist[i][0])
         obsid = header[0].header['OBSID']
         # Use this to remove the lamps off ronchi flats (not used by the pipeline).
         shutter = header[0].header['GCALSHUT'].strip()
@@ -692,47 +743,61 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                     if obsid in item:
                         date = item[0]
                         if date in objDir:
-                            shutil.copy('./'+entry, objDir+'/Calibrations/')
-                            print entry
+                            shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations/')
+                            ronchilist[i][1] = 0
+                            print ronchilist[i][0]
                             count += 1
                             path = objDir+'/Calibrations/'
                             # create a ronchilist in the relevant directory
-                            writeList(entry, 'ronchilist', path)
+                            writeList(ronchilist[i][0], 'ronchilist', path)
 
     # Sort arcs.
     print "\nSorting arcs:"
-    for entry in arclist:
-        header = pyfits.open(entry)
+    for i in range(len(arclist)):
+        header = pyfits.open(arclist[i][0])
         obsid = header[0].header['OBSID']
         date = header[0].header['DATE'].replace('-','')
         for objDir in objDirList:
             if date in objDir:
-                shutil.copy('./'+entry, objDir+'/Calibrations/')
-                print entry
+                shutil.copy('./'+arclist[i][0], objDir+'/Calibrations/')
+                arclist[i][1] = 0
+                print arclist[i][0]
                 count += 1
                 path = objDir+'/Calibrations/'
                 # Create an arclist in the relevant directory.
-                writeList(entry, 'arclist', path)
+                writeList(arclist[i][0], 'arclist', path)
 
     # Sort arc darks.
     print "\nSorting arc darks:"
-    for entry in arcdarklist:
-        header = pyfits.open(entry)
+    for i in range(len(arcdarklist)):
+        header = pyfits.open(arcdarklist[i][0])
         obsid = header[0].header['OBSID']
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        shutil.copy('./'+entry, objDir+'/Calibrations/')
-                        print entry
+                        shutil.copy('./'+arcdarklist[i][0], objDir+'/Calibrations/')
+                        arcdarklist[i][1] = 0
+                        print arcdarklist[i][0]
                         count += 1
                         path = objDir+'/Calibrations/'
                         # Create an arcdarklist in the relevant directory.
-                        writeList(entry, 'arcdarklist', path)
+                        writeList(arcdarklist[i][0], 'arcdarklist', path)
+
+    # Check that each file in flatlist was copied.
+    for i in range(len(flatlist)):
+        if flatlist[i][1] == 1:
+            print flatlist[i][0], " was not copied."
+
+
+
 
 
     # ---------------------------- Tests ------------------------------------- #
+
+
+
 
     # Check to see how many calibrations were copied.
     if expected_count - count == 0:
@@ -740,6 +805,37 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
     else:
         print "\nI did not copy ", expected_count - count, " calibration file(s).\n"
 
+    # Check each calibration file list to see which ones were not copied.
+    # Check that each file in flatlist was copied.
+    for i in range(len(flatlist)):
+        if flatlist[i][1] == 1:
+            print flatlist[i][0], " from flatlist was not copied."
+
+    # Check that each file in flatdarklist was copied.
+    for i in range(len(flatdarklist)):
+        if flatdarklist[i][1] == 1:
+            print flatdarklist[i][0], " from flatdarklist was not copied."
+
+    # Check that each file in ronchilist was copied.
+    for i in range(len(ronchilist)):
+        if ronchilist[i][1] == 1:
+            print ronchilist[i][0], " from ronchilist was not copied."
+
+    # Check that each file in arclist was copied.
+    for i in range(len(arclist)):
+        if arclist[i][1] == 1:
+            print arclist[i][0], " from arclist was not copied."
+
+    # Check that each file in arcdarklist was copied.
+    for i in range(len(arcdarklist)):
+        if arcdarklist[i][1] == 1:
+            print arcdarklist[i][0], " from arcdarklist was not copied."
+
+
+    # Change back to original working directory.
+    os.chdir(path1)
+
+    # Check that each science directory exists and has associated calibration data.
     # Pseudocode (repeated below with actual code):
     # For each science directory, make sure that:
     # a calibrations directory is present.
@@ -749,13 +845,11 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
     # arcdarklist exists and has more than one file.
     # ronchilist exists and has more than one file.
 
-    # For each science directory, make sure that:
-    # Change back to original working directory.
-    os.chdir(path1)
-
+    print "\nChecking that each science image has required calibration data. "
     # For each science image, read its header data and try to change to the appropriate directory.
+    # Check that:
     for i in range(len(sciImageList)):
-        header = pyfits.open(dir+'/'+sciImageList[i]+'.fits')
+        header = pyfits.open(dir+'/'+sciImageList[i])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -764,22 +858,137 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
         obsclass = header[0].header['OBSCLASS']
         obj = header[0].header['OBJECT'].replace(' ','')
 
-    # a calibrations directory is present.
-    # flatlist exists and has more than one file.
-    # flatdarklist exists and has more than one file.
-    # arclist exists and has more than one file.
-    # arcdarklist exists and has more than one file.
-    # ronchilist exists and has more than one file.
+        # a science and Calibrations directory are present.
+        try:
+            os.chdir(obj+'/'+date+'/'+grat+'/obs'+obsid+'/')
+            os.chdir('../../Calibrations/')
+        except Exception as e:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: no Calibrations directory found for "
+            print "                      science frame ", sciImageList[i]
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+            continue
 
+        # flatlist exists and has more than one file.
+        try:
+            flatlist = open('flatlist', "r").readlines()
+            if len(flatlist) <= 1:
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: only 1 lamps on flat frame found for science"
+                print "                      frame ", sciImageList[i]
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
+        except Exception as e:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: no flatlist found for science frame"
+            print "                      ", sciImageList[i]
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+
+        # flatdarklist exists and has more than one file.
+        try:
+            flatdarklist = open('flatdarklist', "r").readlines()
+            if len(flatdarklist) <= 1:
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: only 1 lamps off flat frame found for science"
+                print "                      frame ", sciImageList[i]
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
+        except Exception as e:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: no flatdarklist found for science frame"
+            print "                      ", sciImageList[i]
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+
+        # arclist exists and has more than one file.
+        try:
+            arclist = open('arclist', "r").readlines()
+            if len(arclist) <= 1:
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: only 1 arc frame found for science frame"
+                print "                      ", sciImageList[i]
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
+        except Exception as e:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: no arclist found for science frame"
+            print "                      ", sciImageList[i]
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+
+        # arcdarklist exists and has more than one file.
+        try:
+            arcdarklist = open('arcdarklist', "r").readlines()
+            if len(arcdarklist) <= 1:
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: only 1 dark arc frame found for science frame"
+                print "                      ", sciImageList[i]
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
+        except Exception as e:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: no arcdarklist found for science frame"
+            print "                      ", sciImageList[i]
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+
+        # ronchilist exists and has more than one file.
+        try:
+            ronchilist = open('ronchilist', "r").readlines()
+            if len(ronchilist) <= 1:
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: only 1 ronchi flat frame found for science frame"
+                print "                      ", sciImageList[i]
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
+        except Exception as e:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: no ronchilist found for science frame"
+            print "                      ", sciImageList[i]
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+
+        os.chdir(path1)
 
     # Change back to original working directory.
     os.chdir(path1)
 
-    # Check to see how many calibrations were copied.
-    if expected_count - count == 0:
-        print "\nI sorted the ", expected_count, " expected calibrations.\n"
-    else:
-        print "\nI did not copy ", expected_count - count, " calibration file(s).\n"
+    # ---------------------------- End Tests --------------------------------- #
 
     return calDirList
 
@@ -787,7 +996,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
 def telSort(telDirList, obsDirList):
 
-    """Matches science images with the telluric images that are closest in time.
+    """Matches science images with the telluric frames that are closest in time.
     Creates a file in each telluric observation directory called objtellist.
     objtellist lists the obsid of the science images (ie. obs123) and then the
     science images with this obsid that match the telluric observation.
@@ -800,16 +1009,20 @@ def telSort(telDirList, obsDirList):
 
     """
 
+    print "\nI am matching science images with tellurics closest in time.\n"
+
+    # Store current working directory for later use.
     path = os.getcwd()
 
+    # Get a list of unique dates of telluric observations.
     dateList=[]
-
-    print "\nI am matching science images with tellurics closest in time.\n"
     for i in range(len(telDirList)):
         date = telDirList[i].split(os.sep)[-4]
         if i==0 or dateList[-1]!=date:
             dateList.append(date)
 
+    # Make a 2D list; list of lists of telluric directory path, files in that directory, grating of those tellurics.
+    # [['telluric_directory/', ['telluric1.fits, telluric2.fits, ...'], 'telluric_grating']]
     for date in dateList:
         tellist = []
         for telDir in telDirList:
@@ -832,8 +1045,8 @@ def telSort(telDirList, obsDirList):
                 templist.append(telluric_grating)
                 tellist.append(templist)
 
-            # Create a list of the start and stop times for each observation called timeList
-            # timeList is of the form [[obsid1, start1, stop1], [obsid2, start2, stop2],...]
+        # Create a list of the start and stop times for each observation called timeList.
+        # timeList is of the form [[obsid1, start1, stop1], [obsid2, start2, stop2],...]
         for a in range(len(tellist)):
             templist=[]
             os.chdir(tellist[a][0])
@@ -846,6 +1059,7 @@ def telSort(telDirList, obsDirList):
             templist.append(tellist[a][2])
             timeList.append(templist)
 
+        # Find a science image with the same date and grating.
         for obsDir in obsDirList:
             os.chdir(obsDir)
             if date in obsDir:
@@ -855,7 +1069,7 @@ def telSort(telDirList, obsDirList):
                     sciImageList = open('skylist', "r").readlines()
                 sciImageList = [image.strip() for image in sciImageList]
 
-                # Open image and get science image grating from header
+                # Open image and get science image grating from header.
 
                 science_image = sciImageList[0]
                 science_header = pyfits.open('./'+ science_image + '.fits')
@@ -865,7 +1079,7 @@ def telSort(telDirList, obsDirList):
                     diffList=[]
                     imageTime = timeCalc(image+'.fits')
                     for b in range(len(timeList)):
-                        # Check to make sure same grating is being used
+                        # Check to make sure telluric grating and science grating match.
                         if timeList[b][3] == science_grating:
                             if abs(imageTime-timeList[b][1]) <= 5400 or abs(imageTime-timeList[b][2]) <=5400:
                                 if abs(imageTime-timeList[b][1]) < abs(imageTime-timeList[b][2]):
@@ -875,7 +1089,8 @@ def telSort(telDirList, obsDirList):
                                 diffList.append(timeList[b][0])
                                 diffList.append(diff)
 
-                    # find and record the science observation that is closest in time to the telluric image
+                    # Find and record the science observation that is closest in time to the telluric image.
+                    # Store the science observation name in a textfile, objtellist, for later use by the pipeline.
                     if diffList:
                         minDiff = min(diffList)
                         telobs = diffList[diffList.index(minDiff)-1]
@@ -903,43 +1118,68 @@ def telSort(telDirList, obsDirList):
             os.chdir(science_directory)
             # Store science observation name in science_observation_name
             science_observation_name = science_directory.split(os.sep)[-1]
-            # Optional: store time of a science frame in science_time
+            # Optional: store time of a science frame in science_time.
             try:
                 sciImageList = open('objlist', "r").readlines()
             except IOError:
-                print "\nWARNING in sort: science ", science_observation_name,\
-                        " does not contain science images.\n"
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: science ", science_observation_name
+                print "                      does not contain science images."
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
+
+
                 sciImageList = open('skylist', "r").readlines()
             sciImageList = [image.strip() for image in sciImageList]
 
-            # Open image and get science image grating from header
+            # Open image and get science image grating from header.
             science_image = sciImageList[0]
             science_header = pyfits.open('./'+ science_image + '.fits')
             science_time = timeCalc(science_image+'.fits')
             science_date = science_header[0].header[ 'DATE'].replace('-','')
 
-            # Check that directory obsname matches header obsname
+            # Check that directory obsname matches header obsname.
             temp_obs_name = 'obs' + science_header[0].header['OBSID'][-3:].replace('-','')
             if science_observation_name != temp_obs_name:
                 print "\nWARNING: Problem with science ", science_observation_name, \
                 " observation name data in headers and directory do not match.\n"
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: science ", science_observation_name, " :"
+                print "                      observation name data in headers and directory"
+                print "                      do not match."
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
 
-            # Check that a tellurics directory exists
+            # Check that a tellurics directory exists.
             if os.path.exists('../Tellurics/'):
                 os.chdir('../Tellurics/')
             else:
                 print "\nWARNING: Tellurics directory for science ", science_observation_name, \
                       " does not exist.\n"
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: Telluric directory for science ", science_observation_name
+                print "                      does not exist."
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
 
             found_telluric_flag = False
 
-            # Iterate through tellurics observation directories
+            # Iterate through tellurics observation directories.
             for directory in list(glob.glob('obs*')):
                 os.chdir('./'+directory)
-                # Check that a file, objtellist exists
+                # Check that a file, objtellist exists.
                 try:
                     objtellist = open('objtellist', "r").readlines()
-                    # Check that the science observation name is in the file
+                    # Check that the science observation name is in the file.
                     # Check that immediately after is at least one telluric image name.
                     # Do this by checking for the science date in the telluric name.
                     for i in range(len(objtellist)):
@@ -961,17 +1201,22 @@ def telSort(telDirList, obsDirList):
                 os.chdir('../')
                 print "\nWARNING: no tellurics data found for science ", science_observation_name, \
                 " .\n."
+                print "\n#####################################################################"
+                print "#####################################################################"
+                print ""
+                print "     WARNING in sort: no tellurics data found for science ", science_observation_name
+                print ""
+                print "#####################################################################"
+                print "#####################################################################\n"
+
+
             else:
                 print "\nFound telluric data for all science observations.\n"
+            # TO DO:
             # Optional: open that telluric image and store time in telluric_time
             # Check that abs(telluric_time - science_time) < 1.5 hours
 
-        # If failure at any point: catch appropriate exception and warn user that
-        # valid telluric data for the science observation name is not present (and
-        # can seriously impact results).
-
-
-        # Check that each science directory has valid calibration data
+    # ---------------------------- End Tests --------------------------------- #
 
     os.chdir(path)
     return
@@ -980,14 +1225,15 @@ def telSort(telDirList, obsDirList):
 
 def getPaths(allfilelist, objDateList, dir):
 
-    """Creates a list of Calibrations directories, observation directories, and Tellurics directories.
+    """Creates lists of Calibrations, science observations
+    and Tellurics/ directories.
     """
 
     obsDirList = []
     calDirList = []
     telDirList = []
 
-    # Modify allfilelist to remove sorted/not sorted flag
+    # Modify allfilelist to remove sorted/not sorted flag data used in previous steps.
     tempList = []
     for i in range(len(allfilelist)):
          tempList.append(allfilelist[i][0])
@@ -1001,6 +1247,7 @@ def getPaths(allfilelist, objDateList, dir):
         Raw = path+'/Raw'
 
     for entry in allfilelist:
+        # Make a 2D list of paths to science observations and the time of each one.
         header = pyfits.open(Raw+'/'+entry)
 
         obstype = header[0].header['OBSTYPE'].strip()
@@ -1010,39 +1257,39 @@ def getPaths(allfilelist, objDateList, dir):
         obsclass = header[0].header['OBSCLASS']
         obj = header[0].header['OBJECT'].replace(' ','')
         time = timeCalc(Raw+'/'+entry)
-        # append obsDirList
+
         if obsclass=='science':
             objDir = path+'/'+obj
             path1 = (objDir+'/'+date+'/'+grat+'/obs'+obsid[-3:].replace('-',''))
             if not obsDirList or not obsDirList[-1][1]==path1:
                 obsDirList.append([[time], path1])
             elif obsDirList[-1][1] == path1:
-                print "Appending more times"
                 obsDirList[-1][0].append(time)
 
+    # Get list of paths to Tellurics/ot_observation_id directories.
+    print "\nGetting list of paths to Telluric observations."
     for i in range(len(allfilelist)):
         header = pyfits.open(Raw+'/'+allfilelist[i])
 
-        obstype = header[0].header['OBSTYPE'].strip()    # determines which files are ARCS
+        obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')
-        grat = header[0].header['GRATING'][0:1]  # this is so we can trim the string using indexing
-        date = header[0].header[ 'DATE'].replace('-','')         # 1st CAL sorting criterion
-        obsclass = header[0].header['OBSCLASS']  # used to sort out the acqs and acqCals in the trap
+        grat = header[0].header['GRATING'][0:1]
+        date = header[0].header[ 'DATE'].replace('-','')
+        obsclass = header[0].header['OBSCLASS']
         obj = header[0].header['OBJECT'].replace(' ', '')
         telluric_time = timeCalc(Raw+'/'+allfilelist[i])
 
-
+        # Match tellurics to science data by date, grating and time.
         if obsclass=='partnerCal':
-            print 'sorting a telluric: '
             print allfilelist[i]
             timeList = []
             for k in range(len(obsDirList)):
-                # Make sure date and gratings match
+                # Make sure date and gratings match.
                 tempDir = obsDirList[k][1].split(os.sep)
                 if date in tempDir and grat in tempDir:
-                    # Open the times of all science images in science_directory
+                    # Open the times of all science images in science_directory.
                     times = obsDirList[k][0]
-                    # Find difference in each time from the telluric image we're trying to sort
+                    # Find difference in each time from the telluric frame we're trying to sort.
                     diffList = []
                     for b in range(len(times)):
                         difference = abs(telluric_time-obsDirList[k][0][b])
@@ -1050,25 +1297,25 @@ def getPaths(allfilelist, objDateList, dir):
                         templist.append(difference)
                         templist.append(obsDirList[k][1])
                         diffList.append(templist)
-                    # Find the science image with the smallest difference;
+                    # Find the science image with the smallest difference.
                     minDiff = min(diffList)
-                    # Pass that time and path out of the for loop
+                    # Pass that time and path out of the for loop.
                     timeList.append(minDiff)
             # Out of the for loop, compare min times from different directories.
             if timeList:
                 closest_time = min(timeList)
-                # Copy the telluric image to the path of that science image.
+                # Copy the telluric frame to the path of that science image.
                 path_to_science_dir = closest_time[1]
                 path_to_tellurics = os.path.split(path_to_science_dir)[0]
-                if not telDirList or telDirList[-1] != path_to_tellurics:
-                    telDirList.append(path_to_tellurics)
+                if not telDirList or telDirList[-1] != path_to_tellurics+'/Tellurics/obs'+obsid:
+                    telDirList.append(path_to_tellurics+'/Tellurics/obs'+obsid)
 
-    # append Calibrations directories to the calDirList (ie. YYYYMMDD/Calibrations)
+    # Append Calibrations directories to the calDirList (ie. YYYYMMDD/Calibrations).
     for item in objDateList:
             Calibrations = (path+'/'+item[0]+'/'+item[1]+'/Calibrations')
             calDirList.append(Calibrations)
 
-    # Modify obsDirList to remove extra time information
+    # Modify obsDirList to remove extra time information.
     tempList = []
     for i in range(len(obsDirList)):
         tempList.append(obsDirList[i][1])
@@ -1076,7 +1323,8 @@ def getPaths(allfilelist, objDateList, dir):
 
     return obsDirList, calDirList, telDirList
 
-#-----------------------------------------------------------------------------#
+#--------------------------- End of Functions ---------------------------------#
 
 if __name__ == '__main__':
-    print "sort"
+    # Don't do anything if name == main
+    pass
