@@ -2,11 +2,11 @@
 from optparse import OptionParser
 from optparse import OptionParser
 from pyraf import iraf
-import sort as sortScript
+import nifs_sort as sortScript
 import merge as mergeScript
 import nifs_baseline_calibration as calibrateScript
-import reduce as reduceScript
-from defs import datefmt
+import nifs_reduce as reduceScript
+from nifs_defs import datefmt
 import logging, os
 
 #--------------------------------------------------------------------#

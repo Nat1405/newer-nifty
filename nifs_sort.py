@@ -8,7 +8,7 @@ import pyfits
 import os, shutil, glob, math, logging
 import numpy as np
 # Import custom Nifty functions.
-from defs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
+from nifs_defs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
 datefmt, checkOverCopy, checkQAPIreq, checkDate, writeList, checkEntry, timeCalc
 
 

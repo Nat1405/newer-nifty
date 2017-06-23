@@ -11,7 +11,7 @@ import pexpect as p
 from pyraf import iraf, iraffunctions
 import pyfits
 from pyfits import getdata, getheader
-from defs import datefmt, listit, writeList, checkLists, writeCenters, makeSkyList, MEFarith, convertRAdec
+from nifs_defs import datefmt, listit, writeList, checkLists, writeCenters, makeSkyList, MEFarith, convertRAdec
 import numpy
 from scipy.interpolate import interp1d
 from scipy import arange, array, exp

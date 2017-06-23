@@ -7,7 +7,7 @@ from pyraf import iraffunctions
 import pyfits
 import logging, os
 # Import custom Nifty functions
-from defs import datefmt, listit, checkLists
+from nifs_defs import datefmt, listit, checkLists
 
 def start(obsDirList, calDirList, over, start, stop):
     """
