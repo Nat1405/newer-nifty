@@ -17,35 +17,27 @@ def start(dir, tel, sort, over, copy, program, date):
         nifs_sort
 
         This module contains all the functions needed to copy and sort
-        NIFS RAW DATA.
-
-
-        If nifs_sort is being run outside of the Gemini North internal network,
-        a path to the raw files directory must be entered with -q.
-
-        If nifs_sort is being run from the Gemini North internal network, data can
-        be copied from /net/mko-nfs/sci/dataflow by entering a program id or date with
-        -p or -d at command line.
+        the NIFS raw data, where the data is located in a local directory.
 
         COMMAND LINE OPTIONS
-        If you wish to process local raw files specify a path to the raw files
-        directory with -q in command line
-        If you wish to skip the copy procedure enter -c False in command line
-        If you wish to skip the sort procedure enter -s False in command line
-        If you already copied files from the Gemini North internal network and
-        wish to skip the copy procedure enter -c False and -s False in command line.
+        If you wish to skip the copy procedure enter -c False in the command line
+        and if you wish to skip the sort procedure enter -s False.
 
         INPUT FILES:
         + Raw files
           - Science frames
           - Calibration frames
           - Telluric frames
-          - Acquisition frames (optional)
+          - Acquisition frames (optional, but if data is copied from archive
+            then acquisition frames will be copied and sorted)
 
         OUTPUT:
           - Sorted data
           - Lists of paths to the calibrations, science and telluric frames
           - Names of frames stored in text files for later use by the pipeline
+
+    If -c True or a program or date is specified with -p or -d data will be copied from
+    Gemini North internal network (used ONLY within Gemini).
 
     Args:
         dir (string):   Local path to raw files directory. Specified with -q at command line.
@@ -102,7 +94,7 @@ def start(dir, tel, sort, over, copy, program, date):
     ############################################################################
     ############################################################################
     #                                                                          #
-    #                     CASE 1: USE LOCAL RAW FILES                          #
+    #              CASE 1: NIFS RAW DATA in local directory                    #
     #                                                                          #
     #    These conditions are used when a local path to raw files              #
     #    is specified with -q at command line.                                 #
@@ -133,7 +125,7 @@ def start(dir, tel, sort, over, copy, program, date):
     ############################################################################
     ############################################################################
     #                                                                          #
-    #                       CASE 2: USE GEMINI NETWORK                         #
+    #               CASE 2: NIFS RAW DATA in GEMINI NETWORK                    #
     #                                                                          #
     #     These conditions are used if a program, date or copy is specified    #
     #     with -p, -d or -c True at command line. Files can be copied from     #

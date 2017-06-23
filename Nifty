@@ -42,7 +42,7 @@ def main():
     print "#                                  #"
     print "#              NIFTY               #"
     print "#   NIFS Date Reduction Pipeline   #"
-    print "#          Version 1.1.1           #"
+    print "#          Version 1.1.0           #"
     print "#     Marie Lemoine-Busserolle     #"
     print "# Gemini Observatory, Hilo, Hawaii #"
     print "#                                  #"
