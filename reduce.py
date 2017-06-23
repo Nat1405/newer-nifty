@@ -105,8 +105,8 @@ def start(
     # Set up logfile
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
-    logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
-    log = os.getcwd()+'/main.log'
+    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
+    log = os.getcwd()+'/Nifty.log'
 
 
     # loops through all the observation directories to perform the science reduction on each one

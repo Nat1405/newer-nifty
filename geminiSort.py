@@ -29,8 +29,8 @@ def start(tel, sort, over, copy, program, date):
 
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
-    logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
-    log = os.getcwd()+'/main.log'
+    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
+    log = os.getcwd()+'/Nifty.log'
 
     path = os.getcwd()
 

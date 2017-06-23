@@ -54,9 +54,9 @@ def main():
     DATEFMT = datefmt()
 
     # Set up the logging file
-    logging.basicConfig(filename='main.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
+    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     logger = logging.getLogger()
-    logging.info('Login file is main.log')
+    logging.info('Login file is Nifty.log')
 
     # Enable Debugging break points. Used for testing.
     debug = False

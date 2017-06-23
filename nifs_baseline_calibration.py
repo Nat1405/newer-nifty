@@ -48,7 +48,7 @@ def start(obsDirList, calDirList, over, start, stop):
     Directory structure after Calibration:
 
     --->cwd/
-        --->Nifty files (eg Main.py, sort.py, main.log)
+        --->Nifty files (eg Main.py, sort.py, Nifty.log)
             --->objectname/ (Science target name- found from .fits file headers).
                 --->date/ (YYYYMMDD)
                     --->Calibrations/
