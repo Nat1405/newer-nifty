@@ -577,7 +577,8 @@ def wavecal(arc, log, over):
     else:
         clist="gnirs$data/argon.dat"
         my_thresh=100.0
-        interactive = 'yes'
+        # CHANGE THIS TO YES. IT IS NO FOR TESTING PURPOSES
+        interactive = 'no'
 
     # Output : A series of files in a "database/" directory containing the wavelength
     # solutions of each slice. And a reduced arc frame (Eg: wrgnARC.fits).

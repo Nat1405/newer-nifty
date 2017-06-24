@@ -727,9 +727,9 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
         os.chdir(Raw)
         header = pyfits.open(ronchilist[i][0])
         obsid = header[0].header['OBSID']
-        # Use this to remove the lamps off ronchi flats (not used by the pipeline).
-        shutter = header[0].header['GCALSHUT'].strip()
-        if shutter != "CLOSED":
+        # Use this to remove the lamps off ronchi flats (they are not used by the pipeline).
+        lamp = header[0].header['GCALLAMP'].strip()
+        if lamp != "IRhigh":
             for objDir in objDirList:
                 for item in obsidDateList:
                     if obsid in item:
