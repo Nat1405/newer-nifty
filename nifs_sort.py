@@ -137,13 +137,21 @@ def start(dir, tel, sort, over, copy, program, date):
 
     elif copy or program or date:
         try:
-            import geminiSort
+            import gemini_sort
         except ImportError:
-            print "\nImportError: I didn't find the geminiSort.py module. Be sure to install it\
-                    to download from the Gemini Internal Network."
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: gemini_sort.py module is needed to find NIFS data"
+            print "                      within the Gemini Internal Network. This option"
+            print "                      is only available when the pipeline is run at"
+            print "                      the observatory."
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
             raise SystemExit
         else:
-            geminiSort.start(tel, sort, over, copy, program, date)
+            gemini_sort.start(tel, sort, over, copy, program, date)
 
 
 
@@ -349,7 +357,7 @@ def makeSortFiles(dir):
 
 def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
 
-    """Sorts the science frames, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass, when not using the Gemini network.
+    """Sorts the science frames, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass.
     """
 
     # Store number of science, telluric, sky, telluric sky and acquisition frames in number_files_to_be_copied

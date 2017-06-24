@@ -626,4 +626,4 @@ def getFlat(filelist):
 #----------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    print "geminiSort"
+    print "gemini_sort"
