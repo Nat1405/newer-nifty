@@ -274,12 +274,25 @@ def makeSortFiles(dir):
         # Add lamps on flat frames to flatlist,
         # add lamps off flat frames to flatdarklist,
         # add ronchi flat frames to ronchilist.
-        # Lamps on and lamps off flats are seperated by mean number of counts per pixel.
-        # Arbitrary threshold is if mean_counts < 2000 it is a lamps off flat.
+        # Lamps on and lamps off flats, and lamps on and lamps off ronchis are
+        # seperated by mean number of counts per pixel. Arbitrary threshold is
+        # if mean_counts < 500, it is a lamps off flat or ronchi.
         if obstype == 'FLAT':
 
             if aper == 'Ronchi_Screen_G5615':
-                ronchilist.append(entry)
+                # Only use lamps on ronchi flat frames.
+                # Open the image and store pixel values in an array and
+                # take the mean of all pixel values.
+                array = pyfits.getdata(entry)
+                mean_counts = np.mean(array)
+
+                # Once the mean is stored in mean_counts we can check whether the
+                # frame is a lamps off ronchi or a lamps on ronchi based on the counts.
+                # 500.0 is an arbitrary threshold that appears to work well.
+                if mean_counts < 500.0:
+                    pass
+                else:
+                    ronchilist.append(entry)
 
             else:
                 # Open the image and store pixel values in an array and
@@ -288,9 +301,9 @@ def makeSortFiles(dir):
                 mean_counts = np.mean(array)
 
                 # Once the mean is stored in mean_counts we can check whether the
-                # frame is a sky or an object based on the counts. 2000.0 is an
+                # frame is a sky or an object based on the counts. 500.0 is an
                 # arbitrary threshold that appears to work well.
-                if mean_counts < 2000.0:
+                if mean_counts < 500.0:
                     flatdarklist.append(entry)
                 else:
                     flatlist.append(entry)
@@ -735,21 +748,18 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
         os.chdir(Raw)
         header = pyfits.open(ronchilist[i][0])
         obsid = header[0].header['OBSID']
-        # Use this to remove the lamps off ronchi flats (they are not used by the pipeline).
-        lamp = header[0].header['GCALLAMP'].strip()
-        if lamp != "IRhigh":
-            for objDir in objDirList:
-                for item in obsidDateList:
-                    if obsid in item:
-                        date = item[0]
-                        if date in objDir:
-                            shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations/')
-                            ronchilist[i][1] = 0
-                            print ronchilist[i][0]
-                            count += 1
-                            path = objDir+'/Calibrations/'
-                            # create a ronchilist in the relevant directory
-                            writeList(ronchilist[i][0], 'ronchilist', path)
+        for objDir in objDirList:
+            for item in obsidDateList:
+                if obsid in item:
+                    date = item[0]
+                    if date in objDir:
+                        shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations/')
+                        ronchilist[i][1] = 0
+                        print ronchilist[i][0]
+                        count += 1
+                        path = objDir+'/Calibrations/'
+                        # create a ronchilist in the relevant directory
+                        writeList(ronchilist[i][0], 'ronchilist', path)
 
     # Sort arcs.
     print "\nSorting arcs:"

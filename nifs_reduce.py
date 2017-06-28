@@ -12,7 +12,7 @@ from pyraf import iraf, iraffunctions
 import pyfits
 from pyfits import getdata, getheader
 from nifs_defs import datefmt, listit, writeList, checkLists, writeCenters, makeSkyList, MEFarith, convertRAdec
-import numpy
+import numpy as np
 from scipy.interpolate import interp1d
 from scipy import arange, array, exp
 import glob
@@ -93,21 +93,36 @@ def start(
         telinter (bool): Perform an interactive Telluric Correction. Default True.
 
     """
-    # Set up iraf
-    iraf.gemini()
-    iraf.nifs()
-    iraf.gnirs()
-    iraf.gemtools()
 
-
+    # Store current working directory for later use.
     path = os.getcwd()
 
-    # Set up logfile
+    # Enable optional debugging pauses
+    debug = False
+
+    # Set up the logging file
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     log = os.getcwd()+'/Nifty.log'
 
+    logging.info('#################################################')
+    logging.info('#                                               #')
+    logging.info('# Start the NIFS Science and Telluric Reduction #')
+    logging.info('#                                               #')
+    logging.info('#################################################')
+
+    print '\n#################################################'
+    print '#                                               #'
+    print '# Start the NIFS Science and Telluric Reduction #'
+    print '#                                               #'
+    print '#################################################\n'
+
+    # Set up/prepare IRAF
+    iraf.gemini()
+    iraf.nifs()
+    iraf.gnirs()
+    iraf.gemtools()
 
     # loops through all the observation directories to perform the science reduction on each one
     for observationDirectory in observationDirectoryList:
@@ -142,7 +157,6 @@ def start(
         ronchi = open(calDir+"ronchifile", "r").readlines()[0].strip()
         iraf.copy(calDir+ronchi+".fits",output="./")
         sflat_bpm = calDir+str(open(calDir+"sflat_bpmfile", "r").readlines()[0]).strip()
-        arcdark = calDir+str(open(calDir+"arcdarkfile", "r").readlines()[0]).strip()
 
         # copy wavelength calibrated arc to observationDirectory
         arc = "wrgn"+str(open(calDir+"arclist", "r").readlines()[0]).strip()
@@ -288,8 +302,8 @@ def start(
                     if kind == 'Telluric':
                         logging.info('Flux Calibration')
                         fluxCalibrate(
-                            observationDirectory, continuuminter, hlineinter,
-                            hline_method, spectemp, mag, over)
+                            observationDirectory, path, continuuminter, hlineinter,
+                            hline_method, spectemp, mag, log, over)
 
             valindex += 1
 
@@ -444,7 +458,7 @@ def fixBad(objlist, log, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def fitCoords(objlist, arc, sflat, log, over, kind):
+def fitCoords(objlist, arc, ronchi, log, over, kind):
     """ Derive the 2D to 3D spatial/spectral transformation with iraf.nsfitcoords().
     Output: -->fbrgn
 
@@ -459,9 +473,9 @@ def fitCoords(objlist, arc, sflat, log, over, kind):
                 print "Output file exists and -over not set - skipping fitcoord_list"
                 continue
         if kind=='Object':
-            iraf.nsfitcoords("brgn"+image,lamptransf=arc, sdisttransf=sflat,logfile=log)
+            iraf.nsfitcoords("brgn"+image,lamptransf=arc, sdisttransf=ronchi,logfile=log)
         elif kind=='Telluric':
-            iraf.nsfitcoords("brgn"+image, fl_int='no', lamptransf=arc, sdisttransf=sflat, lxorder=4, syorder=4, logfile=log)
+            iraf.nsfitcoords("brgn"+image, fl_int='no', lamptransf=arc, sdisttransf=ronchi, lxorder=4, syorder=4, logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
@@ -516,8 +530,10 @@ def makeTelluric(objlist, log, over):
         try:
             iraf.nfextract("tfbrgn"+image, outpref="x", diameter=diam, fl_int='yes', logfile=log)
         except Exception as e:
+            # Directory is left in a very messy state if nfextract attempted without ds9 running.
             iraf.delete("xtfbrgn"+image+".fits")
             logging.error(traceback.format_exc())
+            # ds9 not being open has c
             raise SystemExit("ERROR: ds9 or another image viewer is not running in the background.")
 
 
@@ -660,8 +676,8 @@ def makeCube(pre, objlist, tel, observationDirectory, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def fluxCalibrate(
-    observationDirectory, continuuminter, hlineinter, hline_method, spectemp,
-    mag, over):
+    observationDirectory, path, continuuminter, hlineinter, hline_method, spectemp,
+    mag, log, over):
     """FLUX CALIBRATION
 
     Consists of this start function and six required functions at the end of
@@ -865,7 +881,7 @@ def readCube(cube):
     wdelt = cube[1].header['CD3_3']
 
     # initialize a wavelength array
-    wavelength = numpy.zeros(2040)
+    wavelength = np.zeros(2040)
 
     # create a wavelength array using the starting wavelength and the wavelength increment
     for i in range(2040):
@@ -894,7 +910,7 @@ def readSpec(spectrum, MEF=True):
         wdelt = spec[0].header['CD1_1']
 
     # initialize a wavelength array
-    wavelength = numpy.zeros(2040)
+    wavelength = np.zeros(2040)
 
     # create a wavelength array using the starting wavelength and the wavelength increment
     for i in range(2040):
@@ -946,7 +962,7 @@ def telCor(obsDir, telDirList_temp, over):
                         if over:
                             os.remove(image[0]+'p'+image[1:])
                             pass
-                    numpy.set_printoptions(threshold=numpy.nan)
+                    np.set_printoptions(threshold=np.nan)
 
 
                     # read in cube data
@@ -982,9 +998,9 @@ def telCor(obsDir, telDirList_temp, over):
 
                         for i in range(len(telflux)):
                             if telfluxi[i]>0. and telfluxi[i]<1.:
-                                telfluxi[i] = numpy.log(telfluxi[i])
+                                telfluxi[i] = np.log(telfluxi[i])
                                 telfluxi[i] *=amcor
-                                telfluxi[i] = numpy.exp(telfluxi[i])
+                                telfluxi[i] = np.exp(telfluxi[i])
                         '''
 
                     try:
@@ -999,9 +1015,9 @@ def telCor(obsDir, telDirList_temp, over):
 
                     for i in range(len(effspec)):
                         if effspec[i]>0. and effspec[i]<1.:
-                            effspec[i] = numpy.log(effspec[i])
+                            effspec[i] = np.log(effspec[i])
                             effspec[i] *=amcor
-                            effspec[i] = numpy.exp(effspec[i])
+                            effspec[i] = np.exp(effspec[i])
 
                     # divide each spectrum in the cubedata array by the efficiency spectrum
                     print image
