@@ -186,12 +186,16 @@ def main():
 
     logging.info('obsDirList : %s', obsDirList)
     logging.info('telDirList : %s', telDirList)
+    logging.info('calDirList : %s', calDirList)
     print '\nobsDirList : '
     for i in range(len(obsDirList)):
         print obsDirList[i]
     print '\ntelDirList : '
     for i in range(len(telDirList)):
         print telDirList[i]
+    print '\ncalDirList : '
+    for i in range(len(calDirList)):
+        print calDirList[i]
 
     # Reduce the calibration data
     print '\nI am reducing the calibration data. '

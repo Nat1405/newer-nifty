@@ -345,7 +345,7 @@ def makeSortFiles(dir):
     os.chdir(path)
 
     # Print information for user.
-    print "\nTotal number of files found by type: "
+    print "\nTotal number of files found by type.\n"
     print "Length allfilelist (science and telluric frames): ", len(allfilelist)
     print "Length arclist (arc frames): ", len(arclist)
     print "Length arcdarklist (arc dark frames): ", len(arcdarklist)
@@ -362,7 +362,7 @@ def makeSortFiles(dir):
     number_calibration_files_to_be_copied = len(arclist) + len(arcdarklist) +\
                          len(flatlist) + len(flatdarklist) + len(ronchilist)
 
-    print "\nNumber of files to be processed: ", number_files_to_be_copied + number_calibration_files_to_be_copied
+    print "\nTotal number of frames to be copied: ", number_files_to_be_copied + number_calibration_files_to_be_copied
 
     return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, sciImageList
 
@@ -471,7 +471,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
 
 
     # Copy science and acquisition frames to the appropriate directory.
-    print "\nCopying Science and Acquisitions.\nNow copying: "
+    print "\nCopying Science and Acquisitions.\nCopying science frames.\nNow copying: "
 
     for i in range(len(allfilelist)):
         header = pyfits.open(Raw+'/'+allfilelist[i][0])
@@ -520,7 +520,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
     # Copy telluric frames to the appropriate folder.
     # Note: Because the 'OBJECT' of a telluric file header is different then the
     # science target, we need to sort by date, grating AND most recent time.
-    print "\n\nCopying tellurics data.\nNow copying: "
+    print "\nCopying telluric frames.\nNow copying: "
     for i in range(len(allfilelist)):
         header = pyfits.open(Raw+'/'+allfilelist[i][0])
 
@@ -691,33 +691,32 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
     os.chdir(Raw)
 
-    # Create Calibrations directories in each of the observation date directories (ie. YYYYMMDD/Calibrations).
-    for item in objDateList:
-        if not os.path.exists(path1+'/'+item[0]+'/'+item[1]+'/Calibrations'):
-            os.mkdir(path1+'/'+item[0]+'/'+item[1]+'/Calibrations')
-            calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations')
-        else:
-            calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations')
-            # If any of the text file lists exist remove them.
-            for list in filelist:
-                if os.path.exists('./'+list):
-                    os.remove('./'+list)
-
+    # Create Calibrations directories in each of the observation date directories based on existence of
+    # lamps on flats. Eg: YYYYMMDD/Calibrations
     # Sort lamps on flats.
     print "\nSorting flats:"
     for i in range(len(flatlist)):
         header = pyfits.open(flatlist[i][0])
         obsid = header[0].header['OBSID']
+        grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations/')
+                        for item in objDateList:
+                            if not os.path.exists(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating):
+                                os.mkdir(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating)
+                                calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating)
+                            else:
+                                if path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating not in calDirList:
+                                    calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating)
+                        # Copy lamps on flats to appropriate directory.
+                        shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatlist[i][1] = 0
                         print flatlist[i][0]
                         count += 1
-                        path = objDir+'/Calibrations/'
+                        path = objDir+'/Calibrations_'+grating+'/'
                         # Create a flatlist in the relevent directory.
                         # Create a text file called flatlist to store the names of the
                         # lamps on flats for later use by the pipeline.
@@ -729,16 +728,17 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
         os.chdir(Raw)
         header = pyfits.open(flatdarklist[i][0])
         obsid = header[0].header['OBSID']
+        grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        shutil.copy('./'+flatdarklist[i][0], objDir+'/Calibrations/')
+                        shutil.copy('./'+flatdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatdarklist[i][1] = 0
                         print flatdarklist[i][0]
                         count += 1
-                        path = objDir+'/Calibrations/'
+                        path = objDir+'/Calibrations_'+grating+'/'
                         # Create a flatdarklist in the relevant directory.
                         writeList(flatdarklist[i][0], 'flatdarklist', path)
 
@@ -748,16 +748,17 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
         os.chdir(Raw)
         header = pyfits.open(ronchilist[i][0])
         obsid = header[0].header['OBSID']
+        grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations/')
+                        shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations_'+grating+'/')
                         ronchilist[i][1] = 0
                         print ronchilist[i][0]
                         count += 1
-                        path = objDir+'/Calibrations/'
+                        path = objDir+'/Calibrations_'+grating+'/'
                         # create a ronchilist in the relevant directory
                         writeList(ronchilist[i][0], 'ronchilist', path)
 
@@ -767,13 +768,14 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
         header = pyfits.open(arclist[i][0])
         obsid = header[0].header['OBSID']
         date = header[0].header['DATE'].replace('-','')
+        grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
             if date in objDir:
-                shutil.copy('./'+arclist[i][0], objDir+'/Calibrations/')
+                shutil.copy('./'+arclist[i][0], objDir+'/Calibrations_'+grating+'/')
                 arclist[i][1] = 0
                 print arclist[i][0]
                 count += 1
-                path = objDir+'/Calibrations/'
+                path = objDir+'/Calibrations_'+grating+'/'
                 # Create an arclist in the relevant directory.
                 writeList(arclist[i][0], 'arclist', path)
 
@@ -782,16 +784,17 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
     for i in range(len(arcdarklist)):
         header = pyfits.open(arcdarklist[i][0])
         obsid = header[0].header['OBSID']
+        grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        shutil.copy('./'+arcdarklist[i][0], objDir+'/Calibrations/')
+                        shutil.copy('./'+arcdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         arcdarklist[i][1] = 0
                         print arcdarklist[i][0]
                         count += 1
-                        path = objDir+'/Calibrations/'
+                        path = objDir+'/Calibrations_'+grating+'/'
                         # Create an arcdarklist in the relevant directory.
                         writeList(arcdarklist[i][0], 'arcdarklist', path)
 
@@ -871,7 +874,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
         # a science and Calibrations directory are present.
         try:
             os.chdir(obj+'/'+date+'/'+grat+'/obs'+obsid+'/')
-            os.chdir('../../Calibrations/')
+            os.chdir('../../Calibrations_'+grating+'/')
         except Exception as e:
             print "\n#####################################################################"
             print "#####################################################################"
