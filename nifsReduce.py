@@ -88,7 +88,8 @@ def start(
 
     Args:
         telDirList: [‘path/obj/date/grat/Tellurics/obsid’]
-        calDirList: [‘path/obj/date/Calibrations’]
+        obsDirList: [‘path/obj/date/grat/obsid’]
+        calDirList: [‘path/obj/date/Calibrations_grating’]
         tel (bool): Perform telluric correction. Default True.
         telinter (bool): Perform an interactive Telluric Correction. Default True.
 
@@ -132,10 +133,14 @@ def start(
         # finds the Calibrations directory that corresponds to the science observation date
         for calDir in calDirList:
             tempCal = calDir.split(os.sep)
-            if tempObs[-3]==tempCal[-2]:
+            # For science observation directories.
+            # IF dates in path names match AND gratings in path names match, break.
+            if tempObs[-3]==tempCal[-2] and tempObs[-2] == tempCal[-1][-1]:
                 calDir = calDir+'/'
                 break
-            elif tempObs[-4]==tempCal[-2]:
+            # For telluric observation directories.
+            # IF dates in path names match AND gratings in path names match, break.
+            elif tempObs[-4]==tempCal[-2] and tempObs[-3] == tempCal[-1][-1]:
                 calDir = calDir+'/'
                 break
 

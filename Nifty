@@ -2,10 +2,10 @@
 from optparse import OptionParser
 from optparse import OptionParser
 from pyraf import iraf
-import nifs_sort as sortScript
+import nifsSort as sortScript
 import merge as mergeScript
-import nifs_baseline_calibration as calibrateScript
-import nifs_reduce as reduceScript
+import nifsBaselineCalibration as calibrateScript
+import nifsReduce as reduceScript
 from nifs_defs import datefmt
 import logging, os
 
@@ -35,11 +35,28 @@ import logging, os
 #--------------------------------------------------------------------#
 
 
+#
+#
+#
+#
+#
+#
+#
+#
+#    +
+#   +
+#  +
+# +
+#
+#
+#
+
 
 def main():
 
     print "\n####################################"
     print "#                                  #"
+    print "#           Isn't that             #"
     print "#              NIFTY               #"
     print "#   NIFS Date Reduction Pipeline   #"
     print "#          Version 1.1.0           #"

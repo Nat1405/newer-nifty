@@ -43,8 +43,8 @@ def start(tel, sort, over, copy, program, date):
         if program:
             allfilelist, filelist, skylist, telskylist = getProgram(program, date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
-            objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
-            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
+            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
+            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList)
             # If a telluric correction will be performed sort the science and telluric images based on time between observations.
             # This will ONLY NOT be executed if -t False is specified at command line.
             if tel:
@@ -53,8 +53,8 @@ def start(tel, sort, over, copy, program, date):
         elif date:
             allfilelist, filelist, skylist, telskylist = getScience(date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList = getCals(filelist, over)
-            objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
-            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
+            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
+            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList)
             # If telluric correction will be performed sort the science and telluric images based on time between observations.
             # This will ONLY NOT be executed if -t False is specified at command line.
             if tel:
@@ -70,14 +70,14 @@ def start(tel, sort, over, copy, program, date):
         if program:
             allfilelist, filelist, skylist, telskylist = getProgram(program, date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
-            obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
+            obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateGratingList, dir)
         # When a date is given (looks for data using /net/mko-nfs/sci/dataflow)
         elif date:
             allfilelist, filelist, skylist, telskylist = getScience(date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
-            obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
+            obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateGratingList, dir)
         # Exit if a program or date was not provided with -p or -d at command line.
         else:
             print "\n Error in sort.py. Please enter a program ID or observation date with -p or -d at command line.\n"
@@ -85,11 +85,11 @@ def start(tel, sort, over, copy, program, date):
 
     # Sort data ALREADY copied from Gemini Network. Specified if -s and -c are NOT specified at command line.
     elif not copy and sort:
-        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
+        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skylist, telskylist, obsidDateList = makeSortFiles(dir)
         # Sort and get data from Gemini Internal Network
         if program or date:
-            objDateList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
-            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList)
+            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skylist, telskylist)
+            calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList)
         # if a telluric correction will be performed sort the science and telluric images based on time between observations
         if tel:
             telSort(telDirList, obsDirList)
@@ -123,7 +123,7 @@ def sortObsGem(allfilelist, skylist, telskylist):
     pathlist = []
     pathlist2 = []
     objDirList = []
-    objDateList = []
+    objDateGratingList = []
     obsDirList = []
     telDirList = []
 
@@ -146,15 +146,15 @@ def sortObsGem(allfilelist, skylist, telskylist):
                 if not objDirList or not objDirList[-1]==objDir:
                      objDirList.append(objDir)
 
-    # append object date list of the form objDateList = [[obj1, DATE1],[obj2, DATE1]...] (used in sortCalsGem)
+    # append object date list of the form objDateGratingList = [[obj1, DATE1],[obj2, DATE1]...] (used in sortCalsGem)
     for entry in allfilelist:
         header = getFitsHeader(entry, fitsKeyWords)
         DATE = header[4].replace('-','')
         obj = header[2]
         if header[3]=='science':
             list1 = [obj, DATE]
-            if not objDateList or not objDateList[-1]==list1:
-                objDateList.append(list1)
+            if not objDateGratingList or not objDateGratingList[-1]==list1:
+                objDateGratingList.append(list1)
 
     for entry in allfilelist:
         header = getFitsHeader(entry, fitsKeyWords)
@@ -219,7 +219,7 @@ def sortObsGem(allfilelist, skylist, telskylist):
 
     os.chdir(path)
 
-    return objDateList, objDirList, obsDirList, telDirList
+    return objDateGratingList, objDirList, obsDirList, telDirList
 
 #----------------------------------------------------------------------------------------#
 

@@ -107,9 +107,9 @@ def start(dir, tel, sort, over, copy, program, date):
     # IF a local raw directory path is given with -q at command line, sort OR don't sort data.
     if dir:
         if sort:
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, sciImageList = makeSortFiles(dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skylist, telskylist, obsidDateList, sciImageList = makeSortFiles(dir)
             objDirList, obsDirList, telDirList = sortObs(allfilelist, skylist, telskylist, sciImageList, dir)
-            calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, sciImageList, dir)
+            calDirList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList, sciImageList, dir)
             # If a telluric correction will be performed sort the science and telluric images based on time between observations.
             # This will NOT be executed if -t False is specified at command line.
             if tel:
@@ -117,8 +117,8 @@ def start(dir, tel, sort, over, copy, program, date):
         # IF NO sort, create lists of paths to data directories.
         # This will ONLY be executed IF -q <path to raw image files> AND -s False are specified at command line.
         elif not sort:
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, scienceframeList = makeSortFiles(dir)
-            obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateList, dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skylist, telskylist, obsidDateList, scienceframeList = makeSortFiles(dir)
+            obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateGratingList, dir)
 
 
 
@@ -184,7 +184,7 @@ def makeSortFiles(dir):
     arclist = [] # List of arc frames.
     arcdarklist = [] # List of arc dark frames.
 
-    objDateList = [] # 2D list of object (science or telluric) name, date pairs.
+    objDateGratingList = [] # 2D list of object (science or telluric) name, date pairs.
 
     skylist = [] # List of sky frames.
     telskylist = [] # List of telluric sky frames.
@@ -317,12 +317,13 @@ def makeSortFiles(dir):
         obj = header[0].header['OBJECT'].replace(' ', '')
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID']
+        grat = header[0].header['GRATING'][0:1]
 
         if obsclass == 'science':
-            list1 = [obj, date]
+            list1 = [obj, date, grat]
             # Append if list is empty or not a duplicate of last entry.
-            if not objDateList or not objDateList[-1]==list1:
-                objDateList.append(list1)
+            if not objDateGratingList or not list1 in objDateGratingList:
+                objDateGratingList.append(list1)
 
     # Make list of unique [date, obsid] pairs from FLATS. If flat was taken on the same day as a science
     # frame, append that flat date. If not, append an arbitrary unique date from sciDateList.
@@ -364,7 +365,7 @@ def makeSortFiles(dir):
 
     print "\nTotal number of frames to be copied: ", number_files_to_be_copied + number_calibration_files_to_be_copied
 
-    return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateList, skylist, telskylist, obsidDateList, sciImageList
+    return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skylist, telskylist, obsidDateList, sciImageList
 
 #----------------------------------------------------------------------------------------#
 
@@ -620,7 +621,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
 
 #----------------------------------------------------------------------------------------#
 
-def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateList, objDirList, obsidDateList, sciImageList, dir):
+def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList, sciImageList, dir):
 
     """Sort calibrations into the appropriate directory based on date.
     """
@@ -695,22 +696,35 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
     # lamps on flats. Eg: YYYYMMDD/Calibrations
     # Sort lamps on flats.
     print "\nSorting flats:"
+    # Create a flag so we only warn about non-standard gratings once.
+    grating_warning_flag = False
     for i in range(len(flatlist)):
         header = pyfits.open(flatlist[i][0])
         obsid = header[0].header['OBSID']
         grating = header[0].header['GRATING'][0:1]
+        if grating not in ["K", "J", "H", "Z"]:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in sort: non-standard (non K, J, H, K) grating encountered. "
+            print "                      NIFTY has not been tested with non-standard"
+            print "                      gratings!"
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
-                        for item in objDateList:
-                            if not os.path.exists(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating):
-                                os.mkdir(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating)
-                                calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating)
-                            else:
-                                if path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating not in calDirList:
-                                    calDirList.append(path1+'/'+item[0]+'/'+item[1]+'/Calibrations_'+grating)
+                        for entry in objDateGratingList:
+                            if entry[1] == date and entry[2] == grating:
+                                if not os.path.exists(path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating):
+                                    os.mkdir(path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating)
+                                    calDirList.append(path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating)
+                                else:
+                                    if path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating not in calDirList:
+                                        calDirList.append(path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating)
                         # Copy lamps on flats to appropriate directory.
                         shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatlist[i][1] = 0
@@ -873,9 +887,9 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
 
         # a science and Calibrations directory are present.
         try:
-            os.chdir(obj+'/'+date+'/'+grat+'/obs'+obsid+'/')
-            os.chdir('../../Calibrations_'+grating+'/')
-        except Exception as e:
+            os.chdir(path1+'/'+obj+'/'+date+'/'+grat+'/obs'+obsid+'/')
+            os.chdir('../../Calibrations_'+grat+'/')
+        except OSError:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -898,7 +912,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                 print ""
                 print "#####################################################################"
                 print "#####################################################################\n"
-        except Exception as e:
+        except OSError:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -920,7 +934,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                 print ""
                 print "#####################################################################"
                 print "#####################################################################\n"
-        except Exception as e:
+        except OSError:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -942,7 +956,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                 print ""
                 print "#####################################################################"
                 print "#####################################################################\n"
-        except Exception as e:
+        except OSError:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -964,7 +978,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                 print ""
                 print "#####################################################################"
                 print "#####################################################################\n"
-        except Exception as e:
+        except OSError:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -986,7 +1000,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateLi
                 print ""
                 print "#####################################################################"
                 print "#####################################################################\n"
-        except Exception as e:
+        except OSError:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -1174,7 +1188,7 @@ def telSort(telDirList, obsDirList):
                 print "\n#####################################################################"
                 print "#####################################################################"
                 print ""
-                print "     WARNING in sort: Telluric directory for science ", science_observation_name
+                print "     WARNING in sort: telluric directory for science ", science_observation_name
                 print "                      does not exist."
                 print ""
                 print "#####################################################################"
@@ -1230,7 +1244,7 @@ def telSort(telDirList, obsDirList):
 
 #-----------------------------------------------------------------------------#
 
-def getPaths(allfilelist, objDateList, dir):
+def getPaths(allfilelist, objDateGratingList, dir):
 
     """Creates lists of Calibrations, science observations
     and Tellurics/ directories.
@@ -1318,8 +1332,8 @@ def getPaths(allfilelist, objDateList, dir):
                     telDirList.append(path_to_tellurics+'/Tellurics/obs'+obsid)
 
     # Append Calibrations directories to the calDirList (ie. YYYYMMDD/Calibrations).
-    for item in objDateList:
-            Calibrations = (path+'/'+item[0]+'/'+item[1]+'/Calibrations')
+    for item in objDateGratingList:
+            Calibrations = (path+'/'+item[0]+'/'+item[1]+'/Calibrations_'+item[2])
             calDirList.append(Calibrations)
 
     # Modify obsDirList to remove extra time information.

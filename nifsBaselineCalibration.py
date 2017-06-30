@@ -164,6 +164,23 @@ def start(obsDirList, calDirList, over, start, stop):
         pwdDir = os.getcwd()+"/"
         iraffunctions.chdir(pwdDir)
 
+        # However, don't do the reduction for a Calibration_"grating" directory without associated science data.
+        # Check that a "grating" directory exists at the same level as the Calibrations_"grating" directory.
+        # If not, skip the reduction of that directory.
+        # "grating" should be the last letter of calpath.
+        grating = calpath[-1]
+        if not os.path.exists("../"+grating):
+
+            print "\n##############################################################################"
+            print ""
+            print "  No grating directory (including science data) found for  "
+            print "  ", calpath
+            print "  Skipping reduction of calibrations in that directory."
+            print ""
+            print "##############################################################################\n"
+
+            continue
+
         # Create lists of each type of calibration from textfiles in Calibrations directory.
         flatlist = open('flatlist', "r").readlines()
         flatdarklist = open("flatdarklist", "r").readlines()
@@ -625,7 +642,7 @@ def wavecal(arc, log, over):
         interactive = 'yes'
 
     else:
-        # Print a warning that the pipeline is being run with non-standard wavelength configurations.
+        # Print a warning that the pipeline is being run with non-standard grating.
         print "\n#####################################################################"
         print "#####################################################################"
         print ""

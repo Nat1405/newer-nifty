@@ -2,8 +2,8 @@
 test.py
 test.sh
 merge.pyc
-nifs_baseline_calibration.pyc
+nifsBaselineCalibration.pyc
 nifs_defs.pyc
-nifs_reduce.pyc
-nifs_sort.pyc
+nifsReduce.pyc
+nifsSort.pyc
 Nifty.log
