@@ -11,7 +11,7 @@ from nifs_defs import datefmt, listit, checkLists
 
 def start(obsDirList, calDirList, over, start, stop):
     """
-         nifs_baseline_calibration
+         nifsBaselineCalibration
 
          This module contains all the functions needed to reduce
          NIFS GENERAL BASELINE CALIBRATIONS
@@ -40,7 +40,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
     Args:
         obsDirList:      list of paths to science observations. ['path/obj/date/grat/obsid']
-        calDirList:      list of paths to calibrations. ['path/obj/date/calibrations']
+        calDirList:      list of paths to calibrations. ['path/obj/date/Calibrations_grating']
         over (boolean):  overwrite old files. Default: False.
         start (int):     starting step of daycal reduction. Specified at command line with -a. Default: 1.
         stop (int):      stopping step of daycal reduction. Specified at command line with -z. Default: 6.
@@ -104,7 +104,7 @@ def start(obsDirList, calDirList, over, start, stop):
     # Store current working directory for later use.
     path = os.getcwd()
 
-    # Enable optional debugging pauses
+    # Enable optional debugging pauses.
     debug = False
 
     # Set up the logging file.
@@ -202,7 +202,7 @@ def start(obsDirList, calDirList, over, start, stop):
         # Check start and stop values for reduction steps. Ask user for a correction if
         # input is not valid.
         valindex = start
-        while valindex > stop  or valindex < 1 or stop > 6:
+        while valindex > stop  or valindex < 1 or stop > 3:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -226,74 +226,50 @@ def start(obsDirList, calDirList, over, start, stop):
 
         while valindex <= stop :
 
-            ###########################################################################
-            ##  STEP 1: Determine the shift to the MDF (mask definition file)        ##
-            ##          using nfprepare (nsoffset). Ie: locate the spectra           ##
-            ##  Output: First image in flatlist with "s" prefix                      ##
-            ###########################################################################
+            #############################################################################
+            ##  STEP 1: Determine the shift to the MDF (mask definition file)          ##
+            ##          using nfprepare (nsoffset). Ie: locate the spectra.            ##
+            ##          Create Flat Field frame and BPM (Bad Pixel Mask)               ##
+            ##  Output: First image in flatlist with "s" prefix.                       ##
+            ##          Flat Field image with spatial and spectral information.        ##
+            ##          First image in flatlist with  "rgn" prefix and "_flat" suffix. ##
+            #############################################################################
 
             if valindex == 1:
                 getShift(calflat, over, log)
-                print "\nSTEP 1: Determine the shift to the MDF - COMPLETED\n"
-
-            ############################################################################
-            ##  STEP 2: Create Flat Field frame and BPM (Bad Pixel Mask)              ##
-            ##  Ouput:  Flat Field image with spatial and spectral information        ##
-            ##          First image in flatlist with  "rgn" prefix and "_flat" suffix ##
-            ############################################################################
-
-            elif valindex == 2:
                 makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
                 print "\n###################################################################"
                 print ""
-                print "    STEP 2: Create Flat Field image and BPM image - COMPLETED       "
+                print "    STEP 1: Determine the shift to the MDF."
+                print "            Create Flat Field image and BPM image - COMPLETED       "
                 print ""
                 print "###################################################################\n"
 
             ############################################################################
-            ##  STEP 3: NFPREPARE and Combine arc darks                                ##
+            ##  STEP 2: NFPREPARE and Combine arc darks.                              ##
+            ##          NFPREPARE, Combine and flat field arcs.                       ##
+            ##          Determine the wavelength solution and create the wavelength   ##
+            ##          referenced arc.                                               ##
             ############################################################################
 
-            elif valindex == 3:
+        elif valindex == 2:
                 makeArcDark(arcdarklist, arcdark, calflat, over, log)
-                print "\n###################################################################"
-                print ""
-                print "         STEP 3: NFPREPARE and Combine arc darks - COMPLETED  "
-                print ""
-                print "###################################################################\n"
-
-
-            ############################################################################
-            ##  STEP 4: NFPREPARE, Combine and flat field arcs                        ##
-            ############################################################################
-            elif valindex == 4:
                 reduceArc(arclist, arc, log, over)
-                print "\n###################################################################"
-                print ""
-                print "     STEP 4: NFPREPARE, Combine and flat field arcs - COMPLETED  "
-                print ""
-                print "###################################################################\n"
-
-
-            ###########################################################################
-            ##  Step 5: Determine the wavelength solution and create the wavelength  ##
-            ##          referenced arc                                               ##
-            ###########################################################################
-
-            elif valindex == 5:
                 wavecal(arc, log, over)
                 print "\n###################################################################"
                 print ""
-                print "     Step 5: Determine the wavelength solution and create the"
-                print "             wavelength ref. arc - COMPLETED"
+                print "         STEP 3: NFPREPARE and Combine arc darks.  "
+                print "                 NFPREPARE, Combine and flat field arcs."
+                print "                 Determine the wavelength solution and create the"
+                print "                 wavelength referenced arc - COMPLETED"
                 print ""
                 print "###################################################################\n"
 
             ######################################################################################
-            ##  Step 6: Trace the spatial curvature and spectral distortion in the Ronchi flat  ##
+            ##  Step 3: Trace the spatial curvature and spectral distortion in the Ronchi flat. ##
             ######################################################################################
 
-            elif valindex == 6:
+        elif valindex == 3:
                 ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
                 print "\n###################################################################"
                 print ""
@@ -307,6 +283,14 @@ def start(obsDirList, calDirList, over, start, stop):
                 raise SystemExit
 
             valindex += 1
+
+        print "\n##############################################################################"
+        print ""
+        print "  COMPLETE - Calibration reductions completed for "
+        print "  ", calpath
+        print ""
+        print "##############################################################################\n"
+
 
     # Return to directory script was begun from.
     os.chdir(path)
@@ -372,7 +356,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
 
     """
 
-    # Update lamps on flat images with offset value and generate variance and data quality extensions.
+    # Update lamps on flat frames with mdf offset value and generate variance and data quality extensions.
     for image in flatlist:
         image = str(image).strip()
         if os.path.exists('n'+image+'.fits'):
@@ -461,7 +445,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 def makeArcDark(arcdarklist, arcdark, calflat, over, log):
-    """" Prepare with iraf.nfprepare and combine the daytime arc darks.
+    """"Prepare with iraf.nfprepare and combine the daytime arc darks.
 
     Processing with NFPREPARE will rename the data extension and add
     variance and data quality extensions. By default (see NSHEADERS)
@@ -498,7 +482,7 @@ def makeArcDark(arcdarklist, arcdark, calflat, over, log):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def reduceArc(arclist, arc, log, over):
-    """ Flat field and cut the arc data with iraf.nfprepare and
+    """Flat field and cut the arc data with iraf.nfprepare and
     iraf.nsreduce.
 
     Processing with NFPREPARE will rename the data extension and add
@@ -585,7 +569,7 @@ def reduceArc(arclist, arc, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def wavecal(arc, log, over):
-    """ Determine the wavelength solution of each slice of the observation and
+    """Determine the wavelength solution of each slice of the observation and
     set the arc coordinate file.
 
     If the user wishes to change the coordinate file to a different

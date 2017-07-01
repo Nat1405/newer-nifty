@@ -136,7 +136,7 @@ def main():
 
     # Set the stopping step of calibrate reduction to 6
     if not options.rstop:
-        rstop = 6
+        rstop = 3
     else:
         rstop = options.rstop
 
