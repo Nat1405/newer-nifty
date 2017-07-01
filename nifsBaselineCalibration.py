@@ -202,7 +202,7 @@ def start(obsDirList, calDirList, over, start, stop):
         # Check start and stop values for reduction steps. Ask user for a correction if
         # input is not valid.
         valindex = start
-        while valindex > stop  or valindex < 1 or stop > 3:
+        while valindex > stop  or valindex < 1 or stop > 4:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -212,8 +212,8 @@ def start(obsDirList, calDirList, over, start, stop):
             print "#####################################################################"
             print "#####################################################################\n"
 
-            valindex = int(raw_input("\nPlease enter a valid start value (1 to 6, default 1): "))
-            stop = int(raw_input("\nPlease enter a valid stop value (1 to 6, default 6): "))
+            valindex = int(raw_input("\nPlease enter a valid start value (1 to 4, default 1): "))
+            stop = int(raw_input("\nPlease enter a valid stop value (1 to 4, default 4): "))
 
         # Print the current directory of calibrations being processed.
         print "\n#################################################################################"
@@ -224,35 +224,44 @@ def start(obsDirList, calDirList, over, start, stop):
         print "#################################################################################\n"
 
 
-        while valindex <= stop :
+        while valindex <= stop:
 
             #############################################################################
             ##  STEP 1: Determine the shift to the MDF (mask definition file)          ##
             ##          using nfprepare (nsoffset). Ie: locate the spectra.            ##
-            ##          Create Flat Field frame and BPM (Bad Pixel Mask)               ##
             ##  Output: First image in flatlist with "s" prefix.                       ##
-            ##          Flat Field image with spatial and spectral information.        ##
-            ##          First image in flatlist with  "rgn" prefix and "_flat" suffix. ##
             #############################################################################
 
             if valindex == 1:
                 getShift(calflat, over, log)
+                print "\n###################################################################"
+                print ""
+                print "    STEP 1: Determine the shift to the MDF - COMPLETED"
+                print ""
+                print "###################################################################\n"
+
+            #############################################################################
+            ##  STEP 2: Create Flat Field frame and BPM (Bad Pixel Mask)               ##
+            ##  Output: Flat Field image with spatial and spectral information.        ##
+            ##          First image in flatlist with  "rgn" prefix and "_flat" suffix. ##
+            #############################################################################
+
+            elif valindex == 2:
                 makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
                 print "\n###################################################################"
                 print ""
-                print "    STEP 1: Determine the shift to the MDF."
-                print "            Create Flat Field image and BPM image - COMPLETED       "
+                print "    STEP 2: Create Flat Field image and BPM image - COMPLETED       "
                 print ""
                 print "###################################################################\n"
 
             ############################################################################
-            ##  STEP 2: NFPREPARE and Combine arc darks.                              ##
+            ##  STEP 3: NFPREPARE and Combine arc darks.                              ##
             ##          NFPREPARE, Combine and flat field arcs.                       ##
             ##          Determine the wavelength solution and create the wavelength   ##
             ##          referenced arc.                                               ##
             ############################################################################
 
-        elif valindex == 2:
+            elif valindex == 3:
                 makeArcDark(arcdarklist, arcdark, calflat, over, log)
                 reduceArc(arclist, arc, log, over)
                 wavecal(arc, log, over)
@@ -269,11 +278,11 @@ def start(obsDirList, calDirList, over, start, stop):
             ##  Step 3: Trace the spatial curvature and spectral distortion in the Ronchi flat. ##
             ######################################################################################
 
-        elif valindex == 3:
+            elif valindex == 4:
                 ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
                 print "\n###################################################################"
                 print ""
-                print "     Step 6: Trace the spatial curvature and spectral distortion "
+                print "     Step 4: Trace the spatial curvature and spectral distortion "
                 print "             in the Ronchi flat - COMPLETED"
                 print ""
                 print "###################################################################\n"
