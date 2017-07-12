@@ -437,7 +437,34 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
         iraf.delete("rgn"+flatdark+"_dark.fits")
         iraf.delete("rgn"+calflat+"_sflat.fits")
         iraf.delete("rgn"+calflat+"_sflat_bpm.pl")
-    iraf.nsflat("rgn"+calflat,darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat", darkfile="rgn"+flatdark+"_dark",fl_save_dark='yes',process="fit", thr_flo=0.15,thr_fup=1.55,fl_vardq='yes',logfile=log)
+
+    # Get the spectral band so we can fine tune thr_flo and thr_fup. This fine tunes the number of
+    # bad pixels caught.
+    header = pyfits.open(calflat+'.fits')
+    grat = header[0].header['GRATING'][0:1]
+    if grat == 'Z' or grat == 'J':
+        flo = 0.07
+        fup = 1.55
+        inter = 'no'
+    elif grat == 'H' or grat == 'K':
+        flo = 0.05
+        fup = 1.55
+        inter = 'no'
+    else:
+        print "\n#####################################################################"
+        print "#####################################################################"
+        print ""
+        print "     WARNING in baselineCalibration: nsflat detected a non-standard wavelength "
+        print "                                     configuration. Running interactively. "
+        print ""
+        print "#####################################################################"
+        print "#####################################################################\n"
+        # Arbitrary; not tested with non-standard configurations.
+        flo = 0.15
+        fup = 1.55
+        inter = 'yes'
+
+    iraf.nsflat("rgn"+calflat,darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat", darkfile="rgn"+flatdark+"_dark",fl_save_dark='yes',process="fit", thr_flo=flo,thr_fup=fup,fl_int=inter,fl_vardq='yes',logfile=log)
 
     # Renormalize the slices to account for slice-to-slice variations using NSSLITFUNCTION - make the final flat field image.
 
@@ -622,17 +649,21 @@ def wavecal(arc, log, over):
     interactive = 'no'
 
     if band == "K":
-        clist="nifs$data/ArXe_K.dat"
+        clist="k_test_two_argon.dat"
         my_thresh = 50.0
+        interactive = 'no'
+    elif band == "J" or band == "H":
+        clist="j_test_one_argon.dat"
+        my_thresh=100.0
+        interactive = 'no'
+    elif band == "H":
+        clist="h_test_one_argon.dat"
+        my_thresh=100.0
         interactive = 'no'
     elif band == "Z":
         clist="nifs$data/ArXe_Z.dat"
         my_thresh=100.0
-        interactive = 'no'
-    elif band == "J" or band == "H":
-        clist="gnirs$data/Ar_Xe.dat"
-        my_thresh=100.0
-        interactive = 'no'
+        interactive = 'yes'
 
     else:
         # Print a warning that the pipeline is being run with non-standard grating.
