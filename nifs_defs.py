@@ -277,6 +277,16 @@ def checkLists(original_list, path, prefix, suffix):
             new_list.append(image)
         else:
             print '\n', image, '.fits not being processed due to error in image.\n'
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING: ", image, " .fits was removed from a list after a checkLists call."
+            print "               An iraf task may have failed. "
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+
+
             pass
 
     return new_list

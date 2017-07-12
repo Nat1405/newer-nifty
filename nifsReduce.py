@@ -95,18 +95,12 @@ def start(
 
     # Set up/prepare IRAF.
     iraf.gemini()
-    iraf.nifs()
-    iraf.gnirs()
     iraf.gemtools()
+    iraf.gnirs()
+    iraf.nifs()
 
     # Reset to default parameters the used IRAF tasks.
     iraf.unlearn(iraf.gemini,iraf.gemtools,iraf.gnirs,iraf.nifs,iraf.imcopy)
-
-    # Prepare the IRAF package for NIFS.
-    # NSHEADERS lists the header parameters used by the various tasks in the
-    # NIFS package (excluding headers values which have values fixed by IRAF or
-    # FITS conventions).
-    iraf.nsheaders("nifs",logfile=log)
 
     # From http://bishop.astro.pomona.edu/Penprase/webdocuments/iraf/beg/beg-image.html:
     # Before doing anything involving image display the environment variable
@@ -115,6 +109,12 @@ def start(
     # devices") or to the correct image display device. The task GDEVICES is
     # helpful for determining this information for the display servers.
     iraf.set(stdimage='imt2048')
+
+    # Prepare the IRAF package for NIFS.
+    # NSHEADERS lists the header parameters used by the various tasks in the
+    # NIFS package (excluding headers values which have values fixed by IRAF or
+    # FITS conventions).
+    iraf.nsheaders("nifs",logfile=log)
 
     # Set clobber to 'yes' for the script. This still does not make the gemini
     # tasks overwrite files, so:
@@ -158,18 +158,19 @@ def start(
         shift = calDir+str(open(calDir+"shiftfile", "r").readlines()[0]).strip()
         # Open and store the name of the flat frame from flatfile in flat.
         flat = calDir+str(open(calDir+"flatfile", "r").readlines()[0]).strip()
+        # Open and store the bad pixel mask name from sflat_bpmfile in sflat_bpm.
+        sflat_bpm = calDir+str(open(calDir+"sflat_bpmfile", "r").readlines()[0]).strip()
         # Open and store the name of the reduced spatial correction ronchi flat frame name from ronchifile in ronchi.
         ronchi = open(calDir+"ronchifile", "r").readlines()[0].strip()
         # Copy the spatial calibration ronchi flat frame from Calibrations_grating to the observation directory.
         iraf.copy(calDir+ronchi+".fits",output="./")
-        # Open and store the bad pixel mask name from sflat_bpmfile in sflat_bpm.
-        sflat_bpm = calDir+str(open(calDir+"sflat_bpmfile", "r").readlines()[0]).strip()
         # Open and store the name of the reduced wavelength calibration arc frame from arclist in arc.
         arc = "wrgn"+str(open(calDir+"arclist", "r").readlines()[0]).strip()
         # Copy the wavelength calibration arc frame from Calibrations_grating to the observation directory.
         iraf.copy(calDir+arc+".fits",output="./")
 
-        # Determine whether the data is science or telluric.
+        # Determine whether the data is science or telluric, then open the appropriate
+        # object list and sky frame list.
         if tempObs[-2]=='Tellurics':
             kind = 'Telluric'
             objlist = open('tellist', 'r').readlines()
@@ -626,10 +627,8 @@ def makeTelluric(objlist, log, over):
             else:
                 print "Output file exists and -over not set - skipping extraction in make_telluric"
                 continue
-        # Set aperture diameter in arcseconds.
-        diam = 0.5
         try:
-            iraf.nfextract("tfbrgn"+frame, outpref="x", diameter=diam, fl_int='yes', logfile=log)
+            iraf.nfextract("tfbrgn"+frame, outpref="x", diameter=0.5, fl_int='yes', logfile=log)
         except Exception as e:
             # Directory is left in a very messy state if nfextract attempted without ds9 running.
             # Attempt to do a bit of clean up if this happens.

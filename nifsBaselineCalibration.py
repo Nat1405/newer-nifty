@@ -103,7 +103,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
     # Store current working directory for later use.
     path = os.getcwd()
-
+    raise SystemExit()
     # Enable optional debugging pauses.
     debug = False
 
@@ -275,7 +275,7 @@ def start(obsDirList, calDirList, over, start, stop):
                 print "###################################################################\n"
 
             ######################################################################################
-            ##  Step 3: Trace the spatial curvature and spectral distortion in the Ronchi flat. ##
+            ##  Step 4: Trace the spatial curvature and spectral distortion in the Ronchi flat. ##
             ######################################################################################
 
             elif valindex == 4:
@@ -330,7 +330,7 @@ def getShift(calflat, over, log):
         else:
             return
 
-    iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', logfile=log)
+    iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', fl_int='yes', logfile=log)
 
     # Put the name of the reference shift file into a text file called
     # shiftfile to be used by the pipeline later.
@@ -371,11 +371,11 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
         if os.path.exists('n'+image+'.fits'):
             if over:
                 os.remove('n'+image+'.fits')
-                iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_int='yes',fl_corr='no',fl_nonl='no', logfile=log)
+                iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
             else:
                 print "Output exists and -over- not set - skipping nfprepare of lamps on flats"
         else:
-            iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_int='yes',fl_corr='no',fl_nonl='no', logfile=log)
+            iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
     flatlist = checkLists(flatlist, '.', 'n', '.fits')
 
     # Update lamps off flat images with offset value and generate variance and data quality extensions.
@@ -384,11 +384,11 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
         if os.path.exists('n'+image+'.fits'):
             if over:
                 iraf.delete('n'+image+'.fits')
-                iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_int='yes',fl_corr='no',fl_nonl='no', logfile=log)
+                iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
             else:
                 print "\nOutput exists and -over- not set - skipping nfprepare of lamps off flats."
         else:
-            iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_int='yes',fl_corr='no',fl_nonl='no', logfile=log)
+            iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
     flatdarklist = checkLists(flatdarklist, '.', 'n', '.fits')
 
     # Combine lamps on flat images, "n"+image+".fits". Output combined file will have name of the first flat file with "gn" prefix.
@@ -624,15 +624,15 @@ def wavecal(arc, log, over):
     if band == "K":
         clist="nifs$data/ArXe_K.dat"
         my_thresh = 50.0
-        interactive = 'yes'
+        interactive = 'no'
     elif band == "Z":
         clist="nifs$data/ArXe_Z.dat"
         my_thresh=100.0
-        interactive = 'yes'
-    elif band == "J" or band == "K":
-        clist="gnirs$data/argon.dat"
+        interactive = 'no'
+    elif band == "J" or band == "H":
+        clist="gnirs$data/Ar_Xe.dat"
         my_thresh=100.0
-        interactive = 'yes'
+        interactive = 'no'
 
     else:
         # Print a warning that the pipeline is being run with non-standard grating.
@@ -648,12 +648,12 @@ def wavecal(arc, log, over):
 
         clist="gnirs$data/argon.dat"
         my_thresh=100.0
-        interactive = 'yes'
+        interactive = 'no'
 
     # Establish wavelength calibration for arclamp spectra. Output: A series of
     # files in a "database/" directory containing the wavelength solutions of
     # each slice and a reduced arc frame "wrgn"+ARC+".fits".
-    iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter=interactive,nfound=10,nlost=10,logfile=log)
+    iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter=interactive,nfound=10,nlost=10,logfile=log,aiddebug="l")
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
@@ -698,8 +698,7 @@ def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
 
     # Determine the spatial distortion correction. Output: overwrites "rgn"+ronchiflat+".fits" and makes
     # changes to files in /database directory.
-
-    iraf.nfsdist("rgn"+ronchiflat,fwidth=6.0, cradius=8.0, glshift=2.8, minsep=6.5, thresh=2000.0, nlost=3, fl_inter='no',logfile=log)
+    iraf.nfsdist("rgn"+ronchiflat,fwidth=6.0, cradius=8.0, glshift=2.8, minsep=6.5, thresh=2000.0, nlost=3, fl_inter='yes',logfile=log)
 
     # Put the name of the spatially referenced ronchi flat "rgn"+ronchiflat into a
     # text file called ronchifile to be used by the pipeline later. Also associated files

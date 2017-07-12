@@ -66,7 +66,7 @@ OTHER COMMAND LINE OPTIONS
 				CALIBRATIONS:   Sci Object Name/Date/Calibrations         e.g.  HD14004/20100401/Calibrations	  		   	
 -r   or   --noreduce	   	if specified then the baseline calibrations will not be reduced; this option is useful when the calibration data has already been reduced
 -a   or  --redstart                   to specify the starting step of the baseline calibration reductions; any integer value from 1 to 3 may be chosen; the default is 1; SEE BASELINE CALIBRATION REDUCTION STEPS BELOW
--z   or   --redstop		to specify the stopping step of the baseline calibration reductions; any integer value from 1 to 3 may be chosen; the default is 6; SEE BASELINE CALIBRATION REDUCTION STEPS BELOW
+-z   or   --redstop		to specify the stopping step of the baseline calibration reductions; any integer value from 1 to 4 may be chosen; the default is 6; SEE BASELINE CALIBRATION REDUCTION STEPS BELOW
 -k  or   --notelred		if specified then the telluric data will not be reduced according to the science and telluric reduction steps below
 -g  or	 --nofluxcal          if specified then the final flux calibrated telluric (with hydrogen lines removed) will not be produced, which means that a telluric correction cannot be performed
 -t   or   --telcorr	   	if specified then no H line removal, flux calibrations, or telluric corrections on science data will be executed
