@@ -103,7 +103,6 @@ def start(obsDirList, calDirList, over, start, stop):
 
     # Store current working directory for later use.
     path = os.getcwd()
-    raise SystemExit()
     # Enable optional debugging pauses.
     debug = False
 
@@ -330,7 +329,7 @@ def getShift(calflat, over, log):
         else:
             return
 
-    iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', fl_int='yes', logfile=log)
+    iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', fl_int='no', logfile=log)
 
     # Put the name of the reference shift file into a text file called
     # shiftfile to be used by the pipeline later.

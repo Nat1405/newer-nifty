@@ -57,7 +57,7 @@ def start(
 
     OUTPUT:
         - If telluric reduction a reduced and calibrated telluric frame
-        - If science reduction a reduced science frame data cube. Eg: c(a)tfbrgnSCI.fits)
+        - If science reduction a reduced science frame data cube. Eg: c(a)tfbrsgnSCI.fits)
 
     Args:
         One of:
@@ -170,7 +170,7 @@ def start(
         iraf.copy(calDir+arc+".fits",output="./")
 
         # Determine whether the data is science or telluric, then open the appropriate
-        # object list and sky frame list.
+        # object frame list and sky frame list.
         if tempObs[-2]=='Tellurics':
             kind = 'Telluric'
             objlist = open('tellist', 'r').readlines()
@@ -215,7 +215,7 @@ def start(
         # Check start and stop values for reduction steps. Ask user for a correction if
         # input is not valid.
         valindex = start
-        while valindex > stop  or valindex < 1 or stop > 6:
+        while valindex > stop  or valindex < 1 or stop > 10:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -241,7 +241,7 @@ def start(
         while valindex <= stop :
 
             ###########################################################################
-            ##  STEP 1: Prepare raw data ->n                                         ##
+            ##  STEP 1: Prepare raw data; both object and sky frames ->n             ##
             ###########################################################################
 
             if valindex == 1:
@@ -254,11 +254,11 @@ def start(
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 2: Combine multiple frames ->gn                                 ##
+            ##  STEP 2: Combine multiple sky frames ->gn                                 ##
             ###########################################################################
 
             elif valindex == 2:
-                if kind=='Object':
+                if kind=='Telluric':
                     if len(skylist)>1:
                         combineImages(skylist, "gn"+sky, log, over)
                     else:
@@ -273,106 +273,109 @@ def start(
 
 
             ###########################################################################
-            ##  STEP 3: Sky Subtraction ->gn                                         ##
+            ##  STEP 3: Sky Subtraction ->sn                                         ##
             ###########################################################################
 
             elif valindex == 3:
-                skySubtractObj(objlist, skylist, log, over)
+                if kind=='Telluric':
+                    skySubtractTel(objlist, "gn"+sky, log, over)
+                else:
+                    skySubtractObj(objlist, skylist, log, over)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 3: Sky Subtraction ->gn - COMPLETED "
+                print "  STEP 3: Sky Subtraction ->sn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 4: Flat field, slice and subtract dark ->rgn                    ##
+            ##  STEP 4: Flat field, slice and subtract dark ->rsn                    ##
             ###########################################################################
 
             elif valindex == 4:
                 applyFlat(objlist, flat, log, over, kind)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 4: Flat field ->rgn - COMPLETED "
+                print "  STEP 4: Flat field ->rsn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 5: Correct bad pixels ->brgn                                    ##
+            ##  STEP 5: Correct bad pixels ->brsn                                    ##
             ###########################################################################
 
             elif valindex == 5:
                 fixBad(objlist, log, over)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 5: Correct bad pixels ->brgn - COMPLETED "
+                print "  STEP 5: Correct bad pixels ->brsn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 6: Derive 2D to 3D transformation ->fbrgn                       ##
+            ##  STEP 6: Derive 2D to 3D transformation ->fbrsn                       ##
             ###########################################################################
 
             elif valindex == 6:
                 fitCoords(objlist, arc, ronchi, log, over, kind)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 6: Derive 2D to 3D transformation ->fbrgn - COMPLETED "
+                print "  STEP 6: Derive 2D to 3D transformation ->fbrsn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 7: Apply transformation ->tfbrgn                                ##
+            ##  STEP 7: Apply transformation ->tfbrsn                                ##
             ###########################################################################
 
             elif valindex == 7:
                 transform(objlist, log, over)
-                logging.info('Apply transformation ->tfbrgn')
+                logging.info('Apply transformation ->tfbrsn')
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 7: Apply transformation ->tfbrgn - COMPLETED "
+                print "  STEP 7: Apply transformation ->tfbrsn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 8a: For telluric data derive telluric correction ->gxtfbrgn    ##
-            ##       8b: For science data apply telluric correction ->atfbrgn       ##
+            ##  STEP 8a: For telluric data derive telluric correction ->gxtfbrsn    ##
+            ##       8b: For science data apply telluric correction ->atfbrsn       ##
             ###########################################################################
 
             elif valindex == 8:
                 if kind=='Telluric':
                     makeTelluric(objlist, log, over)
                 elif kind=='Object' and tel and telinter=='no':
-                    makeCube('tfbrgn', objlist, False, observationDirectory, log, over)
+                    makeCube('tfbrsgn', objlist, False, observationDirectory, log, over)
                     applyTelluric(objlist, obsid, skylist, telinter, log, over)
                 elif kind=='Object' and tel and telinter=='yes':
                     applyTelluric(objlist, obsid, skylist, telinter, log, over)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 8: Derive or apply telluric correction ->gxtfbrgn or ->atgbrgn - COMPLETED "
+                print "  STEP 8: Derive or apply telluric correction ->gxtfbrsgn or ->atgbrsgn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 9: Create a 3D cube from science data ->catfbrgn or ->ctfbrgn   ##
+            ##  STEP 9: Create a 3D cube from science data ->catfbrsgn or ->ctfbrsgn   ##
             ###########################################################################
 
             elif valindex == 9:
                 if kind=='Object' and telinter=='yes' and tel:
                     # Make cube with telluric correction.
-                    makeCube('atfbrgn', objlist, tel, observationDirectory, log, over)
+                    makeCube('atfbrsgn', objlist, tel, observationDirectory, log, over)
                 elif kind=='Object' and not tel and telinter=='yes':
                     # Make cube without telluric correction.
-                    makeCube('tfbrgn', objlist, tel, observationDirectory, log, over)
+                    makeCube('tfbrsgn', objlist, tel, observationDirectory, log, over)
                 elif kind == "Telluric":
                    print "\nNo cube being made for tellurics.\n"
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 9: Create a 3D cube from science data ->catfbrgn or ->ctfbrgn - COMPLETED "
+                print "  STEP 9: Create a 3D cube from science data ->catfbrsgn or ->ctfbrsgn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
             ###########################################################################
-            ##  STEP 10: Perform a flux calibration ->fcatfbrgn or ->fctfbrgn        ##
+            ##  STEP 10: Perform a flux calibration ->fcatfbrsgn or ->fctfbrsgn        ##
             ###########################################################################
             elif valindex == 10:
                 if fluxcal:
@@ -383,7 +386,7 @@ def start(
                             hline_method, spectemp, mag, log, over)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 10: Perform a flux calibration ->fcatfbrgn or ->fctfbrgn - COMPLETED "
+                print "  STEP 10: Perform a flux calibration ->fcatfbrsgn or ->fctfbrsgn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
@@ -429,7 +432,7 @@ def prepare(inlist, shiftima, sflat_bpm, log, over):
             else:
                 print "Output file exists and -over not set - skipping prepare_list"
                 continue
-        iraf.nfprepare(frame, rawpath="", shiftimage=shiftima, fl_vardq="yes", bpm=sflat_bpm, logfile=log)
+        iraf.nfprepare(frame, rawpath="", shiftimage=shiftima, fl_vardq="yes", bpm=sflat_bpm, fl_int='yes', fl_corr='no', fl_nonl='no', logfile=log)
     inlist = checkLists(inlist, '.', 'n', '.fits')
     return inlist
 
@@ -446,12 +449,12 @@ def combineImages(inlist, out, log, over):
             print "Output file exists and -over not set - skipping combine_ima"
             return
 
-    iraf.gemcombine(listit(inlist,"n"),output=out,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+    iraf.gemcombine(listit(inlist,"n"),output=out,fl_dqpr='yes', fl_vardq='yes',masktype="none", combine="median", logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def copyImage(input, output, over):
-    """Copy an image (used to add the correct prefix when skipping steps)."""
+    """Copy a frame (used to add the correct prefix when skipping steps)."""
 
     if os.path.exists(output):
         if over:
@@ -465,37 +468,37 @@ def copyImage(input, output, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def skySubtractObj(objlist, skylist, log, over):
-    """"Sky subtraction for science using iraf.gemarith. Output: ->gn"""
+    """"Sky subtraction for science using iraf.gemarith. Output: ->sgn"""
 
     for i in range(len(objlist)):
         frame = str(objlist[i])
         sky = str(skylist[i])
-        if os.path.exists("gn"+frame+".fits"):
+        if os.path.exists("sgn"+frame+".fits"):
            if over:
-               os.remove("gn"+frame+".fits")
+               os.remove("sgn"+frame+".fits")
            else:
                print "Output file exists and -over not set - skipping skysub_list"
                continue
-        iraf.gemarith ("n"+frame, "-", "n"+sky, "gn"+frame, fl_vardq="yes", logfile=log)
+        iraf.gemarith ("n"+frame, "-", "n"+sky, "sn"+frame, fl_vardq="yes", logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def skySubtractTel(tellist, sky, log, over):
-    """Sky subtraction for telluric using iraf.gemarith. Output: ->gn"""
+    """Sky subtraction for telluric using iraf.gemarith. Output: ->sgn"""
 
     for frame in tellist:
-        if os.path.exists("gn"+frame+".fits"):
+        if os.path.exists("sgn"+frame+".fits"):
             if over:
-                os.remove("gn"+frame+".fits")
+                os.remove("sgn"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping skysub_list"
+                print "Output file exists and -over not set - skipping skySubtractTel."
                 continue
-        iraf.gemarith ("n"+frame, "-", sky, "gn"+frame, fl_vardq="yes", logfile=log)
+        iraf.gemarith ("n"+frame, "-", sky, "sn"+frame, fl_vardq="yes", logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def applyFlat(objlist, flat, log, over, kind, dark=""):
-    """Flat field and cut the data with iraf.nsreduce. Output: ->rgn.
+    """Flat field and cut the data with iraf.nsreduce. Output: ->rsgn.
 
     NSREDUCE is used for basic reduction of raw data - it provides a
     single, unified interface to several tasks and also allows for
@@ -512,22 +515,22 @@ def applyFlat(objlist, flat, log, over, kind, dark=""):
 
     for frame in objlist:
         frame = str(frame).strip()
-        if os.path.exists("rgn"+frame+".fits"):
+        if os.path.exists("rsn"+frame+".fits"):
             if over:
-                os.remove("rgn"+frame+".fits")
+                os.remove("rsn"+frame+".fits")
             else:
                 print "Output file exists and -over not set - skipping apply_flat_list"
                 continue
         # Only subtract darks from Telluric frames.
         if kind == 'Object':
-            iraf.nsreduce("gn"+frame, fl_cut="yes", fl_nsappw="yes", fl_dark="no", fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="yes",logfile=log)
+            iraf.nsreduce("sn"+frame, fl_cut="yes", fl_nsappw="yes", fl_dark="no", fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="yes",logfile=log)
         elif kind == "Telluric":
-            iraf.nsreduce("gn"+frame, darki=dark, fl_cut="yes", fl_nsappw="no", fl_dark=fl_dark, fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="yes",logfile=log)
+            iraf.nsreduce("sn"+frame, flatimage=flat, fl_cut="yes", fl_nsappw="no", fl_dark="no", fl_sky="no", fl_flat="yes", fl_vardq="yes", logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def fixBad(objlist, log, over):
-    """Interpolate over bad pixels flagged in the DQ plane with iraf.nffixbad. Output: -->brgn.
+    """Interpolate over bad pixels flagged in the DQ plane with iraf.nffixbad. Output: -->brsn.
 
     NFFIXBAD - Fix Hot/Cold pixels on the NIFS detector.
 
@@ -540,19 +543,19 @@ def fixBad(objlist, log, over):
 
     for frame in objlist:
         frame = str(frame).strip()
-        if os.path.exists("brgn"+frame+".fits"):
+        if os.path.exists("brsn"+frame+".fits"):
             if over:
-                os.remove("brgn"+frame+".fits")
+                os.remove("brsn"+frame+".fits")
             else:
                 print "Output file exists and -over not set - skipping fixbad_list"
                 continue
-        iraf.nffixbad("rgn"+frame,logfile=log)
+        iraf.nffixbad("rsn"+frame,logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def fitCoords(objlist, arc, ronchi, log, over, kind):
     """Derive the 2D to 3D spatial/spectral transformation with iraf.nsfitcoords.
-    Output: -->fbrgn
+    Output: -->fbrsn
 
     NFFITCOORDS - Compute 2D dispersion and distortion maps.
 
@@ -566,22 +569,22 @@ def fitCoords(objlist, arc, ronchi, log, over, kind):
 
     for frame in objlist:
         frame = str(frame).strip()
-        if os.path.exists("fbrgn"+frame+".fits"):
+        if os.path.exists("fbrsn"+frame+".fits"):
             if over:
-                os.remove("fbrgn"+frame+".fits")
+                os.remove("fbrsn"+frame+".fits")
             else:
                 print "Output file exists and -over not set - skipping fitcoord_list"
                 continue
         if kind=='Object':
-            iraf.nsfitcoords("brgn"+frame,lamptransf=arc, sdisttransf=ronchi,logfile=log)
+            iraf.nsfitcoords("brsn"+frame,lamptransf=arc, sdisttransf=ronchi,logfile=log)
         elif kind=='Telluric':
-            iraf.nsfitcoords("brgn"+frame, fl_int='no', lamptransf=arc, sdisttransf=ronchi, lxorder=4, syorder=4, logfile=log)
+            iraf.nsfitcoords("brsn"+frame, fl_int='yes', lamptransf=arc, sdisttransf=ronchi, logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def transform(objlist, log, over):
     """Apply the transformation determined in iraf.nffitcoords with
-    iraf.nstransform. Output: -->tfbrgn
+    iraf.nstransform. Output: -->tfbrsgn
 
     NSTRANSFORM - Spatially rectify and wavelength calibrate data.
 
@@ -596,19 +599,19 @@ def transform(objlist, log, over):
 
     for frame in objlist:
         frame = str(frame).strip()
-        if os.path.exists("tfbrgn"+frame+".fits"):
+        if os.path.exists("tfbrsn"+frame+".fits"):
             if over:
-                iraf.delete("tfbrgn"+frame+".fits")
+                iraf.delete("tfbrsn"+frame+".fits")
             else:
                 print "Output file exists and -over not set - skipping transform_list"
                 continue
-        iraf.nstransform("fbrgn"+frame, logfile=log)
+        iraf.nstransform("fbrsn"+frame, logfile=log)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def makeTelluric(objlist, log, over):
     """Extracts 1-D spectra with iraf.nfextract and combines them with iraf.gemcombine.
-    iraf.nfextract is currently only done interactively. Output: -->xtfbrgn and gxtfbrgn
+    iraf.nfextract is currently only done interactively. Output: -->xtfbrsn and gxtfbrsn
 
     NFEXTRACT - Extract NIFS spectra.
 
@@ -621,41 +624,41 @@ def makeTelluric(objlist, log, over):
 
     for frame in objlist:
         frame = str(frame).strip()
-        if os.path.exists("xtfbrgn"+frame+".fits"):
+        if os.path.exists("xtfbrsn"+frame+".fits"):
             if over:
-                iraf.delete("xtfbrgn"+frame+".fits")
+                iraf.delete("xtfbrsn"+frame+".fits")
             else:
                 print "Output file exists and -over not set - skipping extraction in make_telluric"
                 continue
         try:
-            iraf.nfextract("tfbrgn"+frame, outpref="x", diameter=0.5, fl_int='yes', logfile=log)
+            iraf.nfextract("tfbrsn"+frame, outpref="x", diameter=0.5, fl_int='yes', fl_zval='yes', z1=0, z2=10000.0, logfile=log)
         except Exception as e:
             # Directory is left in a very messy state if nfextract attempted without ds9 running.
             # Attempt to do a bit of clean up if this happens.
-            iraf.delete("xtfbrgn"+frame+".fits")
+            iraf.delete("xtfbrsn"+frame+".fits")
             logging.error(traceback.format_exc())
             raise SystemExit("ERROR: ds9 or another image viewer is not running in the background.")
 
     # Combine all the 1D spectra to one final output file.
     telluric = str(objlist[0]).strip()
-    if os.path.exists("gxtfbrgn"+telluric+".fits"):
+    if os.path.exists("gxtfbrsn"+telluric+".fits"):
         if over:
-            iraf.delete("gxtfbrgn"+telluric+".fits")
+            iraf.delete("gxtfbrsn"+telluric+".fits")
         else:
             print "Output file exists and -over not set - skipping gemcombine in make_telluric"
             return
 
-    iraf.gemcombine(listit(objlist,"xtfbrgn"),output="gxtfbrgn"+telluric, statsec="[*]", combine="median",logfile=log,masktype="none",fl_vardq="yes")
+    iraf.gemcombine(listit(objlist,"xtfbrsn"),output="gxtfbrsn"+telluric, statsec="[*]", combine="median",logfile=log,masktype="none",fl_vardq="yes")
 
     # Put the name of the final telluric correction file into a text file called
     # telluricfile to be used by the pipeline later.
-    open("telluricfile", "w").write("gxtfbrgn"+telluric)
+    open("telluricfile", "w").write("gxtfbrsn"+telluric)
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def applyTelluric(objlist, obsid, skylist, telinter, log, over):
     """Corrects the data for telluric absorption features with iraf.nftelluric.
-    iraf.nftelluric is currently only run interactively. Output: -->atfbrgn
+    iraf.nftelluric is currently only run interactively. Output: -->atfbrsgn
 
     NFTELLURIC
 
@@ -700,23 +703,23 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
                     i=index+1
 
                     while i<len(objlist) and 'obs' not in objlist[i]:
-                        if os.path.exists("atfbrgn"+objlist[i]+".fits"):
+                        if os.path.exists("atfbrsgn"+objlist[i]+".fits"):
                             if over:
-                                iraf.delete("atfbrgn"+objlist[i]+".fits")
-                                iraf.nftelluric('tfbrgn'+objlist[i], outprefix='a', calspec=telluric, fl_inter = 'yes', logfile=log)
+                                iraf.delete("atfbrsgn"+objlist[i]+".fits")
+                                iraf.nftelluric('tfbrsgn'+objlist[i], outprefix='a', calspec=telluric, fl_inter = 'yes', logfile=log)
                             else:
                                 print "Output file exists and -over not set - skipping nftelluric in applyTelluric"
-                        elif not os.path.exists('atfbrgn'+objlist[i]+'.fits'):
-                            iraf.nftelluric('tfbrgn'+objlist[i], outprefix='a', calspec=telluric, fl_inter = 'yes', logfile=log)
+                        elif not os.path.exists('atfbrsgn'+objlist[i]+'.fits'):
+                            iraf.nftelluric('tfbrsgn'+objlist[i], outprefix='a', calspec=telluric, fl_inter = 'yes', logfile=log)
 
                         '''
                         # remove continuum fit from reduced science image
                         if over:
                             if os.path.exists("cont"+objlist[i]+".fits"):
                                 iraf.delete("cont"+objlist[i]+".fits")
-                            MEFarithpy('atfbrgn'+objlist[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+objlist[i]+'.fits')
+                            MEFarithpy('atfbrsgn'+objlist[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+objlist[i]+'.fits')
                         elif not os.path.exists('cont'+objlist[i]+'.fits'):
-                            MEFarithpy('atfbrgn'+objlist[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+objlist[i]+'.fits')
+                            MEFarithpy('atfbrsgn'+objlist[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+objlist[i]+'.fits')
                         else:
                             print "Output file exists and -over not set - skipping continuum division in applyTelluric"
 
@@ -726,11 +729,11 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
                             exptime = objheader[0].header['EXPTIME']
                             if str(int(exptime)) in bb:
                                 if over:
-                                    if os.path.exists('bbatfbrgn'+objlist[i]+'.fits'):
-                                        os.remove('bbatfbrgn'+objlist[i]+'.fits')
-                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrgn'+objlist[i]+'.fits')
-                                elif not os.path.exists('bbatfbrgn'+objlist[i]+'.fits'):
-                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrgn'+objlist[i]+'.fits')
+                                    if os.path.exists('bbatfbrsgn'+objlist[i]+'.fits'):
+                                        os.remove('bbatfbrsgn'+objlist[i]+'.fits')
+                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrsgn'+objlist[i]+'.fits')
+                                elif not os.path.exists('bbatfbrsgn'+objlist[i]+'.fits'):
+                                    MEFarithpy('cont'+objlist[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrsgn'+objlist[i]+'.fits')
                                 else:
                                     print "Output file exists and -over- not set - skipping blackbody calibration in applyTelluric"
                         '''
@@ -741,7 +744,7 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
 
 def makeCube(pre, objlist, tel, observationDirectory, log, over):
     """ Reformat the data into a 3-D datacube using iraf.nifcube. Output: If
-    telluric correction to be applied, -->catfbrgn. Else, -->ctfbrgn.
+    telluric correction to be applied, -->catfbrsgn. Else, -->ctfbrsgn.
 
     NIFCUBE - Construct 3D NIFS datacubes.
 
@@ -1053,7 +1056,7 @@ def telCor(obsDir, telDirList_temp, over):
             os.chdir(obsDir)
             scilist = glob.glob('c*.fits')
             for frame in scilist:
-                if frame.replace('ctfbrgn','').replace('.fits', '') in objlist:
+                if frame.replace('ctfbrsgn','').replace('.fits', '') in objlist:
                     if os.path.exists(frame[0]+'p'+frame[1:]):
                         if not over:
                             print 'Output already exists and -over- not set - skipping telluric correction and flux calibration'
