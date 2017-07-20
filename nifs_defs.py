@@ -320,7 +320,7 @@ def writeCenters(objlist):
 
 #-----------------------------------------------------------------------------#
 
-def makeSkyList(skylist, objlist, obsDir):
+def OLD_makeSkyList(skylist, objlist, obsDir):
     """ check to see if the number of sky images matches the number of science
         images and if not duplicates sky images and rewrites the sky file and skylist
     """
@@ -370,6 +370,101 @@ def makeSkyList(skylist, objlist, obsDir):
     return skylist
 
 #-----------------------------------------------------------------------------#
+
+
+def makeSkyList(skylist, sciencelist, obsDir):
+    """ Makes a skylist equal in length to object list with sky and object
+    frames closest in time at equal indices.
+
+    Returns:
+        skylist (list): list of sky frames organized so each science frame has subtracted
+                        the sky frame closest in time.
+
+    Eg:
+        Observations had an ABA ABA pattern:
+            obs1
+            sky1
+            obs2
+
+            obs3
+            sky2
+            obs4
+
+            obs5
+            sky3
+            obs6
+
+        sciencelist was:    skylist was:   Output skylist will be:
+            obs1                    sky1            sky1
+            obs2                    sky2            sky1
+            obs3                    sky3            sky2
+            obs4                                    sky2
+            obs5                                    sky3
+            obs6                                    sky3
+
+        Observations had an AB AB AB pattern:
+            obs1
+            sky1
+            obs2
+            sky2
+            obs3
+            sky3
+
+        sciencelist was:    skylist was:   Output skylist will be:
+            obs1                    sky1            sky1
+            obs2                    sky2            sky1
+            obs3                    sky3            sky2
+    """
+    print "\n#############################################################"
+    print "#                                                           #"
+    print "#  Matching science frames with sky frames closest in time  #"
+    print "#                                                           #"
+    print "#############################################################\n"
+    # Do some tests first.
+    # Check that data is either:
+    # ABA ABA ABA- one sky frame per two science frames.
+    # AB AB AB- one sky frame per one two science frames.
+    #
+    # If it is neither warn user to verify that sky frames were matched with science frames correctly.
+    if len(skylist) != len(sciencelist)/2 and len(skylist) != len(sciencelist):
+        print "\n#####################################################################"
+        print "#####################################################################"
+        print ""
+        print "     WARNING in reduce: it appears science frames and sky frames were not"
+        print "                        taken in an ABA ABA or AB AB pattern."
+        print ""
+        print "#####################################################################"
+        print "#####################################################################\n"
+    skytimes = []
+    prepared_sky_list = []
+    # Calculate time of each sky frame. Store the calculated time and the frame name in skytimes, a
+    # 2D list of [skyframe_time, skyframe_name] pairs.
+    # Eg: [[39049.3, 'N20130527S0241'], [39144.3, 'N20130527S0244'], [39328.8, 'N20130527S0247'], [39590.3, 'N20130527S0250']]
+    for item in skylist:
+        # Strip off the trailing newline.
+        item = str(item).strip()
+        # Calculate the time of the sky frame.
+        skytime = timeCalc(item+'.fits')
+        # Store the sky frame time and corresponding sky frame name in skytimes.
+        templist = [skytime, item]
+        skytimes.append(templist)
+    print "scienceframelist:      skyframelist:      time delta (between observation UT start times from .fits headers):"
+    for item in sciencelist:
+        # Calculate time of the science frame in seconds.
+        item = str(item).strip()
+        sciencetime = timeCalc(item+'.fits')
+        # Sort the 2D list of [skyframe_time, skyframe_name] pairs by absolute science_frame_time - skyframe_time.
+        # Eg: [[39049.3, 'N20130527S0241'], [39144.3, 'N20130527S0244'], [39328.8, 'N20130527S0247'], [39590.3, 'N20130527S0250']]
+        sorted_by_closest_time = sorted(skytimes, key=lambda x: (abs(sciencetime - x[0])))
+        # Append the name corresponding to the minimum time difference to prepared_sky_list.
+        prepared_sky_list.append(sorted_by_closest_time[0][1])
+        # Print the scienceframe, matching skyframe and time difference side by side for later comparison.
+        print "  ", item, "       ", sorted_by_closest_time[0][1], "        ", abs(sciencetime - sorted_by_closest_time[0][0])
+    print "\n"
+    return prepared_sky_list
+
+#-----------------------------------------------------------------------------#
+
 
 def convertRAdec(ra, dec):
     """ converts RA from degrees to H:M:S and dec from degrees to degrees:arcmin:arcsec"""

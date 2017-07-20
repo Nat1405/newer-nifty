@@ -255,12 +255,12 @@ def makeSortFiles(dir):
             # If the offsets are outside a circle of 5.0 units in radius, append to skylist.
             if obsclass == 'science':
                 sciImageList.append(entry)
-                if rad > 3.0:
+                if rad >= 2.0:
                     skylist.append(entry)
 
             # Create a list of telluric sky frames.
             if obsclass == 'partnerCal':
-                if rad > 2.5:
+                if rad >= 2.0:
                     telskylist.append(entry)
 
             # Create sciDateList: list of unique dates of science observations.

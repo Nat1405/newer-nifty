@@ -155,7 +155,7 @@ def main():
     print 'Starting point is', start
     logging.info('Starting point is %s', start)
 
-    print 'Starting point is', stop
+    print 'Stopping point is', stop
     logging.info('Stopping point is %s', stop)
 
     # Set the H line removal method
