@@ -6,8 +6,9 @@ import nifsSort as sortScript
 import merge as mergeScript
 import nifsBaselineCalibration as calibrateScript
 import nifsReduce as reduceScript
-from nifs_defs import datefmt
+from nifs_defs import datefmt, writeList
 import logging, os
+
 
 #--------------------------------------------------------------------#
 #                                                                    #
@@ -196,14 +197,54 @@ def main():
     print 'Flux calibrate is performed  ? ', fluxcal
     logging.info('Flux calibrate is performed ? %s', fluxcal)
 
-    # Sort the data and calibrations
-    print '\n\nI am sorting the data.\n'
-    logging.info(' I am sorting the data ')
-    obsDirList, calDirList, telDirList = sortScript.start(dir, tel, sort, over, copy, program, date)
 
-    logging.info('obsDirList : %s', obsDirList)
-    logging.info('telDirList : %s', telDirList)
-    logging.info('calDirList : %s', calDirList)
+    if sort:
+        # Sort the data and calibrations.
+        print '\n\nI am sorting the data.\n'
+        logging.info(' I am sorting the data ')
+        obsDirList, calDirList, telDirList = sortScript.start(dir, tel, sort, over, copy, program, date)
+
+        # Save the paths to files found in sorting in three text files for later use.
+        # Remove textfiles from old runs to avoid extra entries.
+        if os.path.exists("obsDirList"):
+            os.remove("obsDirList")
+        if os.path.exists("telDirList"):
+            os.remove("telDirList")
+        if os.path.exists("calDirList"):
+            os.remove("calDirList")
+
+        for i in range(len(obsDirList)):
+            writeList(obsDirList[i], "obsDirList", ".")
+        for i in range(len(telDirList)):
+            writeList(telDirList[i], "telDirList", ".")
+        for i in range(len(calDirList)):
+            writeList(calDirList[i], "calDirList", ".")
+
+    else:
+        # Don't use sortScript at all; read the paths to data from textfiles.
+        obsDirList = open("obsDirList", "r").readlines()
+        obsDirList = [entry.strip() for entry in obsDirList]
+
+        try:
+            telDirList = open("telDirList", "r").readlines()
+            telDirList = [entry.strip() for entry in telDirList]
+        except IOError:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in Nifty: no telluric data found. Setting telDirList to "
+            print "                       an empty list."
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+            telDirList = []
+
+        calDirList = open("calDirList", "r").readlines()
+        calDirList = [entry.strip() for entry in calDirList]
+
+        logging.info('obsDirList : %s', obsDirList)
+        logging.info('telDirList : %s', telDirList)
+        logging.info('calDirList : %s', calDirList)
     print '\nobsDirList : '
     for i in range(len(obsDirList)):
         print obsDirList[i]

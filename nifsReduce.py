@@ -128,6 +128,10 @@ def start(
 
     # Loop through all the observation directories to perform a reduction on each one.
     for observationDirectory in observationDirectoryList:
+
+        # REALLY GROSS HACK FOR TESTING PURPOSES:
+        if "0420" in observationDirectory:
+            continue
         os.chdir(observationDirectory)
         tempObs = observationDirectory.split(os.sep)
 
@@ -312,11 +316,17 @@ def start(
             elif valindex == 5:
                 if kind=='Telluric':
                     makeTelluric(objlist, log, over)
+
+                # Use kerry's method
                 elif kind=='Object' and tel and telinter=='no':
                     makeCube('tfbrsn', objlist, False, observationDirectory, log, over)
                     applyTelluric(objlist, obsid, skylist, telinter, log, over)
+
+                # Use nftelluric.
                 elif kind=='Object' and tel and telinter=='yes':
                     applyTelluric(objlist, obsid, skylist, telinter, log, over)
+                    makeCube('atfbrsn', objlist, tel, observationDirectory, log, over)
+
                 print "\n##############################################################################"
                 print ""
                 print "  STEP 5: Derive or apply telluric correction ->gxtfbrsgn or ->atgbrsgn - COMPLETED "
@@ -328,14 +338,14 @@ def start(
             #############################################################################
 
             elif valindex == 6:
-                if kind=='Object' and telinter=='yes' and tel:
-                    # Make cube with telluric correction.
-                    makeCube('atfbrsn', objlist, tel, observationDirectory, log, over)
-                elif kind=='Object' and not tel and telinter=='yes':
+
+                if kind=='Object' and not tel and telinter=='yes':
                     # Make cube without telluric correction.
                     makeCube('tfbrsn', objlist, tel, observationDirectory, log, over)
+
                 elif kind == "Telluric":
                    print "\nNo cube being made for tellurics.\n"
+
                 print "\n##############################################################################"
                 print ""
                 print "  STEP 9: Create a 3D cube from science data ->catfbrsgn or ->ctfbrsgn - COMPLETED "
@@ -358,7 +368,6 @@ def start(
                 print ""
                 print "##############################################################################\n"
 
-
             valindex += 1
 
         print "\n##############################################################################"
@@ -366,6 +375,9 @@ def start(
         print "  COMPLETE - Reductions completed for ", observationDirectory
         print ""
         print "##############################################################################\n"
+
+        print kind
+        a = raw_input("Pausing after telluric flux calibration")
 
     # Return to directory script was begun from.
     os.chdir(path)
@@ -631,8 +643,11 @@ def applyTelluric(objlist, obsid, skylist, telinter, log, over):
     os.chdir('../Tellurics')
     telDirList = glob.glob('*')
 
+
+    # Used for faint objects.
     if telinter=='no':
         telCor(observationDirectory, telDirList, over)
+    # Used for brighter objects.
     else:
         for telDir in telDirList:
             if 'obs' in telDir:
@@ -1400,7 +1415,7 @@ def linefit_manual(spectrum, band):
             with open("ftell_nolines"+band+".fits") as f: pass
             break
         except IOError as e:
-            print "It looks as if you didn't use the if key to write out the lineless spectrum. We'll have to try again. --> Re-entering splot"
+            print "It looks as if you didn't use the i key to write out the lineless spectrum. We'll have to try again. --> Re-entering splot"
             iraf.splot(images=spectrum, new_image='ftell_nolines'+band, save_file='../PRODUCTS/lorentz_hlines.txt', overwrite='yes')
 
 #-------------------------------------------------------------------------------#
