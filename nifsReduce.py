@@ -372,9 +372,6 @@ def start(
         print ""
         print "##############################################################################\n"
 
-        print kind
-        a = raw_input("Pausing after telluric flux calibration")
-
     # Return to directory script was begun from.
     os.chdir(path)
     return
@@ -605,14 +602,18 @@ def makeTelluric(objlist, log, over):
 
     # Combine all the 1D spectra to one final output file with the name of the first input file.
     telluric = str(objlist[0]).strip()
-    if os.path.exists("gxtfbrsn"+telluric+".fits"):
+    if len(objlist) > 1:
+        if os.path.exists("gxtfbrsn"+telluric+".fits"):
+            if over:
+                iraf.delete("gxtfbrsn"+telluric+".fits")
+            else:
+                print "Output file exists and -over not set - skipping gemcombine in make_telluric"
+                return
+        iraf.gemcombine(listit(objlist,"xtfbrsn"),output="gxtfbrsn"+telluric, statsec="[*]", combine="median",masktype="none",fl_vardq="yes", logfile=log)
+    else:
         if over:
             iraf.delete("gxtfbrsn"+telluric+".fits")
-        else:
-            print "Output file exists and -over not set - skipping gemcombine in make_telluric"
-            return
-
-    iraf.gemcombine(listit(objlist,"xtfbrsn"),output="gxtfbrsn"+telluric, statsec="[*]", combine="median",masktype="none",fl_vardq="yes", logfile=log)
+        iraf.copy(input="xtfbrsn"+telluric+".fits", output="gxtfbrsn"+telluric+".fits")
 
     # Put the name of the final telluric correction file into a text file called
     # telluricfile to be used by the pipeline later.
@@ -893,7 +894,7 @@ def fluxCalibrate(
         #Extract stellar temperature from std_star.txt file , for use in making blackbody
         star_kelvin = float(lines[0].replace('\n','').split()[3])
         #Extract mag from std_star.txt file and convert to erg/cm2/s/A, for a rough flux scaling
-
+        star_mag = mag
         try:
             #find out if a matching band mag exists in std_star.txt
             if band == 'K':
@@ -915,6 +916,7 @@ def fluxCalibrate(
             flambda = 1
             print "No ", band, " magnitude found for this star. A relative flux calibration will be performed"
             print "star_kelvin=", star_kelvin
+            star_mag = 1
             print "star_mag=", star_mag
 
         effspec(observationDirectory, standard, 'ftell_nolines'+band+'.fits', star_mag, star_kelvin, over)
@@ -1478,6 +1480,8 @@ def effspec(telDir, standard, telnolines, mag, T, over):
     tel_bb = telluric[0].data/blackbody
     csb = tel_bb[lamc_ind[0]]
     cs =  telluric[0].data[lamc_ind[0]]
+
+    print "1", tel_bb, "2", exptime, "3", cs, "4", csb, "5", mag, "6", f0
 
     effspec =  (tel_bb/exptime)*(cs/csb)*(10**(0.4*mag))*(f0)**-1
     print 'effspec =', effspec
