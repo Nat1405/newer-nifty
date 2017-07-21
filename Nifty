@@ -149,7 +149,7 @@ def main():
 
     # Set the stopping step of science reduction to 9
     if not options.stop:
-        stop = 10
+        stop = 7
     else:
         stop = options.stop
 
@@ -222,8 +222,6 @@ def main():
 
     else:
         # Don't use sortScript at all; read the paths to data from textfiles.
-        obsDirList = open("obsDirList", "r").readlines()
-        obsDirList = [entry.strip() for entry in obsDirList]
 
         try:
             telDirList = open("telDirList", "r").readlines()
@@ -238,6 +236,19 @@ def main():
             print "#####################################################################"
             print "#####################################################################\n"
             telDirList = []
+        try:
+            obsDirList = open("obsDirList", "r").readlines()
+            obsDirList = [entry.strip() for entry in obsDirList]
+        except IOError:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in Nifty: no science data found. Setting obsDirList to "
+            print "                       an empty list."
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+            obsDirList = []
 
         calDirList = open("calDirList", "r").readlines()
         calDirList = [entry.strip() for entry in calDirList]
@@ -245,6 +256,7 @@ def main():
         logging.info('obsDirList : %s', obsDirList)
         logging.info('telDirList : %s', telDirList)
         logging.info('calDirList : %s', calDirList)
+
     print '\nobsDirList : '
     for i in range(len(obsDirList)):
         print obsDirList[i]
@@ -257,7 +269,6 @@ def main():
 
     # Reduce the calibration data
     print '\nI am reducing the calibration data. '
-    logging.info('I am reducing the calibration data. ')
     if red:
         if debug:
             a = raw_input('About to enter calibrate.py')
@@ -269,7 +280,6 @@ def main():
             a = raw_input('About to enter reduce to reduce Telluric images, ',\
                            'create telluric correction spectrum and blackbody spectrum.')
         print ' I am starting to reduce the telluric images '
-        logging.info('I am starting to reduce the telluric images')
         if telred:
             reduceScript.start(
                 telDirList, calDirList, start, stop, tel, telinter, fluxcal,\
@@ -279,7 +289,6 @@ def main():
     # Reduce the science images
     if sci:
         print ' I am starting to reduce the science images '
-        logging.info('I am starting to reduce the science images')
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
         reduceScript.start(obsDirList, calDirList, start, stop, tel, telinter, fluxcal,\
@@ -289,7 +298,6 @@ def main():
     # Merge all cubes
     if merge:
         print ' I am starting to merge all cubes '
-        logging.info('I am starting to merge all cubes')
         if debug:
             a = raw_input('About to enter merge to merge cubes.')
         mergeScript.start(obsDirList, over)

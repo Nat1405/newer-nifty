@@ -128,10 +128,6 @@ def start(
 
     # Loop through all the observation directories to perform a reduction on each one.
     for observationDirectory in observationDirectoryList:
-
-        # REALLY GROSS HACK FOR TESTING PURPOSES:
-        if "0420" in observationDirectory:
-            continue
         os.chdir(observationDirectory)
         tempObs = observationDirectory.split(os.sep)
 
@@ -603,14 +599,9 @@ def makeTelluric(objlist, log, over):
             else:
                 print "Output file exists and -over not set - skipping extraction in make_telluric"
                 continue
-        try:
-            iraf.nfextract("tfbrsn"+frame, outpref="x", diameter=0.5, fl_int='yes', logfile=log)
-        except Exception as e:
-            # Directory is left in a very messy state if nfextract attempted without ds9 running.
-            # Attempt to do a bit of clean up if this happens.
-            iraf.delete("xtfbrsn"+frame+".fits")
-            logging.error(traceback.format_exc())
-            raise SystemExit("ERROR in reduce: ds9 or another image viewer is not running in the background.")
+
+        iraf.nfextract("tfbrsn"+frame, outpref="x", xc=15.0, yc=33.0, diameter=2.5, fl_int='no', logfile=log)
+
 
     # Combine all the 1D spectra to one final output file with the name of the first input file.
     telluric = str(objlist[0]).strip()
@@ -809,9 +800,10 @@ def fluxCalibrate(
     except:
         print "No telluricfile found in ", observationDirectory
         return
-    if not os.path.exists('objtellist'):
+    """if not os.path.exists('objtellist'):
         print "No objtellist found in ", observationDirectory
         return
+    """
 
     telheader = pyfits.open(standard+'.fits')
     band = telheader[0].header['GRATING'][0]
@@ -878,7 +870,7 @@ def fluxCalibrate(
 
     # make a list of exposure times from the science images that use this standard star spectrum for the telluric correction
     # used to make flux calibrated blackbody spectra
-    objtellist = open('objtellist', 'r').readlines()
+    '''objtellist = open('objtellist', 'r').readlines()
     objtellist = [frame.strip() for frame in objtellist]
     exptimelist = []
     for item in objtellist:
@@ -889,7 +881,8 @@ def fluxCalibrate(
             objheader = pyfits.open(item+'.fits')
             exptime = objheader[0].header['EXPTIME']
             if not exptimelist or exptime not in exptimelist:
-                exptimelist.append(int(exptime))
+                exptimelist.append(int(exptime))'''
+    exptimelist = [5]
 
     os.chdir(observationDirectory)
     for tgt_exp in exptimelist:

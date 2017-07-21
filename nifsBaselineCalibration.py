@@ -100,7 +100,7 @@ def start(obsDirList, calDirList, over, start, stop):
                                 --->tellist (text file storing names of telluric object frames)
 
     """
-
+    a = raw_input("Pause: modify calDirList, telDirList, obsDirList, make Telluric directories, and move objlists to tellists now!")
     # Store current working directory for later use.
     path = os.getcwd()
     # Enable optional debugging pauses.
@@ -163,7 +163,7 @@ def start(obsDirList, calDirList, over, start, stop):
         pwdDir = os.getcwd()+"/"
         iraffunctions.chdir(pwdDir)
 
-        # However, don't do the reduction for a Calibration_"grating" directory without associated science data.
+        # However, don't do the reduction for a Calibration_"grating" directory without associated telluric or science data.
         # Check that a "grating" directory exists at the same level as the Calibrations_"grating" directory.
         # If not, skip the reduction of calibrations in that Calibrations_grating directory.
         # "grating" should be the last letter of calpath.
@@ -172,7 +172,7 @@ def start(obsDirList, calDirList, over, start, stop):
 
             print "\n##############################################################################"
             print ""
-            print "  No grating directory (including science data) found for  "
+            print "  No grating directory (including science or telluric data) found for  "
             print "  ", calpath
             print "  Skipping reduction of calibrations in that directory."
             print ""
