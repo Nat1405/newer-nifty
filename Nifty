@@ -167,7 +167,6 @@ def main():
         print 'H line removal method is', hline_method
         logging.info('H line removal method is %s', hline_method)
 
-
     # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
     if options.hinter==True:
         hlineinter = 'yes'
@@ -196,6 +195,17 @@ def main():
         fluxcal = 'no'
     print 'Flux calibrate is performed  ? ', fluxcal
     logging.info('Flux calibrate is performed ? %s', fluxcal)
+
+    print "\nEntering interactive options. Press enter to accept defaults. "
+    rstart = raw_input("Starting point of baseline calibration reductions? [1]: ")
+    rstart = rstart or 1
+    rstop = raw_input("Stopping point of baseline calibration reductions? [4]: ")
+    rstop = rstop or 4
+
+    start = raw_input("Starting point of science and telluric reductions? [1]: ")
+    start = start or 1
+    stop = raw_input("Stopping point of science and telluric reductions? [7]: ")
+    stop = stop or 7
 
 
     if sort:
