@@ -123,7 +123,7 @@ def main():
     fluxcal = options.fluxcal
     telinter = options.telinter
 
-    # If a date or program is provided set copy to True
+    # If a date or program is provided set copy to True. Used within Gemini network.
 
     if date or program:
         copy = True
@@ -206,6 +206,9 @@ def main():
     start = start or 1
     stop = raw_input("Stopping point of science and telluric reductions? [7]: ")
     stop = stop or 7
+
+    telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
+    telluric_correction_method = telluric_correction_method or "iraf"
 
 
     if sort:
@@ -294,7 +297,7 @@ def main():
             reduceScript.start(
                 telDirList, calDirList, start, stop, tel, telinter, fluxcal,\
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over\
-                )
+                telluric_correction_method)
 
     # Reduce the science images
     if sci:
@@ -303,7 +306,7 @@ def main():
             a = raw_input('About to enter reduce to reduce science images.')
         reduceScript.start(obsDirList, calDirList, start, stop, tel, telinter, fluxcal,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over\
-                           )
+                           telluric_correction_method)
 
     # Merge all cubes
     if merge:
