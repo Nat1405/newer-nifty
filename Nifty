@@ -60,7 +60,7 @@ def main():
     print "#              NIFTY               #"
     print "#   NIFS Date Reduction Pipeline   #"
     print "#          Version 1.1.1           #"
-    print "#         July 11th, 2017          #"
+    print "#         July 25th, 2017          #"
     print "#     Marie Lemoine-Busserolle     #"
     print "# Gemini Observatory, Hilo, Hawaii #"
     print "#                                  #"
@@ -82,7 +82,7 @@ def main():
     parser = OptionParser()
     parser.add_option('-d', '--date', dest='to', type='string', action='store', help='specify the date when the data were observed; e.g. YYYYMMDD (used ONLY within the GEMINI network)')
     parser.add_option('-p', '--program', dest = 'prog', type = 'string', action = 'store', help = 'specify the program number of the observed data; e.g. GN-2013B-Q-109 (used ONLY within the GEMINI network)')
-    parser.add_option('-q', '--path', dest='raw', type='string', action='store', help='specify the path of the directory where the raw files are stored; e.g. users/name/reduction/Raw')
+    parser.add_option('-q', '--path', dest='raw', type='string', action='store', help='specify the path of the rawPathectory where the raw files are stored; e.g. users/name/reduction/Raw')
     parser.add_option('-o', '--over', dest = 'over', default = False, action = 'store_true', help = 'overwrite old files')
     parser.add_option('-c', '--copy', dest = 'copy', default = False, action = 'store_true', help = 'copy raw data from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)')
     parser.add_option('-s', '--sort', dest = 'sort', default = True, action = 'store_false', help = 'sort data')
@@ -109,7 +109,7 @@ def main():
 
     date = options.to
     program = options.prog
-    dir = options.raw
+    rawPath = options.raw
     over = options.over
     copy = options.copy
     sort = options.sort
@@ -128,94 +128,70 @@ def main():
     if date or program:
         copy = True
 
-
-    # Set the starting step of calibrate reduction to 1
-    if not options.rstart:
-        rstart = 1
-    else:
-        rstart = options.rstart
-
-    # Set the stopping step of calibrate reduction to 6
-    if not options.rstop:
-        rstop = 4
-    else:
-        rstop = options.rstop
-
-    # Set the starting step of science reduction to 1
-    if not options.start:
-        start = 1
-    else:
-        start = options.start
-
-    # Set the stopping step of science reduction to 9
-    if not options.stop:
-        stop = 7
-    else:
-        stop = options.stop
-
-    print 'Starting point is', start
-    logging.info('Starting point is %s', start)
-
-    print 'Stopping point is', stop
-    logging.info('Stopping point is %s', stop)
-
-    # Set the H line removal method
-    if not options.hline_method:
-       hline_method = 'vega'
-    else:
-        hline_method = options.hline_method
-        print 'H line removal method is', hline_method
-        logging.info('H line removal method is %s', hline_method)
-
-    # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
-    if options.hinter==True:
-        hlineinter = 'yes'
-    else:
-        hlineinter = 'no'
-    print 'H line removal method is set to interactive ? ', hlineinter
-    logging.info('H line removal method is set to interactive ? %s', hlineinter)
-
-    if options.continter==True:
-        continuuminter = 'yes'
-    else:
-        continuuminter = 'no'
-    print 'telluric continuum fitting is set to interactive ? ', continuuminter
-    logging.info('telluric continuum fitting is set to interactive ? %s', continuuminter)
-
-    if options.telinter==True:
-        telinter = 'yes'
-    else:
-        telinter = 'no'
-    print 'telluric correction is set to interactive ? ', telinter
-    logging.info('telluric correction is set to interactive ? %s', telinter)
-
-    if options.fluxcal==True:
-        fluxcal = 'yes'
-    else:
-        fluxcal = 'no'
-    print 'Flux calibrate is performed  ? ', fluxcal
-    logging.info('Flux calibrate is performed ? %s', fluxcal)
-
+    # Ask the user about what reduction steps and substeps they would like to perform.
     print "\nEntering interactive options. Press enter to accept defaults. "
-    rstart = raw_input("Starting point of baseline calibration reductions? [1]: ")
-    rstart = rstart or 1
-    rstop = raw_input("Stopping point of baseline calibration reductions? [4]: ")
-    rstop = rstop or 4
+    # Major reduction steps and substeps
+    sort = raw_input("Sort data? [yes]: ")
+    sort = sort or "yes"
+    if sort == "yes":
+        rawPath = raw_input("Path to raw files directory? [~/data]: ")
+        rawPath = rawPath or "~/data"
+    tel = raw_input("Apply a telluric correction? [yes]: ")
+    tel = tel or "yes"
 
-    start = raw_input("Starting point of science and telluric reductions? [1]: ")
-    start = start or 1
-    stop = raw_input("Stopping point of science and telluric reductions? [7]: ")
-    stop = stop or 7
+    print "\nReduction options: "
+    # See if we want to reduce the baseline calibrations. And if so, which substeps
+    # to perform.
+    red = raw_input("Reduce baseline calibrations? [yes]: ")
+    red = red or "yes"
+    # By default do all of them.
+    if red == "yes":
+        rstart = raw_input("Starting point of baseline calibration reductions? [1]: ")
+        rstart = rstart or 1
+        rstop = raw_input("Stopping point of baseline calibration reductions? [4]: ")
+        rstop = rstop or 4
 
-    telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
-    telluric_correction_method = telluric_correction_method or "iraf"
+    # Check for tellurics as well; by default do all reduction steps.
+    telred = raw_input("Reduce telluric data? [yes]:")
+    telred = telred or "yes"
+    if telred == "yes":
+        telStart = raw_input("Starting point of science and telluric reductions? [1]: ")
+        telStart = telStart or 1
+        telStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
+        telStop = telStop or 7
+        # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
+        telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
+        telluric_correction_method = telluric_correction_method or "iraf"
+        # Set the h-line removal method with the vega() function in nifsReduce as default.
+        hline_method = raw_input("H-line removal method? [vega]: ")
+        hline_method = hline_method or "vega"
+        # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
+        hlineinter = raw_input("Interative H-line removal? [no]: ")
+        hlineinter = hlineinter or "no"
+        continuuminter = raw_input("Interative telluric continuum fitting? [no]:")
+        continuuminter = continuuminter or "no"
+        telinter = raw_input("Interactive telluric correction? [no]: ")
+        telinter = telinter or "no"
 
+    # Check for science as well; by default do all reduction steps.
+    sci = raw_input("Reduce science data? [yes]:")
+    sci = sci or "yes"
+        sciStart = raw_input("Starting point of science and telluric reductions? [1]: ")
+        sciStart = sciStart or 1
+        sciStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
+        sciStop = sciStop or 7
+
+    print "\nInsert interesting name here: "
+    fluxcal = raw_input("Do a flux calibration? [yes]:")
+    fluxcal = fluxcal or "yes"
+    merge = raw_input("Produce one final 3D cube? [yes]: ")
+    merge = merge or "yes"
 
     if sort:
         # Sort the data and calibrations.
         print '\n\nI am sorting the data.\n'
         logging.info(' I am sorting the data ')
-        obsDirList, calDirList, telDirList = sortScript.start(dir, tel, sort, over, copy, program, date)
+        obsDirList, calDirList, telDirList = sortScript.start(rawPath, tel, sort, over, copy, program, date)
 
         # Save the paths to files found in sorting in three text files for later use.
         # Remove textfiles from old runs to avoid extra entries.
@@ -281,21 +257,19 @@ def main():
         print calDirList[i]
 
     # Reduce the calibration data
-    print '\nI am reducing the calibration data. '
     if red:
         if debug:
             a = raw_input('About to enter calibrate.py')
         calibrateScript.start(obsDirList, calDirList, over, rstart, rstop)
 
     if tel:
-        # Reduce the telluric images
+        # Reduce the telluric frames.
         if debug:
             a = raw_input('About to enter reduce to reduce Telluric images, ',\
                            'create telluric correction spectrum and blackbody spectrum.')
-        print ' I am starting to reduce the telluric images '
         if telred:
             reduceScript.start(
-                telDirList, calDirList, start, stop, tel, telinter, fluxcal,\
+                telDirList, calDirList, telStart, telStop, tel, telinter, fluxcal,\
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over\
                 telluric_correction_method)
 
@@ -304,7 +278,7 @@ def main():
         print ' I am starting to reduce the science images '
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
-        reduceScript.start(obsDirList, calDirList, start, stop, tel, telinter, fluxcal,\
+        reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, fluxcal,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over\
                            telluric_correction_method)
 
