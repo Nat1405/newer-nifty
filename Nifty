@@ -9,47 +9,26 @@ import nifsReduce as reduceScript
 from nifs_defs import datefmt, writeList
 import logging, os
 
-
-#--------------------------------------------------------------------#
-#                                                                    #
-#                         Nifty.py                                   #
-#                                                                    #
-#     This is the python data reduction script for NIFS.             #
-#                                                                    #
-#     Calls the following scripts:                                   #
-#     nifs_sort.py                                                   #
-#     nifs_baseline_calibration.py                                   #
-#     nifs_reduce.py                                                 #
-#     nifs_merge.py                                                  #
-#                                                                    #
-#     Extra definitions in                                           #
-#     nifs_defs.py                                                   #
-#                                                                    #
-#     To run:                                                        #
-#     python Main.py *command line options* (see below)              #
-#     EXAMPLE: python Main.py -d 20121212                            #
-#                                                                    #
-#                                                                    #
-#     Version 1.1.1 - June 2017   Marie Lemoine-Busserolle           #
-#     mrlb05@googlemail.com                                          #
-#                                                                    #
-#--------------------------------------------------------------------#
-
-
+#                               +
+#
+#              +
+#         +         +         +
+#
+#                     +      +
 #
 #
+#      +       +   + + + + +    + + + +  + + + + +   +    +
+#     + +     +       +        +            +         + +
+#    +   +   +       +        + +          +           +
+#   +     + +       +        +            +           +
+#  +       +   + + + + +    +            +           +
 #
 #
+#                                      +
+#                                   +     +
 #
-#
-#
-#
-#    +
-#   +
-#  +
-# +
-#
-#
+#                                       +
+#                                      +
 #
 
 
@@ -67,11 +46,11 @@ def main():
     print "####################################\n"
 
 
-    # Format logging options
+    # Format logging options.
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
 
-    # Set up the logging file
+    # Set up the logging file.
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     logger = logging.getLogger()
     logging.info('Login file is Nifty.log')
@@ -106,6 +85,7 @@ def main():
     (options, args) = parser.parse_args()
 
     # Define command line options
+    # TODO: commandline option to skip interactive option selection.
 
     date = options.to
     program = options.prog
@@ -129,68 +109,99 @@ def main():
         copy = True
 
     # Ask the user about what reduction steps and substeps they would like to perform.
-    print "\nEntering interactive options. Press enter to accept defaults. "
-    # Major reduction steps and substeps
-    sort = raw_input("Sort data? [yes]: ")
-    sort = sort or "yes"
-    if sort == "yes":
-        rawPath = raw_input("Path to raw files directory? [~/data]: ")
-        rawPath = rawPath or "~/data"
-    tel = raw_input("Apply a telluric correction? [yes]: ")
-    tel = tel or "yes"
+    print "\nGood day! Press enter to accept default reduction options."
+    fullRun = raw_input("Do a full data reduction with default settings? [no]: ")
+    fullRun = fullRun or "no"
+    if fullRun == "no":
+        # "Select in". User has to turn individual steps on.
+        sort = raw_input("Sort data? [no]: ")
+        sort = sort or "no"
+        if sort == "yes":
+            rawPath = raw_input("Path to raw files directory? [~/data]: ")
+            rawPath = rawPath or "~/data"
+        tel = raw_input("Apply a telluric correction? [no]: ")
+        tel = tel or "no"
 
-    print "\nReduction options: "
-    # See if we want to reduce the baseline calibrations. And if so, which substeps
-    # to perform.
-    red = raw_input("Reduce baseline calibrations? [yes]: ")
-    red = red or "yes"
-    # By default do all of them.
-    if red == "yes":
-        rstart = raw_input("Starting point of baseline calibration reductions? [1]: ")
-        rstart = rstart or 1
-        rstop = raw_input("Stopping point of baseline calibration reductions? [4]: ")
-        rstop = rstop or 4
+        print "\nReduction options: "
+        # See if we want to reduce the baseline calibrations. And if so, which substeps
+        # to perform.
+        red = raw_input("Reduce baseline calibrations? [no]: ")
+        red = red or "no"
+        # By default do all of them.
+        if red == "yes":
+            rstart = raw_input("Starting point of baseline calibration reductions? [1]: ")
+            rstart = rstart or 1
+            rstop = raw_input("Stopping point of baseline calibration reductions? [4]: ")
+            rstop = rstop or 4
 
-    # Check for tellurics as well; by default do all reduction steps.
-    telred = raw_input("Reduce telluric data? [yes]:")
-    telred = telred or "yes"
-    if telred == "yes":
-        telStart = raw_input("Starting point of science and telluric reductions? [1]: ")
-        telStart = telStart or 1
-        telStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
-        telStop = telStop or 7
-        # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
-        telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
-        telluric_correction_method = telluric_correction_method or "iraf"
-        # Set the h-line removal method with the vega() function in nifsReduce as default.
-        hline_method = raw_input("H-line removal method? [vega]: ")
-        hline_method = hline_method or "vega"
-        # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
-        hlineinter = raw_input("Interative H-line removal? [no]: ")
-        hlineinter = hlineinter or "no"
-        continuuminter = raw_input("Interative telluric continuum fitting? [no]:")
-        continuuminter = continuuminter or "no"
-        telinter = raw_input("Interactive telluric correction? [no]: ")
-        telinter = telinter or "no"
+        # Check for tellurics as well; by default do all reduction steps.
+        telred = raw_input("Reduce telluric data? [no]:")
+        telred = telred or "no"
+        if telred == "yes":
+            telStart = raw_input("Starting point of science and telluric reductions? [1]: ")
+            telStart = telStart or 1
+            telStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
+            telStop = telStop or 7
+            # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
+            telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
+            telluric_correction_method = telluric_correction_method or "iraf"
+            # Set the h-line removal method with the vega() function in nifsReduce as default.
+            hline_method = raw_input("H-line removal method? [vega]: ")
+            hline_method = hline_method or "vega"
+            # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
+            hlineinter = raw_input("Interative H-line removal? [no]: ")
+            hlineinter = hlineinter or "no"
+            continuuminter = raw_input("Interative telluric continuum fitting? [no]:")
+            continuuminter = continuuminter or "no"
+            telinter = raw_input("Interactive telluric correction? [no]: ")
+            telinter = telinter or "no"
 
-    # Check for science as well; by default do all reduction steps.
-    sci = raw_input("Reduce science data? [yes]:")
-    sci = sci or "yes"
-        sciStart = raw_input("Starting point of science and telluric reductions? [1]: ")
-        sciStart = sciStart or 1
-        sciStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
-        sciStop = sciStop or 7
+        # Check for science as well; by default do all reduction steps.
+        sci = raw_input("Reduce science data? [no]:")
+        sci = sci or "no"
+        if sci == "yes":
+            sciStart = raw_input("Starting point of science and telluric reductions? [1]: ")
+            sciStart = sciStart or 1
+            sciStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
+            sciStop = sciStop or 7
 
-    print "\nInsert interesting name here: "
-    fluxcal = raw_input("Do a flux calibration? [yes]:")
-    fluxcal = fluxcal or "yes"
-    merge = raw_input("Produce one final 3D cube? [yes]: ")
-    merge = merge or "yes"
+        fluxcal = raw_input("Do a flux calibration? [no]:")
+        fluxcal = fluxcal or "no"
+        merge = raw_input("Produce one final 3D cube? [no]: ")
+        merge = merge or "no"
 
+    else:
+        # Use default options provided here to attempt a data reduction.
+        sort = "yes"
+        if sort == "yes":
+            rawPath = raw_input("Path to raw files directory? [~/data]: ")
+            rawPath = rawPath or "~/data"
+        tel = tel or "yes"
+
+        red = "yes"
+        # By default do all of them.
+        if red == "yes":
+            rstart = 1
+            rstop = 4
+
+        telred = "yes"
+        if telred == "yes":
+            telStart = 1
+            telStop = 7
+            telluric_correction_method = telluric_correction_method or "iraf"
+            hline_method = "vega"
+            hlineinter = "no"
+            continuuminter = "no"
+            telinter = "no"
+
+    # Print user parameters for future reference.
+    # TODO
+    # Save user variables to a text file to enable re-launch with last settings.
+
+
+    # Begin running indivual reduction scripts.
     if sort:
         # Sort the data and calibrations.
-        print '\n\nI am sorting the data.\n'
-        logging.info(' I am sorting the data ')
         obsDirList, calDirList, telDirList = sortScript.start(rawPath, tel, sort, over, copy, program, date)
 
         # Save the paths to files found in sorting in three text files for later use.
@@ -270,21 +281,19 @@ def main():
         if telred:
             reduceScript.start(
                 telDirList, calDirList, telStart, telStop, tel, telinter, fluxcal,\
-                continuuminter, hlineinter, hline_method, spectemp, mag ,over\
+                continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                 telluric_correction_method)
 
     # Reduce the science images
     if sci:
-        print ' I am starting to reduce the science images '
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
         reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, fluxcal,\
-                           continuuminter, hlineinter, hline_method, spectemp, mag ,over\
+                           continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                            telluric_correction_method)
 
     # Merge all cubes
     if merge:
-        print ' I am starting to merge all cubes '
         if debug:
             a = raw_input('About to enter merge to merge cubes.')
         mergeScript.start(obsDirList, over)
