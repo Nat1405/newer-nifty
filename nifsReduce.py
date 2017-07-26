@@ -1580,8 +1580,6 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     h = 6.62618e-34
     k = 1.3807e-23
 
-    flambda = lambda x, T: (2.*h*(c**2)*(x**(-5)))/((np.exp((h*c)/(x*k*T)))-1)
-
     print 'Input Standard spectrum for flux calibration is ', combined_extracted_1d_spectra
 
     if os.path.exists('c'+combined_extracted_1d_spectra+'.fits'):
@@ -1592,63 +1590,63 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
             os.remove('c'+combined_extracted_1d_spectra+'.fits')
             pass
 
-    extracted_combined_1d_spectra_header = pyfits.open(combined_extracted_1d_spectra+'.fits')
-    band = extracted_combined_1d_spectra_header[0].header['GRATING'][0]
-    exptime = float(extracted_combined_1d_spectra_header[0].header['EXPTIME'])
-    telfilter = extracted_combined_1d_spectra_header[0].header['FILTER']
-
-    final_tel_no_hlines_no_norm = pyfits.open('final_tel_no_hlines_no_norm'+band+'.fits')
-
-    # Create a 1 dimensional array to hold a 1 dimensional spectra.
-    # Make it as long as the array that holds the combined_extracted_1d_spectra from
-    # iraf.nfextract.
-    # Start at a wavelength found in the
-    telwave = np.zeros(extracted_combined_1d_spectra_header[1].header['NAXIS1'])
-    wstart = extracted_combined_1d_spectra_header[1].header['CRVAL1']
-    wdelt = extracted_combined_1d_spectra_header[1].header['CD1_1']
-    for i in range(len(telwave)):
-        telwave[i] = wstart+(i*wdelt)
-
-
-    # Create a function; f0.
-    f0emp = lambda p, T: p[0]*np.log(T)**2+p[1]*np.log(T)+p[2]
-
-    if 'HK' in telfilter:
-        coeff =[1.97547589e-02, -4.19035839e-01, -2.30083083e+01]
-        effective_target_wavelength = 22000.
-    if 'JH' in telfilter:
-        coeff = [1.97547589e-02, -4.19035839e-01,  -2.30083083e+01]
-        effective_target_wavelength = 15700.
-    if 'ZJ' in telfilter:
-        coeff = [0.14903624, -3.14636068, -9.32675924]
-        effective_target_wavelength = 11100.
-
-    f0 = np.exp(f0emp(coeff, T))
+    combined_extracted_1d_spectra_ = pyfits.open(combined_extracted_1d_spectra+'.fits')
+    band = combined_extracted_1d_spectra_[0].header['GRATING'][0]
+    exptime = float(combined_extracted_1d_spectra_[0].header['EXPTIME'])
+    telfilter = combined_extracted_1d_spectra_[0].header['FILTER']
 
     # Create a black body spectrum at a given temperature.
-    # First define a function of wavelength and T...
-    blackbodyFunction = lambda x, T: (2.*h*(c**2)*(x**(-5)))/((np.exp((h*c)/(x*k*T)))-1)
-    # Then apply that function to each element of empty 1D spectrum (a 1D array).
-    blackbodySpectrum = (blackbodyFunction(telwave*1e-10, T))*1e-7
-
-    effective_target_wavelength = extracted_combined_1d_spectra_header[0].header['WAVELENG']
-    effective_target_wavelength_index = np.where(telwave==min(telwave, key=lambda x:abs(x-effective_target_wavelength)))
+    # Create a 1D array equal in length to the nfextracted 1d spectrum. Eg: length == 2040
+    bb_spectrum_wavelengths = np.zeros(combined_extracted_1d_spectra_[1].header['NAXIS1'])
+    # Find the wavelength at the start of the nfextracted 1d spectrum.
+    wstart = combined_extracted_1d_spectra_[1].header['CRVAL1']
+    # Find the change in wavelength with each pixel of the nfextracted 1d spectrum.
+    wdelt = combined_extracted_1d_spectra_[1].header['CD1_1']
+    # Starting at wstart, at intervals of wdelt, write a wavelength into each element of bb_spectrum_wavelengths.
+    for i in range(len(bb_spectrum_wavelengths)):
+        bb_spectrum_wavelengths[i] = wstart+(i*wdelt)
+    # Find the central wavelength of the original nfextracted and combined 1d spectra.
+    # We will use this later to scale the ouput spectrum of dividing by the blackbody back to the units of
+    # the original observed star spectrum.
+    central_wavelength = combined_extracted_1d_spectra_[0].header['WAVELENG']
+    # Find the index of of the blackbody spectrum array (and hence also the final efficiency
+    # spectrum array) that corresponds to the central wavelength.
+    central_wavelength_index = np.where(bb_spectrum_wavelengths==min(bb_spectrum_wavelengths, key=lambda x:abs(x-central_wavelength)))
+    # Define a function of wavelength and T...
+    blackbodyFunction = lambda x, T: (2.*h*(c**2)*(x**(-5))) / ( (np.exp((h*c)/(x*k*T))) - 1 )
+    # Evaluate that function at each wavelength of the bb_spectrum_wavelengths array, at the temperature of the standard star.
+    blackbodySpectrum = (blackbodyFunction(bb_spectrum_wavelengths*1e-10, T))*1e-7
 
     # Divide final telluric correction spectrum by blackbody spectrum.
-    tel_bb = final_tel_no_hlines_no_norm[0].data/blackbodySpectrum
+    final_telluric = pyfits.open('final_tel_no_hlines_no_norm'+band+'.fits')
+    tel_bb = final_telluric[0].data/blackbodySpectrum
 
-    cs =  final_tel_no_hlines_no_norm[0].data[effective_target_wavelength_index[0]]
-    csb = tel_bb[effective_target_wavelength_index[0]]
+    # Calculate the f0 constant.
+    # Begin to create the function to calculate the f0 constant.
+    f0FunctionIncomplete = lambda p, T: p[0]*(np.log(T)**2)+p[1]*np.log(T)+p[2]
 
+    # Look up the coefficients for the appropriate filter.
+    if 'HK' in telfilter:
+        coeff =[1.97547589e-02, -4.19035839e-01, -2.30083083e+01]
+        central_wavelength = 22000.
+    if 'JH' in telfilter:
+        coeff = [1.97547589e-02, -4.19035839e-01,  -2.30083083e+01]
+        central_wavelength = 15700.
+    if 'ZJ' in telfilter:
+        coeff = [0.14903624, -3.14636068, -9.32675924]
+        central_wavelength = 11100.
+
+    # Evaluate the function at the given temperature and coefficients to return a constant. Return e**result as the f0 constant.
+    f0 = np.exp(f0FunctionIncomplete(coeff, T))
 
     print "1", tel_bb, "2", exptime, "3", cs, "4", csb, "5", mag, "6", f0
 
-    effspec =  (tel_bb/exptime)*(cs/csb)*(10**(0.4*mag))*(f0)**-1
+    effspec =  (tel_bb/exptime)*(final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]])*(10**(0.4*mag))*(f0)**-1
 
-    # Modify data of final_tel_no_hlines_no_norm.
-    extracted_combined_1d_spectra_header[1].data = effspec
-    # Copy modified final_tel_no_hlines_no_norm to cgx... .fits.
-    extracted_combined_1d_spectra_header.writeto('c'+combined_extracted_1d_spectra+'.fits',  output_verify='ignore')
+    # Modify our working copy of the original extracted 1d spectrum. Note though that we aren't permanently writing these changes to disk.
+    combined_extracted_1d_spectra_[1].data = effspec
+    # Don't write our changes to the original extracted 1d spectra; write them to a new file, 'c'+combined...+'.fits'.
+    combined_extracted_1d_spectra.writeto('c'+combined_extracted_1d_spectra+'.fits',  output_verify='ignore')
     writeList('c'+combined_extracted_1d_spectra, 'finalcorrectionspectrum', telDir)
 
 #-------------------------------------------------------------------------------#
