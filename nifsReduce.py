@@ -22,7 +22,7 @@ import sgmllib
 import urllib, sgmllib
 import re
 import traceback
-import matplotlib.sciplot as plt
+import matplotlib.pyplot as plt
 # Import custom Nifty functions.
 from nifs_defs import datefmt, listit, writeList, checkLists, writeCenters, makeSkyList, MEFarith, convertRAdec
 

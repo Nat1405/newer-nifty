@@ -1,4 +1,6 @@
 {
+    "__version__": "1.1.1",
+    "startTime": null,
     "sci": "yes",
     "mag": false,
     "over": false,
@@ -7,7 +9,7 @@
     "fluxcal": "yes",
     "tel": "yes",
     "telinter": false,
-    "telluric_correction_method": "python",
+    "telluric_correction_method": "iraf",
     "telStop": 7,
     "continuuminter": false,
     "telStart": 1,
