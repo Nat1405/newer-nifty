@@ -8,6 +8,7 @@ import nifsBaselineCalibration as calibrateScript
 import nifsReduce as reduceScript
 from nifs_defs import datefmt, writeList
 import logging, os
+import json
 
 #                               +
 #
@@ -87,7 +88,7 @@ def main():
     # Define command line options
     # TODO: commandline option to skip interactive option selection.
 
-    date = options.to
+    """date = options.to
     program = options.prog
     rawPath = options.raw
     over = options.over
@@ -101,7 +102,33 @@ def main():
     spectemp = options.spectemp
     mag = options.mag
     fluxcal = options.fluxcal
-    telinter = options.telinter
+    telinter = options.telinter"""
+
+    date = None
+    program = None
+    rawPath = None
+    over = False
+    copy = False
+    sort = False
+    red = False
+    sci = False
+    merge = False
+    tel = False
+    telred = False
+    spectemp = False
+    mag = False
+    fluxcal = False
+    rstart = False
+    rstop = False
+    telStart = False
+    telStop = False
+    sciStart = False
+    sciStop = False
+    hline_method = False
+    hline_inter = False
+    continuuminter = False
+    telluric_correction_method = False
+    telinter = False
 
     # If a date or program is provided set copy to True. Used within Gemini network.
 
@@ -110,92 +137,154 @@ def main():
 
     # Ask the user about what reduction steps and substeps they would like to perform.
     print "\nGood day! Press enter to accept default reduction options."
-    fullRun = raw_input("Do a full data reduction with default settings? [no]: ")
-    fullRun = fullRun or "no"
-    if fullRun == "no":
-        # "Select in". User has to turn individual steps on.
-        sort = raw_input("Sort data? [no]: ")
-        sort = sort or "no"
-        if sort == "yes":
-            rawPath = raw_input("Path to raw files directory? [~/data]: ")
-            rawPath = rawPath or "~/data"
-        tel = raw_input("Apply a telluric correction? [no]: ")
-        tel = tel or "no"
+    repeat = raw_input("Repeat? [no]: ")
+    if not repeat:
+        fullRun = raw_input("Do a full data reduction with default settings? [no]: ")
+        fullRun = fullRun or "no"
+        if fullRun == "no":
+            # "Select in". User has to turn individual steps on.
+            sort = raw_input("Sort data? [no]: ")
+            sort = sort or False
+            if sort == "yes":
+                rawPath = raw_input("Path to raw files directory? [~/data]: ")
+                rawPath = rawPath or "~/data"
+            tel = raw_input("Apply a telluric correction? [no]: ")
+            tel = tel or False
 
-        print "\nReduction options: "
-        # See if we want to reduce the baseline calibrations. And if so, which substeps
-        # to perform.
-        red = raw_input("Reduce baseline calibrations? [no]: ")
-        red = red or "no"
-        # By default do all of them.
-        if red == "yes":
+            print "\nReduction options: "
+            # See if we want to reduce the baseline calibrations. And if so, which substeps
+            # to perform.
+            red = raw_input("Reduce baseline calibrations? [no]: ")
+            red = red or False
+            # By default do all of them.
             rstart = raw_input("Starting point of baseline calibration reductions? [1]: ")
             rstart = rstart or 1
             rstop = raw_input("Stopping point of baseline calibration reductions? [4]: ")
             rstop = rstop or 4
 
-        # Check for tellurics as well; by default do all reduction steps.
-        telred = raw_input("Reduce telluric data? [no]:")
-        telred = telred or "no"
-        if telred == "yes":
+            # Check for tellurics as well; by default do all reduction steps.
+            telred = raw_input("Reduce telluric data? [no]:")
+            telred = telred or False
             telStart = raw_input("Starting point of science and telluric reductions? [1]: ")
             telStart = telStart or 1
             telStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
             telStop = telStop or 7
             # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
-            telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
-            telluric_correction_method = telluric_correction_method or "iraf"
             # Set the h-line removal method with the vega() function in nifsReduce as default.
             hline_method = raw_input("H-line removal method? [vega]: ")
             hline_method = hline_method or "vega"
             # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
             hlineinter = raw_input("Interative H-line removal? [no]: ")
-            hlineinter = hlineinter or "no"
+            hlineinter = hlineinter or False
             continuuminter = raw_input("Interative telluric continuum fitting? [no]:")
-            continuuminter = continuuminter or "no"
+            continuuminter = continuuminter or False
+            telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
+            telluric_correction_method = telluric_correction_method or "iraf"
             telinter = raw_input("Interactive telluric correction? [no]: ")
-            telinter = telinter or "no"
-
-        # Check for science as well; by default do all reduction steps.
-        sci = raw_input("Reduce science data? [no]:")
-        sci = sci or "no"
-        if sci == "yes":
+            telinter = telinter or False
+            # Check for science as well; by default do all reduction steps.
+            sci = raw_input("Reduce science data? [no]:")
+            sci = sci or False
             sciStart = raw_input("Starting point of science and telluric reductions? [1]: ")
             sciStart = sciStart or 1
             sciStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
             sciStop = sciStop or 7
 
-        fluxcal = raw_input("Do a flux calibration? [no]:")
-        fluxcal = fluxcal or "no"
-        merge = raw_input("Produce one final 3D cube? [no]: ")
-        merge = merge or "no"
+            fluxcal = raw_input("Do a flux calibration? [no]:")
+            fluxcal = fluxcal or False
+            merge = raw_input("Produce one final 3D cube? [no]: ")
+            merge = merge or False
+
+            # Serialize and save the options as a json file.
+            options = {}
+            options['date'] = date
+            options['program'] = program
+            options['rawPath'] = rawPath
+            options['over'] = over
+            options['copy'] = copy
+            options['sort'] = sort
+            options['red'] = red
+            options['sci'] = sci
+            options['merge'] = merge
+            options['tel'] = tel
+            options['telred'] = telred
+            options['spectemp'] = spectemp
+            options['mag'] = mag
+            options['fluxcal'] = fluxcal
+            options['rstart']= rstart
+            options['rstop'] = rstop
+            options['telStart'] = telStart
+            options['telStop'] = telStop
+            options['sciStart'] = sciStart
+            options['sciStop'] = sciStop
+            options['hline_method'] = hline_method
+            options['hlineinter'] = hlineinter
+            options['continuuminter'] = continuuminter
+            options['telluric_correction_method'] = telluric_correction_method
+            options['telinter'] = telinter
+            with open('user_options.txt', 'w') as outfile:
+                json.dump(options, outfile, indent=4)
+
+
+        else:
+            # Use default options provided here to attempt a data reduction.
+            sort = "yes"
+            if sort == "yes":
+                rawPath = raw_input("Path to raw files directory? [~/data]: ")
+                rawPath = rawPath or "~/data"
+            tel = tel or "yes"
+
+            red = "yes"
+            # By default do all of them.
+            if red == "yes":
+                rstart = 1
+                rstop = 4
+
+            telred = "yes"
+            if telred == "yes":
+                telStart = 1
+                telStop = 7
+                telluric_correction_method = telluric_correction_method or "iraf"
+                hline_method = "vega"
+                hlineinter = False
+                continuuminter = False
+                telinter = False
 
     else:
-        # Use default options provided here to attempt a data reduction.
-        sort = "yes"
-        if sort == "yes":
-            rawPath = raw_input("Path to raw files directory? [~/data]: ")
-            rawPath = rawPath or "~/data"
-        tel = tel or "yes"
-
-        red = "yes"
-        # By default do all of them.
-        if red == "yes":
-            rstart = 1
-            rstop = 4
-
-        telred = "yes"
-        if telred == "yes":
-            telStart = 1
-            telStop = 7
-            telluric_correction_method = telluric_correction_method or "iraf"
-            hline_method = "vega"
-            hlineinter = "no"
-            continuuminter = "no"
-            telinter = "no"
+        # Read options from last run from save file
+        with open('user_options.txt') as json_file:
+            options = json.load(json_file)
+            date = options['date']
+            program = options['program']
+            rawPath = options['rawPath']
+            over = options['over']
+            copy = options['copy']
+            sort = options['sort']
+            red = options['red']
+            sci = options['sci']
+            merge = options['merge']
+            tel = options['tel']
+            telred = options['telred']
+            spectemp = options['spectemp']
+            mag = options['mag']
+            fluxcal = options['fluxcal']
+            rstart = options['rstart']
+            rstop = options['rstop']
+            telStart = options['telStart']
+            telStop = options['telStop']
+            sciStart = options['sciStart']
+            sciStop = options['sciStop']
+            hline_method = options['hline_method']
+            hlineinter = options['hlineinter']
+            continuuminter = options['continuuminter']
+            telluric_correction_method = options['telluric_correction_method']
+            telinter = options['telinter']
 
     # Print user parameters for future reference.
-    # TODO
+    print "\nUser parameters for this run (can also be found in user_parameters.txt):"
+    for i in options:
+        print i, options[i]
+    print ""
     # Save user variables to a text file to enable re-launch with last settings.
 
 

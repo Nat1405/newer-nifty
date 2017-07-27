@@ -11,8 +11,8 @@ import time
 import logging
 import pexpect as p
 from pyraf import iraf, iraffunctions
-import pyfits
-from pyfits import getdata, getheader
+import astropy.io.fits
+from astropy.io.fits import getdata, getheader
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy import arange, array, exp
@@ -214,7 +214,7 @@ def start(
         # Check start and stop values for reduction steps. Ask user for a correction if
         # input is not valid.
         valindex = start
-        while valindex > stop  or valindex < 1 or stop > 10:
+        while valindex > stop  or valindex < 1 or stop > 7:
             print "\n#####################################################################"
             print "#####################################################################"
             print ""
@@ -329,7 +329,7 @@ def start(
                 print "\n##############################################################################"
                 print ""
                 print "  STEP 5: Derive or apply telluric correction and make"
-                print "          a data cube ->gxtfbrsgn or ->catgbrsgn - COMPLETED""
+                print "          a data cube ->gxtfbrsgn or ->catgbrsgn - COMPLETED"
                 print ""
                 print "##############################################################################\n"
 
@@ -348,7 +348,7 @@ def start(
 
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 9: Create a 3D cube from science data ->ctfbrsgn - COMPLETED "
+                print "  STEP 6: Create a 3D cube from science data ->ctfbrsgn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
@@ -363,7 +363,7 @@ def start(
                             hline_method, spectemp, mag, log, over)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 10: Perform a flux calibration ->fcatfbrsgn or ->fctfbrsgn - COMPLETED "
+                print "  STEP 7: Perform a flux calibration ->fcatfbrsgn or ->fctfbrsgn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
@@ -600,7 +600,7 @@ def makeCube(pre, objlist, tel, observationDirectory, log, over):
                 continue
         if tel:
             iraf.nifcube (pre+frame, outcubes = 'c'+pre+frame, logfile=log)
-            hdulist = pyfits.open('c'+pre+frame+'.fits', mode = 'update')
+            hdulist = astropy.io.fits.open('c'+pre+frame+'.fits', mode = 'update')
 #            hdulist.info()
             exptime = hdulist[0].header['EXPTIME']
             cube = hdulist[1].data
@@ -665,7 +665,7 @@ def applyTelluricPython(over):
     os.chdir('../Tellurics')
     telDirList_temp = glob.glob('*')
 
-    tempDir = os.path.split(obsDir)
+    tempDir = os.path.split(observationDirectory)
     telDirList = []
     for telDir in telDirList_temp:
         telDirList.append(tempDir[0]+'/Tellurics/'+telDir)
@@ -848,11 +848,14 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
                     if os.path.exists("atfbrsn"+scienceList[i]+".fits"):
                         if over:
                             iraf.delete("atfbrsgn"+scienceList[i]+".fits")
-                            iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', calspec=telluric, fl_inter = telinter, logfile=log)
+                            iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', xc=15.0, yc=33.0, calspec=telluric, fl_inter = telinter, logfile=log)
                         else:
                             print "Output file exists and -over not set - skipping nftelluric in applyTelluric"
                     elif not os.path.exists('atfbrsn'+scienceList[i]+'.fits'):
-                        iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', calspec=telluric, fl_inter = telinter, logfile=log)
+                        print '\ntfbrsn'+scienceList[i]
+                        print telluric
+                        print telinter
+                        iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', xc=15.0, yc=33.0, calspec=telluric, fl_inter = telinter, logfile=log)
 
                     '''
                     # remove continuum fit from reduced science image
@@ -867,7 +870,7 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
 
                     # multiply science by blackbody
                     for bb in bblist:
-                        objheader = pyfits.open(observationDirectory+'/'+scienceList[i]+'.fits')
+                        objheader = astropy.io.fits.open(observationDirectory+'/'+scienceList[i]+'.fits')
                         exptime = objheader[0].header['EXPTIME']
                         if str(int(exptime)) in bb:
                             if over:
@@ -946,7 +949,7 @@ def createEfficiencySpectrum(
         return
     """
 
-    telheader = pyfits.open(combined_extracted_1d_spectra+'.fits')
+    telheader = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
     band = telheader[0].header['GRATING'][0]
     RA = telheader[0].header['RA']
     Dec = telheader[0].header['DEC']
@@ -972,11 +975,11 @@ def createEfficiencySpectrum(
     print "  STEP 7b - Find standard star information - COMPLETED "
     print "            Contents of starfile:\n"
     print "Band:   Magnitude:   Temperature:"
-    if data.find('!starfile') != -1:
+    """if data.find('!starfile') != -1:
         f = open('starfile')
         for line in f:
             print line,
-        f.close()
+        f.close()"""
     print ""
     print "##############################################################################\n"
 
@@ -1017,7 +1020,7 @@ def createEfficiencySpectrum(
 
     # make a list of exposure times from the science images that use this standard star spectrum for the telluric correction
     # used to make flux calibrated blackbody spectra
-    '''objtellist = open('objtellist', 'r').readlines()
+    objtellist = open('objtellist', 'r').readlines()
     objtellist = [frame.strip() for frame in objtellist]
     exptimelist = []
     for item in objtellist:
@@ -1025,11 +1028,10 @@ def createEfficiencySpectrum(
             os.chdir(telluricDirectory)
             os.chdir('../../'+item)
         else:
-            objheader = pyfits.open(item+'.fits')
+            objheader = astropy.io.fits.open(item+'.fits')
             exptime = objheader[0].header['EXPTIME']
             if not exptimelist or exptime not in exptimelist:
-                exptimelist.append(int(exptime))'''
-    exptimelist = [5]
+                exptimelist.append(int(exptime))
 
     os.chdir(telluricDirectory)
     for tgt_exp in exptimelist:
@@ -1039,20 +1041,18 @@ def createEfficiencySpectrum(
         #Extract stellar temperature from std_star.txt file , for use in making blackbody
         star_kelvin = float(lines[0].replace('\n','').split()[3])
         #Extract mag from std_star.txt file and convert to erg/cm2/s/A, for a rough flux scaling
-        try:
-            #find out if a matching band mag exists in std_star.txt
-            if band == 'K':
-                star_mag = lines[0].replace('\n','').split()[2]
-                star_mag = float(star_mag)
-            if band == 'H':
-                star_mag = lines[1].replace('\n','').split()[2]
-                star_mag = float(star_mag)
-            if band == 'J':
-                star_mag = lines[2].replace('\n','').split()[2]
-                star_mag = float(star_mag)
-            print "flambda=", flambda
-
-        except:
+        #find out if a matching band mag exists in std_star.txt
+        print "Band = ", band
+        if band == 'K':
+            star_mag = lines[0].replace('\n','').split()[2]
+            star_mag = float(star_mag)
+        elif band == 'H':
+            star_mag = lines[1].replace('\n','').split()[2]
+            star_mag = float(star_mag)
+        elif band == 'J':
+            star_mag = lines[2].replace('\n','').split()[2]
+            star_mag = float(star_mag)
+        else:
             #if not then just set to 1; no relative flux cal. attempted
             print "\nNo ", band, " magnitude found for this star. A relative flux ",\
                                  "calibration will be performed.\n"
@@ -1087,7 +1087,7 @@ def extrap1d(interpolator):
 def readCube(cube):
 
     # read cube into an HDU list
-    cube = pyfits.open(cube)
+    cube = astropy.io.fits.open(cube)
 
     # find the starting wavelength and the wavelength increment from the science header of the cube
     wstart = cube[1].header['CRVAL3']
@@ -1107,7 +1107,7 @@ def readSpec(spectrum, MEF=True):
     if MEF:
 
         # open the spectrum as an HDU list
-        spec = pyfits.open(spectrum)
+        spec = astropy.io.fits.open(spectrum)
 
         # find the starting wavelength and the wavelength increment from the science header
         wstart = spec[1].header['CRVAL1']
@@ -1116,7 +1116,7 @@ def readSpec(spectrum, MEF=True):
     else:
 
         # open the spectrum as an HDU list
-        spec = pyfits.open(spectrum)
+        spec = astropy.io.fits.open(spectrum)
 
         # find the starting wavelength and the wavelength increment from the science header
         wstart = spec[0].header['CRVAL1']
@@ -1590,25 +1590,25 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
             os.remove('c'+combined_extracted_1d_spectra+'.fits')
             pass
 
-    combined_extracted_1d_spectra_ = pyfits.open(combined_extracted_1d_spectra+'.fits')
-    band = combined_extracted_1d_spectra_[0].header['GRATING'][0]
-    exptime = float(combined_extracted_1d_spectra_[0].header['EXPTIME'])
-    telfilter = combined_extracted_1d_spectra_[0].header['FILTER']
+    combined_spectra_file = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
+    band = combined_spectra_file[0].header['GRATING'][0]
+    exptime = float(combined_spectra_file[0].header['EXPTIME'])
+    telfilter = combined_spectra_file[0].header['FILTER']
 
     # Create a black body spectrum at a given temperature.
     # Create a 1D array equal in length to the nfextracted 1d spectrum. Eg: length == 2040
-    bb_spectrum_wavelengths = np.zeros(combined_extracted_1d_spectra_[1].header['NAXIS1'])
+    bb_spectrum_wavelengths = np.zeros(combined_spectra_file[1].header['NAXIS1'])
     # Find the wavelength at the start of the nfextracted 1d spectrum.
-    wstart = combined_extracted_1d_spectra_[1].header['CRVAL1']
+    wstart = combined_spectra_file[1].header['CRVAL1']
     # Find the change in wavelength with each pixel of the nfextracted 1d spectrum.
-    wdelt = combined_extracted_1d_spectra_[1].header['CD1_1']
+    wdelt = combined_spectra_file[1].header['CD1_1']
     # Starting at wstart, at intervals of wdelt, write a wavelength into each element of bb_spectrum_wavelengths.
     for i in range(len(bb_spectrum_wavelengths)):
         bb_spectrum_wavelengths[i] = wstart+(i*wdelt)
     # Find the central wavelength of the original nfextracted and combined 1d spectra.
     # We will use this later to scale the ouput spectrum of dividing by the blackbody back to the units of
     # the original observed star spectrum.
-    central_wavelength = combined_extracted_1d_spectra_[0].header['WAVELENG']
+    central_wavelength = combined_spectra_file[0].header['WAVELENG']
     # Find the index of of the blackbody spectrum array (and hence also the final efficiency
     # spectrum array) that corresponds to the central wavelength.
     central_wavelength_index = np.where(bb_spectrum_wavelengths==min(bb_spectrum_wavelengths, key=lambda x:abs(x-central_wavelength)))
@@ -1618,7 +1618,9 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     blackbodySpectrum = (blackbodyFunction(bb_spectrum_wavelengths*1e-10, T))*1e-7
 
     # Divide final telluric correction spectrum by blackbody spectrum.
-    final_telluric = pyfits.open('final_tel_no_hlines_no_norm'+band+'.fits')
+    final_telluric = astropy.io.fits.open('final_tel_no_hlines_no_norm'+band+'.fits')
+    # Multiply by the gain to go from ADU to counts.
+    final_telluric[0].data *= 2.8
     tel_bb = final_telluric[0].data/blackbodySpectrum
 
     # Calculate the f0 constant.
@@ -1639,14 +1641,18 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     # Evaluate the function at the given temperature and coefficients to return a constant. Return e**result as the f0 constant.
     f0 = np.exp(f0FunctionIncomplete(coeff, T))
 
-    print "1", tel_bb, "2", exptime, "3", cs, "4", csb, "5", mag, "6", f0
+    print tel_bb
+    print exptime
+    print (final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]])
+    print (10**(0.4*mag))
+    print (f0)**-1
 
     effspec =  (tel_bb/exptime)*(final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]])*(10**(0.4*mag))*(f0)**-1
 
     # Modify our working copy of the original extracted 1d spectrum. Note though that we aren't permanently writing these changes to disk.
-    combined_extracted_1d_spectra_[1].data = effspec
+    combined_spectra_file[1].data = effspec
     # Don't write our changes to the original extracted 1d spectra; write them to a new file, 'c'+combined...+'.fits'.
-    combined_extracted_1d_spectra.writeto('c'+combined_extracted_1d_spectra+'.fits',  output_verify='ignore')
+    combined_spectra_file.writeto('c'+combined_extracted_1d_spectra+'.fits',  output_verify='ignore')
     writeList('c'+combined_extracted_1d_spectra, 'finalcorrectionspectrum', telDir)
 
 #-------------------------------------------------------------------------------#

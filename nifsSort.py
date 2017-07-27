@@ -4,7 +4,7 @@
 from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
-import pyfits
+import astropy.io.fits
 import os, shutil, glob, math, logging
 import numpy as np
 # Import custom Nifty functions.
@@ -225,7 +225,7 @@ def makeSortFiles(dir):
     for entry in rawfiles:
 
         # Open the .fits header.
-        header = pyfits.open(entry)
+        header = astropy.io.fits.open(entry)
 
         # Store information in variables.
         obstype = header[0].header['OBSTYPE'].strip()
@@ -289,7 +289,7 @@ def makeSortFiles(dir):
                 # Only use lamps on ronchi flat frames.
                 # Open the image and store pixel values in an array and
                 # take the mean of all pixel values.
-                array = pyfits.getdata(entry)
+                array = astropy.io.fits.getdata(entry)
                 mean_counts = np.mean(array)
 
                 # Once the mean is stored in mean_counts we can check whether the
@@ -303,7 +303,7 @@ def makeSortFiles(dir):
             else:
                 # Open the image and store pixel values in an array and
                 # take the mean of all pixel values.
-                array = pyfits.getdata(entry)
+                array = astropy.io.fits.getdata(entry)
                 mean_counts = np.mean(array)
 
                 # Once the mean is stored in mean_counts we can check whether the
@@ -317,7 +317,7 @@ def makeSortFiles(dir):
     # Based on science (including sky) frames, make a list of unique [object, date] list pairs to be used later.
     for i in range(len(rawfiles)):
 
-        header = pyfits.open(rawfiles[i])
+        header = astropy.io.fits.open(rawfiles[i])
         date = header[0].header['DATE'].replace('-','')
         obsclass = header[0].header['OBSCLASS']
         obj = header[0].header['OBJECT'].replace(' ', '')
@@ -336,7 +336,7 @@ def makeSortFiles(dir):
     # This is so we can sort calibrations later by date and observation id.
     n = 0
     for flat in flatlist:
-        header = pyfits.open(flat)
+        header = astropy.io.fits.open(flat)
         obsid = header[0].header['OBSID']
         date = header[0].header['DATE'].replace('-','')
         # Make sure no duplicate dates are being entered.
@@ -412,7 +412,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
     # For each science frame, create a "science_object_name/date/" directory in
     # the current working directory.
     for entry in allfilelist:
-        header = pyfits.open(Raw+'/'+entry[0])
+        header = astropy.io.fits.open(Raw+'/'+entry[0])
 
         objname = header[0].header['OBJECT'].replace(' ', '')
         obsclass = header[0].header['OBSCLASS']
@@ -434,7 +434,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
     # For each science frame, create a "science_object_name/date/grating/observationid/"
     # directory in the current working directory.
     for entry in allfilelist:
-        header = pyfits.open(Raw+'/'+entry[0])
+        header = astropy.io.fits.open(Raw+'/'+entry[0])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -481,7 +481,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
     print "\nCopying Science and Acquisitions.\nCopying science frames.\nNow copying: "
 
     for i in range(len(allfilelist)):
-        header = pyfits.open(Raw+'/'+allfilelist[i][0])
+        header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -492,7 +492,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
 
         # Only grab the most recent aquisition frame.
         if i!=len(allfilelist)-1:
-            header2 = pyfits.open(Raw+'/'+allfilelist[i+1][0])
+            header2 = astropy.io.fits.open(Raw+'/'+allfilelist[i+1][0])
             obsclass2 = header2[0].header['OBSCLASS']
             obj2 = header2[0].header['OBJECT'].replace(' ','')
 
@@ -529,7 +529,7 @@ def sortObs(allfilelist, skylist, telskylist, sciImageList, dir):
     # science target, we need to sort by date, grating AND most recent time.
     print "\nCopying telluric frames.\nNow copying: "
     for i in range(len(allfilelist)):
-        header = pyfits.open(Raw+'/'+allfilelist[i][0])
+        header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -705,7 +705,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # Create a flag so we only warn about non-standard gratings once.
     grating_warning_flag = False
     for i in range(len(flatlist)):
-        header = pyfits.open(flatlist[i][0])
+        header = astropy.io.fits.open(flatlist[i][0])
         obsid = header[0].header['OBSID']
         grating = header[0].header['GRATING'][0:1]
         if grating not in ["K", "J", "H", "Z"]:
@@ -746,7 +746,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     print "\nSorting lamps off flats:"
     for i in range(len(flatdarklist)):
         os.chdir(Raw)
-        header = pyfits.open(flatdarklist[i][0])
+        header = astropy.io.fits.open(flatdarklist[i][0])
         obsid = header[0].header['OBSID']
         grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
@@ -766,7 +766,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     print "\nSorting ronchi flats:"
     for i in range(len(ronchilist)):
         os.chdir(Raw)
-        header = pyfits.open(ronchilist[i][0])
+        header = astropy.io.fits.open(ronchilist[i][0])
         obsid = header[0].header['OBSID']
         grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
@@ -785,7 +785,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # Sort arcs.
     print "\nSorting arcs:"
     for i in range(len(arclist)):
-        header = pyfits.open(arclist[i][0])
+        header = astropy.io.fits.open(arclist[i][0])
         obsid = header[0].header['OBSID']
         date = header[0].header['DATE'].replace('-','')
         grating = header[0].header['GRATING'][0:1]
@@ -802,7 +802,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # Sort arc darks.
     print "\nSorting arc darks:"
     for i in range(len(arcdarklist)):
-        header = pyfits.open(arcdarklist[i][0])
+        header = astropy.io.fits.open(arcdarklist[i][0])
         obsid = header[0].header['OBSID']
         grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
@@ -882,7 +882,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # For each science image, read its header data and try to change to the appropriate directory.
     # Check that:
     for i in range(len(sciImageList)):
-        header = pyfits.open(dir+'/'+sciImageList[i])
+        header = astropy.io.fits.open(dir+'/'+sciImageList[i])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -1067,7 +1067,7 @@ def telSort(telDirList, obsDirList):
                 telImageList = open(telDir + '/' + 'tellist', "r").readlines()
                 telImageList = [image.strip() for image in telImageList]
                 telluric_image = telImageList[0]
-                telluric_header = pyfits.open(telDir +'/'+ telluric_image + '.fits')
+                telluric_header = astropy.io.fits.open(telDir +'/'+ telluric_image + '.fits')
                 telluric_grating = telluric_header[0].header['GRATING'][0:1]
 
                 timeList=[]
@@ -1085,7 +1085,7 @@ def telSort(telDirList, obsDirList):
         for a in range(len(tellist)):
             templist=[]
             os.chdir(tellist[a][0])
-            telheader = pyfits.open(tellist[a][1][0])
+            telheader = astropy.io.fits.open(tellist[a][1][0])
             start=timeCalc(tellist[a][1][0])
             stop=timeCalc(tellist[a][1][-1])
             templist.append(os.getcwd())
@@ -1107,7 +1107,7 @@ def telSort(telDirList, obsDirList):
                 # Open image and get science image grating from header.
 
                 science_image = sciImageList[0]
-                science_header = pyfits.open('./'+ science_image + '.fits')
+                science_header = astropy.io.fits.open('./'+ science_image + '.fits')
                 science_grating = science_header[0].header['GRATING'][0:1]
 
                 for image in sciImageList:
@@ -1129,7 +1129,7 @@ def telSort(telDirList, obsDirList):
                     if diffList:
                         minDiff = min(diffList)
                         telobs = diffList[diffList.index(minDiff)-1]
-                        sciheader = pyfits.open(image+'.fits')
+                        sciheader = astropy.io.fits.open(image+'.fits')
                         sciObsid = 'obs'+ sciheader[0].header['OBSID'][-3:].replace('-','')
                         if not os.path.exists(telobs+'/objtellist'):
                             writeList(sciObsid, 'objtellist', telobs)
@@ -1172,7 +1172,7 @@ def telSort(telDirList, obsDirList):
 
             # Open image and get science image grating from header.
             science_image = sciImageList[0]
-            science_header = pyfits.open('./'+ science_image + '.fits')
+            science_header = astropy.io.fits.open('./'+ science_image + '.fits')
             science_time = timeCalc(science_image+'.fits')
             science_date = science_header[0].header[ 'DATE'].replace('-','')
 
@@ -1279,7 +1279,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
     print "\nGetting list of paths to science observations."
     for i in range(len(allfilelist)):
         # Make a 2D list of paths to science observations and the time of each one.
-        header = pyfits.open(Raw+'/'+allfilelist[i][0])
+        header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID']
@@ -1301,7 +1301,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
     # Get list of paths to Tellurics/ot_observation_id directories.
     print "\nGetting list of paths to telluric observations."
     for i in range(len(allfilelist)):
-        header = pyfits.open(Raw+'/'+allfilelist[i][0])
+        header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')
@@ -1377,7 +1377,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
 
         # Open image and get science image grating from header.
         science_image = scienceFrameList[0]
-        science_header = pyfits.open('./'+ science_image + '.fits')
+        science_header = astropy.io.fits.open('./'+ science_image + '.fits')
         science_time = timeCalc(science_image+'.fits')
         science_date = science_header[0].header[ 'DATE'].replace('-','')
 
@@ -1466,7 +1466,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
     # For each science image, read its header data and try to change to the appropriate directory.
     # Check that:
     for i in range(len(sciImageList)):
-        header = pyfits.open(dir+sciImageList[i])
+        header = astropy.io.fits.open(dir+sciImageList[i])
 
         obstype = header[0].header['OBSTYPE'].strip()
         obsid = header[0].header['OBSID'][-3:].replace('-','')

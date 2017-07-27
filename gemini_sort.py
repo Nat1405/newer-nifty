@@ -483,14 +483,14 @@ def getCals(filelist, over):
     flatlist = []
     flatdarklist = []
     for entry in templist:
-        header = pyfits.open(Raw+'/'+entry)
+        header = astropy.io.fits.open(Raw+'/'+entry)
 
         obstype = header[0].header['OBSTYPE'].strip()  # used to sort out the acqs and acqCals in the trap
         aper = header[0].header['APERTURE']
 
         if obstype == 'FLAT' and not aper=='Ronchi_Screen_G5615':
             # open the image and store pixel values in an array
-            array = pyfits.getdata(Raw+'/'+entry)
+            array = astropy.io.fits.getdata(Raw+'/'+entry)
             # then this takes the mean of all of them
             mean_counts = np.mean(array)
 

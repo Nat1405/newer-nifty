@@ -1,11 +1,11 @@
-import pyfits
+import astropy.io.fits
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Create an empty numpy array. 2D; spectra with 4 data elements.
 filtered = np.zeros((2040,4))
 
-combined_extracted_1d_spectra_ = pyfits.open("xtfbrsnN20160705S0025.fits")
+combined_extracted_1d_spectra_ = astropy.io.fits.open("xtfbrsnN20160705S0025.fits")
 exptime = float(combined_extracted_1d_spectra_[0].header['EXPTIME'])
 
 wstart = combined_extracted_1d_spectra_[1].header['CRVAL1']
