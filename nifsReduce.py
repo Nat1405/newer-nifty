@@ -22,6 +22,7 @@ import sgmllib
 import urllib, sgmllib
 import re
 import traceback
+import matplotlib.sciplot as plt
 # Import custom Nifty functions.
 from nifs_defs import datefmt, listit, writeList, checkLists, writeCenters, makeSkyList, MEFarith, convertRAdec
 
@@ -1071,6 +1072,9 @@ def createEfficiencySpectrum(
 
 
 def extrap1d(interpolator):
+    """Extrap1d takes an interpolation function and returns a function which can also extrapolate.
+    From https://stackoverflow.com/questions/2745329/how-to-make-scipy-interpolate-give-an-extrapolated-result-beyond-the-input-range
+    """
     xs = interpolator.x
     ys = interpolator.y
     def pointwise(x):
@@ -1083,6 +1087,8 @@ def extrap1d(interpolator):
     def ufunclike(xs):
         return array(map(pointwise, array(xs)))
     return ufunclike
+
+#--------------------------------------------------------------------------------------------------------------------------------#
 
 def readCube(cube):
 
@@ -1102,34 +1108,7 @@ def readCube(cube):
 
     return cube, wavelength
 
-def readSpec(spectrum, MEF=True):
-
-    if MEF:
-
-        # open the spectrum as an HDU list
-        spec = astropy.io.fits.open(spectrum)
-
-        # find the starting wavelength and the wavelength increment from the science header
-        wstart = spec[1].header['CRVAL1']
-        wdelt = spec[1].header['CD1_1']
-
-    else:
-
-        # open the spectrum as an HDU list
-        spec = astropy.io.fits.open(spectrum)
-
-        # find the starting wavelength and the wavelength increment from the science header
-        wstart = spec[0].header['CRVAL1']
-        wdelt = spec[0].header['CD1_1']
-
-    # initialize a wavelength array
-    wavelength = np.zeros(2040)
-
-    # create a wavelength array using the starting wavelength and the wavelength increment
-    for i in range(2040):
-        wavelength[i] = wstart+(wdelt*i)
-
-    return spec, wavelength
+#--------------------------------------------------------------------------------------------------------------------------------#
 
 def applyTelluricPython(over):
 
@@ -1154,18 +1133,24 @@ def applyTelluricPython(over):
             continue
 
         telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
-        # read in telluric spectrum data
-        telluric, effwave = readSpec(telluric+'.fits')
+        # Open the final correction spectrum file as "telluric". Create a numpy array the same length
+        # as the telluric spectrum with each element a wavelength matching that of the telluric.
+
+        # Open the final correction spectrum so that we use its data.
+        spec = pyfits.open(telluric+'.fits')
+        # Find the starting wavelength and the wavelength increment from the science header.
+        wstart = spec[1].header['CRVAL1']
+        wdelt = spec[1].header['CD1_1']
+        # Create a numpy array of zeros. We will use this to hold the efficiency spectrum.
+        effwave = np.zeros(2040)
+        # Create a wavelength array using the starting wavelength and the wavelength increment.
+        for i in range(2040):
+            effwave[i] = wstart+(wdelt*i)
+
+        # Open the efficiency spectrum as a numpy array.
         effspec = telluric[1].data
+        # Store the airmass of the correction spectrum in telairmass.
         telairmass = telluric[0].header['AIRMASS']
-        #continuum = str(open('continuumfile', 'r').readlines()[0]).strip()
-        # read in continuum spectrum data
-        #continuum, contwave = readSpec(continuum+'.fits', MEF=False)
-        #contflux=continuum[0].data
-
-        #bblist = open('blackbodyfile', 'r').readlines()
-        #bblist = [frame.strip() for frame in bblist]
-
 
         tempDir = obsDir.split(os.sep)
         if tempDir[-1] in objlist:
@@ -1185,40 +1170,22 @@ def applyTelluricPython(over):
                     # read in cube data
                     cube, cubewave = readCube(frame)
 
-                    # interpolate a function using the telluric spectrum
-                    func = interp1d(effwave, effspec, bounds_error = None, fill_value=0.)
-
-                    # use the wavelength array of the cube to shift the telluric and continuum flux arrays
-                    func2 = extrap1d(func)
-                    effspec = func2(cubewave)
-
-                    #func3 = interp1d(contwave, contflux, bounds_error = None, fill_value=0.)
-                    #func4 = extrap1d(func3)
-                    #contfluxi = func4(cubewave)
-
-                    #pl.plot(telwave, telflux, 'r', cubewave, funcc(cubewave), 'g')
-                    #pl.show()
+                    # Interpolate a function using the telluric spectrum.
+                    # From scipy.interp1d help:
+                    #   Interpolate a 1D function.
+                    #   interp1d(x,y)
+                    efficiencySpectrumFunction = interp1d(effwave, effspec, bounds_error = None, fill_value=0.)
+                    # Extend the function to allow extrapolation.
+                    extendedEfficiencySpectrumFunction = extrap1d(efficiencySpectrumFunction)
+                    # For each element of the cube wavelength array, a 1D numpy array holding wavelengths from a single spaxel of the cube, evaluate extrapolatedfunction(wavelength) and
+                    # store the result in the element.
+                    # Iterate over each element, ie, wavelength, of the cubes wavelength array.
+                    # evaluate f(wavelength) and store the result in that element.
+                    effspec = extendedEfficiencySpectrumFunction(cubewave)
 
                     exptime = cube[0].header['EXPTIME']
 
-                    '''
-                    try:
-                        sciairmass = cube[0].header['AIRMASS']
-                        airmcor = True
-                    except:
-                        print "No airmass found in header. No airmass correction being performed on "+frame
-                        airmcor= False
-
-                    if airmcor:
-                        amcor = sciairmass/telairmass
-
-                        for i in range(len(telflux)):
-                            if telfluxi[i]>0. and telfluxi[i]<1.:
-                                telfluxi[i] = np.log(telfluxi[i])
-                                telfluxi[i] *=amcor
-                                telfluxi[i] = np.exp(telfluxi[i])
-                        '''
-
+                    # See about attempting an airmass correction.
                     try:
                         sciairmass = cube[0].header['AIRMASS']
                         airmcor = True
@@ -1227,12 +1194,13 @@ def applyTelluricPython(over):
                         airmcor= False
 
                     if airmcor:
-                        amcor = sciairmass/telairmass
+                        airmassCorrection = sciairmass/telairmass
 
+                    # If effspec[i] is between 0 and 1, apply an airmass correction by multiplying ln(effspec[i]) by the correction factor.
                     for i in range(len(effspec)):
                         if effspec[i]>0. and effspec[i]<1.:
                             effspec[i] = np.log(effspec[i])
-                            effspec[i] *=amcor
+                            effspec[i] *= airmassCorrection
                             effspec[i] = np.exp(effspec[i])
 
                     # divide each spectrum in the cubedata array by the efficiency spectrum
@@ -1240,27 +1208,6 @@ def applyTelluricPython(over):
                     for i in range(cube[1].header['NAXIS2']):
                         for j in range(cube[1].header['NAXIS1']):
                             cube[1].data[:,i,j] /= (effspec*exptime)
-
-                    '''
-                    # divide each spectrum in the cubedata array by the telluric spectrum
-                    for i in range(62):
-                        for j in range(60):
-                            cube[1].data[:,i,j] /= telfluxi
-
-                    for i in range(62):
-                        for j in range(60):
-                            cube[1].data[:,i,j] /= contfluxi
-
-                    for bb in bblist:
-                        exptime = cube[0].header['EXPTIME']
-                        if str(int(exptime)) in bb:
-                            os.chdir(telDir)
-                            blackbody, bbwave = readSpec(bb+'.fits', MEF=False)
-                            bbflux = blackbody[0].data
-                            for i in range(cube[0].header['NAXIS2']):
-                                for j in range(cube[0].header['NAXIS1']):
-                                    cube[1].data[:,i,j] *= bbflux
-                        '''
 
                     os.chdir(obsDir)
                     cube.writeto(frame[0]+'p'+frame[1:], output_verify='ignore')
