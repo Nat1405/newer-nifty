@@ -4,7 +4,7 @@
 import logging
 from pyraf import iraf
 from pyraf import iraffunctions
-import astropy.io.fits
+import pyfits
 import logging, os
 # Import custom Nifty functions.
 from nifs_defs import datefmt, listit, checkLists
@@ -440,7 +440,7 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
     # bad pixels caught to an approximately constant level for each band. A few bad pixels will
     # not be caught, but it was found that catching them marked large portions of the top and bottom
     # rows of pixels of each slice as bad pixels.
-    header = astropy.io.fits.open(calflat+'.fits')
+    header = pyfits.open(calflat+'.fits')
     grat = header[0].header['GRATING'][0:1]
     if grat == 'Z' or grat == 'J':
         flo = 0.07
@@ -620,7 +620,7 @@ def reduceArc(arclist, arc, arcdarklist, arcdark, log, over):
     fl_dark = "no"
     if arcdark != "":
         fl_dark = "yes"
-    hdulist = astropy.io.fits.open(arc+'.fits')
+    hdulist = pyfits.open(arc+'.fits')
     if 'K_Long' in hdulist[0].header['GRATING']:
         iraf.nsreduce("gn"+arc, darki=arcdark, fl_cut="yes", fl_nsappw="yes", crval = 23000., fl_dark="yes", fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="no",logfile=log)
     else:
@@ -672,7 +672,7 @@ def wavecal(arc, log, over, path):
             return
 
     # Determine the wavelength setting.
-    hdulist = astropy.io.fits.open("rgn"+arc+".fits")
+    hdulist = pyfits.open("rgn"+arc+".fits")
     band = hdulist[0].header['GRATING'][0:1]
 
     # Set interactive mode. Default False for standard configurations (and True for non-standard wavelength configurations ).

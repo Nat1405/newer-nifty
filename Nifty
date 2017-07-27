@@ -44,7 +44,7 @@ def main():
     print "#                                  #"
     print "#              NIFTY               #"
     print "#   NIFS Date Reduction Pipeline   #"
-    print "#          Version ", __version__, "           #"
+    print "#          Version", __version__, "          #"
     print "#         July 25th, 2017          #"
     print "#     Marie Lemoine-Busserolle     #"
     print "# Gemini Observatory, Hilo, Hawaii #"
@@ -303,25 +303,8 @@ def main():
         # Sort the data and calibrations.
         obsDirList, calDirList, telDirList = sortScript.start(rawPath, tel, sort, over, copy, program, date)
 
-        # Save the paths to files found in sorting in three text files for later use.
-        # Remove textfiles from old runs to avoid extra entries.
-        if os.path.exists("obsDirList"):
-            os.remove("obsDirList")
-        if os.path.exists("telDirList"):
-            os.remove("telDirList")
-        if os.path.exists("calDirList"):
-            os.remove("calDirList")
-
-        for i in range(len(obsDirList)):
-            writeList(obsDirList[i], "obsDirList", ".")
-        for i in range(len(telDirList)):
-            writeList(telDirList[i], "telDirList", ".")
-        for i in range(len(calDirList)):
-            writeList(calDirList[i], "calDirList", ".")
-
     else:
         # Don't use sortScript at all; read the paths to data from textfiles.
-
         try:
             telDirList = open("telDirList", "r").readlines()
             telDirList = [entry.strip() for entry in telDirList]
@@ -352,10 +335,6 @@ def main():
         calDirList = open("calDirList", "r").readlines()
         calDirList = [entry.strip() for entry in calDirList]
 
-        logging.info('obsDirList : %s', obsDirList)
-        logging.info('telDirList : %s', telDirList)
-        logging.info('calDirList : %s', calDirList)
-
     print '\nobsDirList : '
     for i in range(len(obsDirList)):
         print obsDirList[i]
@@ -366,14 +345,12 @@ def main():
     for i in range(len(calDirList)):
         print calDirList[i]
 
-    # Reduce the calibration data
-    if red:
+    if red:      # Reduce the calibration frames.
         if debug:
             a = raw_input('About to enter calibrate.py')
         calibrateScript.start(obsDirList, calDirList, over, rstart, rstop)
 
-    if tel:
-        # Reduce the telluric frames.
+    if tel:      # Reduce the telluric frames.
         if debug:
             a = raw_input('About to enter reduce to reduce Telluric images, ',\
                            'create telluric correction spectrum and blackbody spectrum.')
@@ -383,16 +360,14 @@ def main():
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                 telluric_correction_method)
 
-    # Reduce the science images
-    if sci:
+    if sci:      # Reduce the science frames.
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
         reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, fluxcal,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                            telluric_correction_method)
 
-    # Merge all cubes
-    if merge:
+    if merge:    # Merge final date cubes.
         if debug:
             a = raw_input('About to enter merge to merge cubes.')
         mergeScript.start(obsDirList, over)

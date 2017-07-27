@@ -4,7 +4,7 @@ import pexpect as p
 import time
 from pyraf import iraf
 from pyraf import iraffunctions
-import astropy.io.fits
+import pyfits
 from nifs_defs import datefmt, writeList, listit
 
 
@@ -154,7 +154,7 @@ def start(obsDirList, over=""):
             os.chdir(Merged+'/'+obsidlist[n])
             iraffunctions.chdir(Merged+'/'+obsidlist[n])
             # set the zero point p and q offsets to the p and q offsets of the first cube in each sequence (assumed to have a p and q of 0)
-            header = astropy.io.fits.open(cubes[0])
+            header = pyfits.open(cubes[0])
             p0 = header[0].header['POFFSET']
             q0 = header[0].header['QOFFSET']
             suffix = cubes[0][-8:-5]
@@ -173,7 +173,7 @@ def start(obsDirList, over=""):
 
         for i in range(len(cubes)-1):
             i+=1
-            header2 = astropy.io.fits.open(cubes[i])
+            header2 = pyfits.open(cubes[i])
             # find the p and q offsets of the other cubes in the sequence
             poff = header2[0].header['POFFSET']
             qoff = header2[0].header['QOFFSET']
@@ -226,7 +226,7 @@ def start(obsDirList, over=""):
         iraffunctions.chdir(Merged)
         gratlist = []
         for i in range(len(mergedCubes)):
-            cubeheader = astropy.io.fits.open(mergedCubes[i])
+            cubeheader = pyfits.open(mergedCubes[i])
             grat = cubeheader[0].header['GRATING']
             gratlist.append(grat)
         for n in range(len(gratlist)):
@@ -258,12 +258,12 @@ def start(obsDirList, over=""):
 
 
 def waveshift(cubelist, grat):
-    cubeheader0 = astropy.io.fits.open(cubelist[0])
+    cubeheader0 = pyfits.open(cubelist[0])
     wstart0 = cubeheader0[1].header['CRVAL3']
     fwave = open('waveoffsets{0}.txt'.format(grat[0]), 'w')
     fwave.write('%d\t%d\t%d\n' % (0., 0., 0.,))
     for i in range(len(cubelist)):
-        cubeheader = astropy.io.fits.open(cubelist[i])
+        cubeheader = pyfits.open(cubelist[i])
         wstart = cubeheader[1].header['CRVAL3']
         wdelt = cubeheader[1].header['CD3_3']
         waveoff = int(round((wstart0-wstart)/wdelt))
@@ -358,7 +358,7 @@ def mergeOld(obsDirList, over=""):
             # set the zero point p and q offsets to the p and q offsets of the first cube in each sequence (assumed to have a p and q of 0)
             print cubes
             print cubelist
-            header = astropy.io.fits.open(cubes[0])
+            header = pyfits.open(cubes[0])
             p0 = header[0].header['POFFSET']
             q0 = header[0].header['QOFFSET']
             refCube = "cube"+cubes[0][-8:-5]
@@ -377,7 +377,7 @@ def mergeOld(obsDirList, over=""):
             foff.write('%d\t%d\t%d\n' % (0, 0, 0))
         for i in range(len(cubes)-1):
             i+=1
-            header2 = astropy.io.fits.open(cubes[i])
+            header2 = pyfits.open(cubes[i])
             # find the p and q offsets of the other cubes in the sequence
             poff = header2[0].header['POFFSET']
             qoff = header2[0].header['QOFFSET']
