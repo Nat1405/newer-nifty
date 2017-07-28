@@ -68,10 +68,8 @@ def start(obsDirList, over=""):
     listsOfCubes = []        # List of lists of cubes (one list for each science observation directory).
     mergedCubes = []         # List of Merged cubes (one merged cube for each science observation directory).
     obsidlist = []           # List of science observation id s.
-    # X pixel scale in arcseconds/pixel.
-    xPixScale = 0.05
-    # Y pixel scale in arcseconds/pixel.
-    yPixScale = 0.043
+    # Pixel scale in arcseconds/pixel.
+    pixScale = 0.05
 
     # TODO(ncomeau[*AT*]uvic.ca): implement a way to read and save cubelists to textfiles. It would be nice for users to
     # be able to edit the list of cubes to merge by hand.
@@ -194,8 +192,8 @@ def start(obsDirList, over=""):
             poff = header2[0].header['POFFSET']
             qoff = header2[0].header['QOFFSET']
             # calculate the difference between the zero point offsets and the offsets of the other cubes and convert that to pixels
-            pShift = round((poff - p0)/xPixScale)
-            qShift = round((qoff - q0)/yPixScale)
+            pShift = round((poff - p0)/pixScale)
+            qShift = round((qoff - q0)/pixScale)
             # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
             foff = open('offsets.txt', 'a')
             foff.write('%d %d %d\n' % (int(pShift), 0, int(qShift)))
