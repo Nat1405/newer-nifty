@@ -6,7 +6,7 @@ import merge as mergeScript
 import nifsBaselineCalibration as calibrateScript
 import nifsReduce as reduceScript
 from nifs_defs import datefmt, writeList
-import logging, os
+import logging, os, sys
 import json
 from datetime import datetime
 
@@ -59,7 +59,15 @@ def main():
     # Set up the logging file.
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     logger = logging.getLogger()
-    logging.info('Login file is Nifty.log')
+    logger.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    logging.info('Log file is Nifty.log')
 
     # Enable Debugging break points. Used for testing.
     debug = False
