@@ -298,7 +298,7 @@ def start(
                 transform(objlist, log, over)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 4: Derive 2D to 3D transformation ->tfbrsn - COMPLETED "
+                print "  STEP 4: Derive and apply 2D to 3D transformation ->tfbrsn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
@@ -335,7 +335,7 @@ def start(
                 print "##############################################################################\n"
 
             #############################################################################
-            ##   STEP 6: Create a 3D cube from science data ->catfbrsn or ->ctfbrsn    ##
+            ##   STEP 6: Create a 3D cube from science data ->ctfbrsn                  ##
             #############################################################################
 
             elif valindex == 6:
@@ -1132,7 +1132,7 @@ def mag2mass(name, path, spectemp, mag, band):
     """
 
     starfile = 'std_star.txt'
-    kelvinfile = path+'/niftyData/starstemp.txt'
+    kelvinfile = path+'/runtimeData/starstemp.txt'
 
     sf = open(starfile,'w')
     klf = open (kelvinfile)
@@ -1349,11 +1349,11 @@ def vega(spectrum, band, path, hlineinter, airmass, telluric_shift_scale_record,
     if os.path.exists("tell_nolines"+band+".fits"):
             if over:
                 os.remove("tell_nolines"+band+".fits")
-                tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
+                tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/runtimeData/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
             else:
                 print "Output file exists and -over not set - skipping H line correction"
     else:
-        tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=1., dscale=0.05, offset=0, smooth=1, cursor='', mode='al', Stdout=1)
+        tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/runtimeData/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=1., dscale=0.05, offset=0, smooth=1, cursor='', mode='al', Stdout=1)
 
     # record shift and scale info for future reference
     telluric_shift_scale_record.write(str(tell_info)+'\n')

@@ -40,7 +40,7 @@ from nifsDefs import datefmt, writeList, loadSortSave
 #
 
 # Welcome to Nifty, the nifs data reduction pipeline! My current version is:
-__version__ = "1.1.1"
+__version__ = "v0.1.1"
 
 # The time when Nifty was started is:
 startTime = str(datetime.now())
@@ -51,7 +51,7 @@ def launch():
     print "#                                  #"
     print "#              NIFTY               #"
     print "#   NIFS Date Reduction Pipeline   #"
-    print "#          Version", __version__, "          #"
+    print "#         Version", __version__, "          #"
     print "#         July 25th, 2017          #"
     print "#     Marie Lemoine-Busserolle     #"
     print "# Gemini Observatory, Hilo, Hawaii #"
