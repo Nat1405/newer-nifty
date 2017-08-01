@@ -1,6 +1,6 @@
 Nifty
 =====
-The Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
+A Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
 Field Spectrometer (NIFS).
 
 This is a new data reduction python pipeline that uses Astroconda and the Gemini
@@ -12,16 +12,11 @@ This pipeline is open source but is not supported by Gemini Observatory.
 
 Any feedback and comments (mbusserolle@gemini.edu) are welcome!
 
-________________________________________________________________________________________________________________________________________
-----------------------------------------------------------------------------------------------------------------------------------------
-
-COPYRIGHT
+Copyright
 ---------
 
 For more details, please read the LICENSE.
 
-________________________________________________________________________________________________________________________________________
-----------------------------------------------------------------------------------------------------------------------------------------
 
 HOW TO SUBMIT BUGS AND REQUESTS
 -------------------------------
@@ -30,11 +25,8 @@ Very important: DO NOT SUBMIT A GEMINI HELPDESK TICKET.
 If you want to report a problem, use the Gemini Data Reduction Forum thread
 (http://drforum.gemini.edu/topic/nifs-python-data-reduction-pipeline/) or create an issue in this repo.
 
-________________________________________________________________________________________________________________________________________
-----------------------------------------------------------------------------------------------------------------------------------------
-
-INSTALLATION
-------------
+Installation
+============
 
 1. Install Astroconda. Instructions can be found on Gemini's website `here. <http://www.gemini.edu/node/12665>`
 2. Download the latest release of Nifty from `here.<https://github.com/Nat1405/newer-nifty/releases>`
@@ -92,8 +84,8 @@ Overview of Major Reduction Steps
 
 
 
-NOTES:
-======
+Note:
+=====
 
 OBJECT AND SKY FRAMES
 
@@ -111,26 +103,26 @@ interactively and using the "vega_tweak" method in order to accurately scale the
 In the interactive mode for the initial scaling and call to "telluric" these are the cursor keys
 and colon commands (from http://iraf.net/irafhelp.php?val=telluric&help=Help+Page):
 
-? - print help
-a - automatic RMS minimization within sample regions
-c - toggle calibration spectrum display
-d - toggle data spectrum display
-e - expand (double) the step for the current selection
-q - quit
-r - redraw the graphs
-s - add or reset sample regions
-w - window commands (see :/help for additional information)
-x - graph and select from corrected shifted candidates
-y - graph and select from corrected scaled candidates
+- ? - print help
+- a - automatic RMS minimization within sample regions
+- c - toggle calibration spectrum display
+- d - toggle data spectrum display
+- e - expand (double) the step for the current selection
+- q - quit
+- r - redraw the graphs
+- s - add or reset sample regions
+- w - window commands (see :/help for additional information)
+- x - graph and select from corrected shifted candidates
+- y - graph and select from corrected scaled candidates
 
-:help           - print help
-:shift  [value] - print or reset the current shift
-:scale  [value] - print or reset the current scale
-:dshift [value] - print or reset the current shift step
-:dscale [value] - print or reset the current scale step
-:offset [value] - print or reset the current offset between spectra
-:sample [value] - print or reset the sample regions
-:smooth [value] - print or reset the smoothing box size
+- :help           - print help
+- :shift  [value] - print or reset the current shift
+- :scale  [value] - print or reset the current scale
+- :dshift [value] - print or reset the current shift step
+- :dscale [value] - print or reset the current scale step
+- :offset [value] - print or reset the current offset between spectra
+- :sample [value] - print or reset the sample regions
+- :smooth [value] - print or reset the smoothing box size
 
 To decrease the scale or shift value, the cursor must be under the spectrum and to increase
 these values the cursor must be above the spectrum. Occasionally, this will not work in which
