@@ -1,16 +1,24 @@
 #!/usr/bin/env python
+################################################################################
+#                Import some useful Python utilities/modules                   #
+################################################################################
 from optparse import OptionParser
 from pyraf import iraf
-import nifsSort as sortScript
-import merge as mergeScript
-import nifsBaselineCalibration as calibrateScript
-import nifsReduce as reduceScript
-from nifs_defs import datefmt, writeList
 import logging, os, sys
 import json
 from datetime import datetime
+# Import major Nifty scripts. You can change the names here if you like.
+import nifsSort as sortScript
+import nifsBaselineCalibration as calibrateScript
+import nifsReduce as reduceScript
+import nifsMerge as mergeScript
+import nifsDefs
+# Import custom Nifty functions.
+from nifsDefs import datefmt, writeList, loadSortSave
 
-#                               +
+#                                +
+#
+#
 #
 #              +
 #         +         +         +
@@ -27,18 +35,17 @@ from datetime import datetime
 #
 #                                      +
 #                                   +     +
-#
 #                                       +
 #                                      +
 #
 
-# Welcome to Nifty! The current version is:
+# Welcome to Nifty, the nifs data reduction pipeline! My current version is:
 __version__ = "1.1.1"
 
 # The time when Nifty was started is:
 startTime = str(datetime.now())
 
-def main():
+def launch():
 
     print "\n####################################"
     print "#                                  #"
@@ -60,13 +67,13 @@ def main():
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-
+    # This lets us print to stdout AND a logfile. Cool, huh?
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(message)s')
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-
+    # Make sure to change this if you change the default logfile.
     logging.info('Log file is Nifty.log')
 
     # Enable Debugging break points. Used for testing.
@@ -79,13 +86,13 @@ def main():
     parser.add_option('-o', '--over', dest = 'over', default = False, action = 'store_true', help = 'overwrite old files')
     parser.add_option('-c', '--copy', dest = 'copy', default = False, action = 'store_true', help = 'copy raw data from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)')
     parser.add_option('-s', '--sort', dest = 'sort', default = True, action = 'store_false', help = 'sort data')
-    parser.add_option('-r', '--noreduce', dest = 'red', default = True, action = 'store_false', help = 'don\'t reduce the baseline calibrations')
+    parser.add_option('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from user_options.json.')
     parser.add_option('-k', '--notelred', dest = 'telred', default= 'True', action = 'store_false', help = 'don\'t reduce telluric data')
     parser.add_option('-g', '--fluxcal', dest = 'fluxcal', default = 'True', action = 'store_true', help = ' perform flux calibration')
     parser.add_option('-t', '--telcorr', dest = 'tel', default= 'False', action = 'store_true', help = 'perform telluric correction')
     parser.add_option('-e', '--stdspectemp', dest = 'spectemp', action = 'store', help = 'specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000')
     parser.add_option('-f', '--stdmag', dest = 'mag', action = 'store', help = 'specify the IR magnitude of the standard star; if you do not wish to do a flux calibration then enter -f x')
-    parser.add_option('-l', '--hline_method', dest = 'hline_method', type = 'string', action = 'store', help = 'choose a method for removing H lines from the telluric spectra. The default is vega and the choices are vega, linefit_auto, linefit_manual, vega_tweak, linefit_tweak, and none')
+    parser.add_option('-l', '--load', dest = 'repeat', default = False, action = 'store_true', help = 'Load data reduction parameters from user_options.json. Equivalent to -r and --repeat.')
     parser.add_option('-i', '--hinter', dest = 'hinter', default = 'False', action = 'store_true', help = 'do the h line fitting interactively')
     parser.add_option('-y', '--continter', dest = 'continter', default = 'False', action = 'store_true', help = 'do the continuum fitting in the flux calibration interactively')
     parser.add_option('-a', '--redstart', dest = 'rstart',  type='int', action = 'store', help = 'choose the starting point of the daycal reduction; any integer from 1 to 6')
@@ -98,9 +105,7 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    # Define command line options
-    # TODO: commandline option to skip interactive option selection.
-
+    # Define command line options and set defaults.
     """date = options.to
     program = options.prog
     rawPath = options.raw
@@ -117,6 +122,7 @@ def main():
     fluxcal = options.fluxcal
     telinter = options.telinter"""
 
+    repeat = options.repeat
     date = None
     program = None
     rawPath = None
@@ -150,7 +156,6 @@ def main():
 
     # Ask the user about what reduction steps and substeps they would like to perform.
     print "\nGood day! Press enter to accept default reduction options."
-    repeat = raw_input("Repeat? [no]: ")
     if not repeat:
         fullRun = raw_input("Do a full data reduction with default settings? [no]: ")
         fullRun = fullRun or "no"
@@ -184,15 +189,15 @@ def main():
             telStop = telStop or 7
             # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
             # Set the h-line removal method with the vega() function in nifsReduce as default.
-            hline_method = raw_input("H-line removal method? [vega]: ")
-            hline_method = hline_method or "vega"
+            hline_method = raw_input("H-line removal method? [vega_tweak]: ")
+            hline_method = hline_method or "vega_tweak"
             # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
             hlineinter = raw_input("Interative H-line removal? [no]: ")
             hlineinter = hlineinter or False
-            continuuminter = raw_input("Interative telluric continuum fitting? [no]:")
+            continuuminter = raw_input("Interative telluric continuum fitting? [no]: ")
             continuuminter = continuuminter or False
-            telluric_correction_method = raw_input("Telluric correction method? [iraf.nftelluric]: ")
-            telluric_correction_method = telluric_correction_method or "iraf"
+            telluric_correction_method = raw_input("Telluric correction method? [python]: ")
+            telluric_correction_method = telluric_correction_method or "python"
             telinter = raw_input("Interactive telluric correction? [no]: ")
             telinter = telinter or False
             # Check for science as well; by default do all reduction steps.
@@ -203,10 +208,12 @@ def main():
             sciStop = raw_input("Stopping point of science and telluric reductions? [7]: ")
             sciStop = sciStop or 7
 
-            fluxcal = raw_input("Do a flux calibration? [no]:")
+            fluxcal = raw_input("Do a flux calibration? [no]: ")
             fluxcal = fluxcal or False
             merge = raw_input("Produce one final 3D cube? [no]: ")
             merge = merge or False
+            use_pq_offsets = raw_input("Use pq offsets to merge data cubes? [yes]: ")
+            use_pq_offsets = use_pq_offsets or True
 
             # Serialize and save the options as a json file.
             options = {}
@@ -237,7 +244,8 @@ def main():
             options['continuuminter'] = continuuminter
             options['telluric_correction_method'] = telluric_correction_method
             options['telinter'] = telinter
-            with open('user_options.txt', 'w') as outfile:
+            options['use_pq_offsets'] = use_pq_offsets
+            with open('user_options.json', 'w') as outfile:
                 json.dump(options, outfile, indent=4)
 
 
@@ -259,15 +267,15 @@ def main():
             if telred == "yes":
                 telStart = 1
                 telStop = 7
-                telluric_correction_method = telluric_correction_method or "iraf"
-                hline_method = "vega"
+                telluric_correction_method = telluric_correction_method or "python"
+                hline_method = "vega_tweak"
                 hlineinter = False
                 continuuminter = False
                 telinter = False
 
     else:
         # Read options from last run from save file
-        with open('user_options.txt') as json_file:
+        with open('user_options.json') as json_file:
             options = json.load(json_file)
             oldVersion = options['__version__']
             if oldVersion != __version__:
@@ -297,51 +305,27 @@ def main():
             continuuminter = options['continuuminter']
             telluric_correction_method = options['telluric_correction_method']
             telinter = options['telinter']
+            use_pq_offsets = options['use_pq_offsets']
 
     # Print user parameters for future reference.
-    print "\nUser parameters for this run (can also be found in user_parameters.txt):"
+    print "\nUser parameters for this run (can also be found in user_options.json):"
     for i in options:
         print i, options[i]
     print ""
-    # Save user variables to a text file to enable re-launch with last settings.
-
 
     # Begin running indivual reduction scripts.
+
+    ###########################################################################
+    ##                      STEP 1: Sort the raw data.                       ##
+    ###########################################################################
+
     if sort:
         # Sort the data and calibrations.
         obsDirList, calDirList, telDirList = sortScript.start(rawPath, tel, sort, over, copy, program, date)
 
     else:
         # Don't use sortScript at all; read the paths to data from textfiles.
-        try:
-            telDirList = open("telDirList", "r").readlines()
-            telDirList = [entry.strip() for entry in telDirList]
-        except IOError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in Nifty: no telluric data found. Setting telDirList to "
-            print "                       an empty list."
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
-            telDirList = []
-        try:
-            obsDirList = open("obsDirList", "r").readlines()
-            obsDirList = [entry.strip() for entry in obsDirList]
-        except IOError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in Nifty: no science data found. Setting obsDirList to "
-            print "                       an empty list."
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
-            obsDirList = []
-
-        calDirList = open("calDirList", "r").readlines()
-        calDirList = [entry.strip() for entry in calDirList]
+        obsDirList, telDirList, calDirList = loadSortSave()
 
     print '\nobsDirList : '
     for i in range(len(obsDirList)):
@@ -353,12 +337,23 @@ def main():
     for i in range(len(calDirList)):
         print calDirList[i]
 
-    if red:      # Reduce the calibration frames.
+    # Here is where the work happens.
+    # Five major reduction steps.
+
+    ###########################################################################
+    ##                STEP 2: Reduce baseline calibrations.                  ##
+    ###########################################################################
+
+    if red:
         if debug:
             a = raw_input('About to enter calibrate.py')
         calibrateScript.start(obsDirList, calDirList, over, rstart, rstop)
 
-    if tel:      # Reduce the telluric frames.
+    ###########################################################################
+    ##                STEP 3: Reduce telluric observations.                  ##
+    ###########################################################################
+
+    if tel:
         if debug:
             a = raw_input('About to enter reduce to reduce Telluric images, ',\
                            'create telluric correction spectrum and blackbody spectrum.')
@@ -368,17 +363,25 @@ def main():
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                 telluric_correction_method)
 
-    if sci:      # Reduce the science frames.
+    ###########################################################################
+    ##                 STEP 4: Reduce science observations.                  ##
+    ###########################################################################
+
+    if sci:
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
         reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, fluxcal,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                            telluric_correction_method)
 
-    if merge:    # Merge final date cubes.
+    ###########################################################################
+    ##                      STEP 5: Merge data cubes.                        ##
+    ###########################################################################
+
+    if merge:
         if debug:
             a = raw_input('About to enter merge to merge cubes.')
-        mergeScript.start(obsDirList, over)
+        mergeScript.start(obsDirList, use_pq_offsets, over)
         print obsDirList
 
     logging.info('###############################')
@@ -396,4 +399,4 @@ def main():
     return
 
 if __name__ == '__main__':
-    main()
+    launch()

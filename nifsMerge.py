@@ -5,10 +5,10 @@ import time
 from pyraf import iraf
 from pyraf import iraffunctions
 import pyfits
-from nifs_defs import datefmt, writeList, listit
+from nifsDefs import datefmt, writeList, listit
 
 
-def start(obsDirList, over=""):
+def start(obsDirList, use_pq_offsets, over=""):
     """MERGE
 
     This module contains all the functions needed to merge
@@ -68,6 +68,7 @@ def start(obsDirList, over=""):
     listsOfCubes = []        # List of lists of cubes (one list for each science observation directory).
     mergedCubes = []         # List of Merged cubes (one merged cube for each science observation directory).
     obsidlist = []           # List of science observation id s.
+
     # Pixel scale in arcseconds/pixel.
     pixScale = 0.05
 
@@ -96,7 +97,7 @@ def start(obsDirList, over=""):
         os.chdir(obsDir)
         obsidlist.append(date+'_'+obsid)
 
-        # create a directory called Merged and copy all the data cubes to this directory
+        # Create a directory called Merged and copy all the data cubes to this directory.
         if not os.path.exists(obsPath+'/Merged/'):
             os.mkdir(obsPath+'/Merged/')
             logging.info('I am creating a directory called Merged')
@@ -107,7 +108,7 @@ def start(obsDirList, over=""):
             os.mkdir(Merged+'/'+date+'_'+obsid)
             logging.info('I am creating a directory with date and abs ID inside Merged ')
 
-        # if a list called shiftedcubes already exists then just merge those shifted cubes and continue
+        # If a list called shiftedcubes already exists then just merge those shifted cubes and continue.
         if glob.glob("./shif*.fits"):
             if over:
                 if os.path.exists('./'+obsid+'_merged.fits'):
@@ -154,7 +155,7 @@ def start(obsDirList, over=""):
         for cube in cubes:
             shutil.copy(cube, Merged+'/'+date+'_'+obsid)
 
-    os.chdir(Merged)
+        os.chdir(Merged)
 
     n=0
     for cubes in listsOfCubes:
@@ -162,10 +163,16 @@ def start(obsDirList, over=""):
         shiftlist = []
         os.chdir(Merged+'/'+obsidlist[n])
         iraffunctions.chdir(Merged+'/'+obsidlist[n])
-        # Set the zero point p and q offsets to the p and q offsets of the first cube in each sequence.
-        header = pyfits.open(cubes[0])
-        p0 = header[0].header['POFFSET']
-        q0 = header[0].header['QOFFSET']
+
+        if use_pq_offsets:
+            # Set the zero point p and q offsets to the p and q offsets of the first cube in each list of cubes.
+            header = pyfits.open(cubes[0])
+            p0 = header[0].header['POFFSET']
+            q0 = header[0].header['QOFFSET']
+            foff = open('offsets.txt', 'w')
+            foff.write('%d %d %d\n' % (0, 0, 0))
+            foff.close()
+
         suffix = cubes[0][-8:-5]
         if os.path.exists('transcube'+suffix+'.fits'):
             if not over:
@@ -178,26 +185,26 @@ def start(obsDirList, over=""):
         shiftlist.append('cube'+suffix+'.fits')
         iraffunctions.chdir(os.getcwd())
 
-        foff = open('offsets.txt', 'w')
-        foff.write('%d %d %d\n' % (0, 0, 0))
-        foff.close()
-
         for i in range(len(cubes)):
             # Skip the first cube!
             if i == 0:
                 continue
             header2 = pyfits.open(cubes[i])
             suffix = cubes[i][-8:-5]
-            # find the p and q offsets of the other cubes in the sequence
-            poff = header2[0].header['POFFSET']
-            qoff = header2[0].header['QOFFSET']
-            # calculate the difference between the zero point offsets and the offsets of the other cubes and convert that to pixels
-            pShift = round((poff - p0)/pixScale)
-            qShift = round((qoff - q0)/pixScale)
-            # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
-            foff = open('offsets.txt', 'a')
-            foff.write('%d %d %d\n' % (int(pShift), 0, int(qShift)))
-            foff.close()
+
+            # If user wants to merge using p and q offsets, grab those from .fits headers.
+            if use_pq_offsets:
+                # find the p and q offsets of the other cubes in the sequence.
+                poff = header2[0].header['POFFSET']
+                qoff = header2[0].header['QOFFSET']
+                # calculate the difference between the zero point offsets and the offsets of the other cubes and convert that to pixels
+                pShift = round((poff - p0)/pixScale)
+                qShift = round((qoff - q0)/pixScale)
+                # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
+                foff = open('offsets.txt', 'a')
+                foff.write('%d %d %d\n' % (int(pShift), 0, int(qShift)))
+                foff.close()
+
             if os.path.exists('transcube'+suffix+'.fits'):
                 if not over:
                     logging.info('Output already exists and -over- not set - skipping im3dtran')
@@ -207,6 +214,14 @@ def start(obsDirList, over=""):
             else:
                 iraf.im3dtran(input = cubes[i]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
             shiftlist.append('cube'+suffix+'.fits')
+
+        if not use_pq_offsets:
+            # Before we combine make sure a suitable offsets.txt file exists.
+            a = raw_input("\nPaused. Please provide a suitable offsets.txt file in ", Merged+'/'+obsidlist[n])
+            while not os.path.exists('offsets.txt'):
+                a = raw_input("No offsets.txt file found. Please try again.")
+            logging.info('offsets.txt found successfully for', obsidlist[n])
+
         if os.path.exists('cube_merged.fits'):
             if over:
                 os.remove('cube_merged.fits')

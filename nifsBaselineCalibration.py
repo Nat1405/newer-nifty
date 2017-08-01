@@ -7,7 +7,7 @@ from pyraf import iraffunctions
 import pyfits
 import logging, os
 # Import custom Nifty functions.
-from nifs_defs import datefmt, listit, checkLists
+from nifsDefs import datefmt, listit, checkLists
 
 def start(obsDirList, calDirList, over, start, stop):
     """
@@ -90,17 +90,19 @@ def start(obsDirList, calDirList, over, start, stop):
                         --->ot_observation_name/ (Science frames)
                             --->N*.fits (raw .fits image files)
                             --->objlist (text file storing names of science frames)
-                            --->skylist (text file storing names of science sky frames)
+                            --->skyframelist (text file storing names of science sky frames)
                         --->Tellurics/
                             --->ot_observation_name/
                                 -->N*.fits (telluric .fits files)
                                 --->objtellist (text file matching telluric and science data.
                                                 See comments in telSort for more info.)
-                                --->skylist (text file storing names of telluric sky frames)
+                                --->skyframelist (text file storing names of telluric sky frames)
                                 --->tellist (text file storing names of telluric object frames)
 
     """
-    a = raw_input("Pause: modify calDirList, telDirList, obsDirList, make Telluric directories, and move objlists to tellists now!")
+    # TODO(nat): stop using first frame from list as name for combined frames. Find better names and implement
+    # them in pipeline and docs.
+
     # Store current working directory for later use.
     path = os.getcwd()
     # Enable optional debugging pauses.
@@ -679,7 +681,7 @@ def wavecal(arc, log, over, path):
     interactive = 'no'
 
     if band == "K":
-        clist=path+"niftyData/k_test_two_argon.dat"
+        clist=path+"/niftyData/k_test_two_argon.dat"
         my_thresh = 50.0
         interactive = 'no'
     elif band == "J":
@@ -694,7 +696,6 @@ def wavecal(arc, log, over, path):
         clist="nifs$data/ArXe_Z.dat"
         my_thresh=100.0
         interactive = 'yes'
-
     else:
         # Print a warning that the pipeline is being run with non-standard grating.
         print "\n#####################################################################"
@@ -711,6 +712,8 @@ def wavecal(arc, log, over, path):
         my_thresh=100.0
         interactive = 'yes'
 
+    print clist
+    a = raw_input("Pause")
     # Establish wavelength calibration for arclamp spectra. Output: A series of
     # files in a "database/" directory containing the wavelength solutions of
     # each slice and a reduced arc frame "wrgn"+ARC+".fits".

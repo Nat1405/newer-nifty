@@ -24,7 +24,7 @@ import re
 import traceback
 import matplotlib.pyplot as plt
 # Import custom Nifty functions.
-from nifs_defs import datefmt, listit, writeList, checkLists, writeCenters, makeSkyList, MEFarith, convertRAdec
+from nifsDefs import datefmt, listit, writeList, checkLists, makeSkyList, MEFarith, convertRAdec
 
 def start(
     observationDirectoryList, calDirList, start, stop, tel, telinter, fluxcal,
@@ -71,6 +71,12 @@ def start(
 
     """
 
+    # TODO(nat): Right now the pipeline will crash if you decide to skip, say, doing a bad
+    # pixel correction. This is because each step adds a prefix to the frame name, and most following
+    # steps depend on that prefix being there.
+    # One way to fix this is if a step is to be skipped, iraf.copy() is called instead to copy the frame and
+    # add the needed prefix. Messy but it might work for now.
+
     # Store current working directory for later use.
     path = os.getcwd()
 
@@ -78,9 +84,6 @@ def start(
     debug = False
 
     # Set up the logging file.
-    FORMAT = '%(asctime)s %(message)s'
-    DATEFMT = datefmt()
-    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     log = os.getcwd()+'/Nifty.log'
 
     logging.info('#################################################')
@@ -156,6 +159,7 @@ def start(
         pwd = os.getcwd()
         iraffunctions.chdir(pwd)
 
+        # Copy relevant calibrations over to the science directory.
         # Open and store the name of the MDF shift reference file from shiftfile into shift.
         shift = calDir+str(open(calDir+"shiftfile", "r").readlines()[0]).strip()
         # Open and store the name of the flat frame from flatfile in flat.
@@ -170,37 +174,6 @@ def start(
         arc = "wrgn"+str(open(calDir+"arclist", "r").readlines()[0]).strip()
         # Copy the wavelength calibration arc frame from Calibrations_grating to the observation directory.
         iraf.copy(calDir+arc+".fits",output="./")
-
-        # Determine whether the data is science or telluric, then open the appropriate
-        # object frame list and sky frame list.
-        if tempObs[-2]=='Tellurics':
-            kind = 'Telluric'
-            objlist = open('tellist', 'r').readlines()
-            objlist = [frame.strip() for frame in objlist]
-            try:
-                skylist = open("skylist", "r").readlines()
-                skylist = [frame.strip() for frame in skylist]
-            except:
-                print "\nNo sky frames were found for standard star. Please make a skylist in the telluric directory\n"
-                raise SystemExit
-            sky = skylist[0]
-        else:
-            kind = 'Science'
-            objlist = open("objlist", "r").readlines()
-            objlist = [frame.strip() for frame in objlist]
-            skylist = open("skylist", "r").readlines()
-            skylist = [frame.strip() for frame in skylist]
-            sky = skylist[0]
-
-            # Check to see if the number of sky frames matches the number of science frames.
-            # IF NOT duplicate the sky frames and rewrite the sky file and skylist.
-            if not len(skylist)==len(objlist):
-                skylist = makeSkyList(skylist, objlist, observationDirectory)
-
-        # Calculate p and q offsets from first frame in objlist and write to offsets.txt for later
-        # use by the pipeline.
-        centers = writeCenters(objlist)
-
         # Make sure the database files are in place. Current understanding is that
         # these should be local to the reduction directory, so need to be copied from
         # the calDir.
@@ -211,6 +184,32 @@ def start(
         elif not os.path.isdir("./database"):
             os.mkdir('./database/')
         iraf.copy(input=calDir+'database/*', output="./database/")
+
+        # Determine whether the data is science or telluric, then open the appropriate
+        # science/telluric frame list and sky frame list.
+        if tempObs[-2]=='Tellurics':
+            kind = 'Telluric'
+            objlist = open('tellist', 'r').readlines()
+            objlist = [frame.strip() for frame in objlist]
+            try:
+                skyframelist = open("skyframelist", "r").readlines()
+                skyframelist = [frame.strip() for frame in skyframelist]
+            except:
+                print "\nNo sky frames were found for standard star. Please make a skyframelist in the telluric directory\n"
+                raise SystemExit
+            sky = skyframelist[0]
+        else:
+            kind = 'Science'
+            objlist = open("objlist", "r").readlines()
+            objlist = [frame.strip() for frame in objlist]
+            skyframelist = open("skyframelist", "r").readlines()
+            skyframelist = [frame.strip() for frame in skyframelist]
+            sky = skyframelist[0]
+
+            # Check to see if the number of sky frames matches the number of science frames.
+            # IF NOT duplicate the sky frames and rewrite the sky file and skyframelist.
+            if not len(skyframelist)==len(objlist):
+                skyframelist = makeSkyList(skyframelist, objlist, observationDirectory)
 
         # Check start and stop values for reduction steps. Ask user for a correction if
         # input is not valid.
@@ -246,7 +245,7 @@ def start(
 
             if valindex == 1:
                 objlist = prepare(objlist, shift, sflat_bpm, log, over)
-                skylist = prepare(skylist, shift, sflat_bpm, log, over)
+                skyframelist = prepare(skyframelist, shift, sflat_bpm, log, over)
                 print "\n##############################################################################"
                 print ""
                 print "  STEP 1: Prepare raw data ->n - COMPLETED "
@@ -260,16 +259,16 @@ def start(
             elif valindex == 2:
                 # Combine telluric sky frames.
                 if kind=='Telluric':
-                    if len(skylist)>1:
-                        combineImages(skylist, "gn"+sky, log, over)
+                    if len(skyframelist)>1:
+                        combineImages(skyframelist, "gn"+sky, log, over)
                     else:
-                        copyImage(skylist, 'gn'+sky+'.fits', over)
+                        copyImage(skyframelist, 'gn'+sky+'.fits', over)
                 else:
                     pass
                 if kind=='Telluric':
                     skySubtractTel(objlist, "gn"+sky, log, over)
                 else:
-                    skySubtractObj(objlist, skylist, log, over)
+                    skySubtractObj(objlist, skyframelist, log, over)
                 print "\n##############################################################################"
                 print ""
                 print "  STEP 2: Sky Subtraction ->sn - COMPLETED "
@@ -314,6 +313,7 @@ def start(
             ###########################################################################
 
             elif valindex == 5:
+                # Make a 1D telluric correction spectrum from reduced telluric data.
                 if kind=='Telluric':
                     makeTelluric(objlist, log, over)
 
@@ -330,12 +330,12 @@ def start(
                 print "\n##############################################################################"
                 print ""
                 print "  STEP 5: Derive or apply telluric correction and make"
-                print "          a data cube ->gxtfbrsgn or ->catgbrsgn - COMPLETED"
+                print "          a data cube ->gxtfbrsn or ->catgbrsn - COMPLETED"
                 print ""
                 print "##############################################################################\n"
 
             #############################################################################
-            ##  STEP 6: Create a 3D cube from science data ->catfbrsgn or ->ctfbrsgn   ##
+            ##   STEP 6: Create a 3D cube from science data ->catfbrsn or ->ctfbrsn    ##
             #############################################################################
 
             elif valindex == 6:
@@ -349,7 +349,7 @@ def start(
 
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 6: Create a 3D cube from science data ->ctfbrsgn - COMPLETED "
+                print "  STEP 6: Create a 3D cube from science data ->ctfbrsn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
@@ -364,7 +364,7 @@ def start(
                             hline_method, spectemp, mag, log, over)
                 print "\n##############################################################################"
                 print ""
-                print "  STEP 7: Perform a flux calibration ->fcatfbrsgn or ->fctfbrsgn - COMPLETED "
+                print "  STEP 7: Perform a flux calibration ->fcatfbrsn or ->fctfbrsn - COMPLETED "
                 print ""
                 print "##############################################################################\n"
 
@@ -444,12 +444,12 @@ def copyImage(input, output, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def skySubtractObj(objlist, skylist, log, over):
+def skySubtractObj(objlist, skyframelist, log, over):
     """"Sky subtraction for science using iraf.gemarith. Output: ->sgn"""
 
     for i in range(len(objlist)):
         frame = str(objlist[i])
-        sky = str(skylist[i])
+        sky = str(skyframelist[i])
         if os.path.exists("sn"+frame+".fits"):
            if over:
                os.remove("sn"+frame+".fits")
@@ -774,7 +774,7 @@ def applyTelluricPython(over):
                     # Divide each spectrum in the cubedata array by the efficiency spectrum*exptime.
                     for i in range(cube[1].header['NAXIS2']):         # NAXIS2 is the y axis of the final cube.
                         for j in range(cube[1].header['NAXIS1']):     # NAXIS1 is the x axis of the final cube.
-                            cube[1].data[:,i,j] /= (effspec*exptime)  # For each x and y, divide entire spectrum by effspec*exptime.
+                            cube[1].data[:,i,j] /= (effspec*exptime)  # For each y and x, divide entire spectrum by effspec*exptime.
 
                     # Write the corrected cube to a new file with a "cp" prefix, "p" for "python corrected".
                     cube.writeto('cp'+frame[1:], output_verify='ignore')
@@ -939,10 +939,10 @@ def createEfficiencySpectrum(
     except:
         print "No telluricfile found in ", telluricDirectory
         return
-    """if not os.path.exists('objtellist'):
+    if not os.path.exists('objtellist'):
         print "No objtellist found in ", telluricDirectory
         return
-    """
+
 
     telheader = pyfits.open(combined_extracted_1d_spectra+'.fits')
     band = telheader[0].header['GRATING'][0]
@@ -1472,7 +1472,7 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     # Begin to create the function to calculate the f0 constant.
     f0FunctionIncomplete = lambda p, T: p[0]*(np.log(T)**2)+p[1]*np.log(T)+p[2]
 
-    # Look up the coefficients for the appropriate filter.
+    # Look up the coefficients for the appropriate grating and filter.
     if 'HK' in telfilter:
         coeff =[1.97547589e-02, -4.19035839e-01, -2.30083083e+01]
         central_wavelength = 22000.

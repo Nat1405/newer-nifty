@@ -25,6 +25,62 @@ def datefmt():
 
 #-----------------------------------------------------------------------------#
 
+def loadSortSave():
+    """Opens and reads lists of:
+        - Science directories,
+        - Telluric directories, and
+        - Calibration directories
+        from scienceDirectoryList.txt, telluricDirectoryList.txt and calibrationDirectoryList.txt in
+        the main Nifty directory.
+    """
+    # Don't use sortScript at all; read the paths to data from textfiles.
+    # Load telluric observation directories.
+    try:
+        telDirList = open("telluricDirectoryList.txt", "r").readlines()
+        telDirList = [entry.strip() for entry in telDirList]
+    except IOError:
+        print "\n#####################################################################"
+        print "#####################################################################"
+        print ""
+        print "     WARNING in Nifty: no telluric data found. Setting telDirList to "
+        print "                       an empty list."
+        print ""
+        print "#####################################################################"
+        print "#####################################################################\n"
+        telDirList = []
+    # Load science observation directories.
+    try:
+        obsDirList = open("scienceDirectoryList.txt", "r").readlines()
+        obsDirList = [entry.strip() for entry in obsDirList]
+    except IOError:
+        print "\n#####################################################################"
+        print "#####################################################################"
+        print ""
+        print "     WARNING in Nifty: no science data found. Setting obsDirList to "
+        print "                       an empty list."
+        print ""
+        print "#####################################################################"
+        print "#####################################################################\n"
+        obsDirList = []
+    # Load calibration directories.
+    try:
+        calDirList = open("calibrationDirectoryList.txt", "r").readlines()
+        calDirList = [entry.strip() for entry in calDirList]
+    except IOError:
+        print "\n#####################################################################"
+        print "#####################################################################"
+        print ""
+        print "     WARNING in Nifty: no science data found. Setting calDirList to "
+        print "                       an empty list."
+        print ""
+        print "#####################################################################"
+        print "#####################################################################\n"
+        calDirList = []
+
+    return obsDirList, telDirList, calDirList
+
+#-----------------------------------------------------------------------------#
+
 def getFitsHeader(fitsFile, fitsKeyWords):
     """ imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py """
     selection2 ="fullheader/"+fitsFile
@@ -320,9 +376,9 @@ def writeCenters(objlist):
 
 #-----------------------------------------------------------------------------#
 
-def OLD_makeSkyList(skylist, objlist, obsDir):
+def OLD_makeSkyList(skyframelist, objlist, obsDir):
     """ check to see if the number of sky images matches the number of science
-        images and if not duplicates sky images and rewrites the sky file and skylist
+        images and if not duplicates sky images and rewrites the sky file and skyframelist
     """
 
     objtime = []
@@ -332,7 +388,7 @@ def OLD_makeSkyList(skylist, objlist, obsDir):
         item = str(item).strip()
         otime = timeCalc(item+'.fits')
         objtime.append(otime)
-    for sky in skylist:
+    for sky in skyframelist:
         sky = str(sky).strip()
         stime = timeCalc(sky+'.fits')
         skytime.append(stime)
@@ -345,39 +401,39 @@ def OLD_makeSkyList(skylist, objlist, obsDir):
         for stime in skytime:
             difflist.append(abs(time-stime))
         ind = difflist.index(min(difflist))
-        if templist and skylist[ind] in templist[-1]:
+        if templist and skyframelist[ind] in templist[-1]:
             n+=1
-            templist.append(skylist[ind])
+            templist.append(skyframelist[ind])
         else:
             n=0
-            templist.append(skylist[ind])
-        writeList(skylist[ind]+b[0][:n], 'skylist', obsDir)
+            templist.append(skyframelist[ind])
+        writeList(skyframelist[ind]+b[0][:n], 'skyframelist', obsDir)
         if n>0:
-            shutil.copyfile(skylist[ind]+'.fits', skylist[ind]+b[0][:n]+'.fits')
+            shutil.copyfile(skyframelist[ind]+'.fits', skyframelist[ind]+b[0][:n]+'.fits')
     '''
-    for i in range(len(skylist)-1):
+    for i in range(len(skyframelist)-1):
         n=0
         for j in range(len(objtime)):
             if abs(skytime[i]-objtime[j])<abs(skytime[i+1]-objtime[j]):
-                print skylist[i]+b[0][:n]
-                writeList(skylist[i]+b[0][:n], 'skylist', obsDir)
+                print skyframelist[i]+b[0][:n]
+                writeList(skyframelist[i]+b[0][:n], 'skyframelist', obsDir)
                 if n>0:
-                    shutil.copyfile(skylist[i]+'.fits', skylist[i]+b[0][:n]+'.fits')
+                    shutil.copyfile(skyframelist[i]+'.fits', skyframelist[i]+b[0][:n]+'.fits')
                 n+=1
     '''
-    skylist = open("skylist", "r").readlines()
-    skylist = [image.strip() for image in skylist]
-    return skylist
+    skyframelist = open("skyframelist", "r").readlines()
+    skyframelist = [image.strip() for image in skyframelist]
+    return skyframelist
 
 #-----------------------------------------------------------------------------#
 
 
-def makeSkyList(skylist, sciencelist, obsDir):
-    """ Makes a skylist equal in length to object list with sky and object
+def makeSkyList(skyframelist, sciencelist, obsDir):
+    """ Makes a skyframelist equal in length to object list with sky and object
     frames closest in time at equal indices.
 
     Returns:
-        skylist (list): list of sky frames organized so each science frame has subtracted
+        skyframelist (list): list of sky frames organized so each science frame has subtracted
                         the sky frame closest in time.
 
     Eg:
@@ -394,7 +450,7 @@ def makeSkyList(skylist, sciencelist, obsDir):
             sky3
             obs6
 
-        sciencelist was:    skylist was:   Output skylist will be:
+        sciencelist was:    skyframelist was:   Output skyframelist will be:
             obs1                    sky1            sky1
             obs2                    sky2            sky1
             obs3                    sky3            sky2
@@ -410,7 +466,7 @@ def makeSkyList(skylist, sciencelist, obsDir):
             obs3
             sky3
 
-        sciencelist was:    skylist was:   Output skylist will be:
+        sciencelist was:    skyframelist was:   Output skyframelist will be:
             obs1                    sky1            sky1
             obs2                    sky2            sky1
             obs3                    sky3            sky2
@@ -426,7 +482,7 @@ def makeSkyList(skylist, sciencelist, obsDir):
     # AB AB AB- one sky frame per one two science frames.
     #
     # If it is neither warn user to verify that sky frames were matched with science frames correctly.
-    if len(skylist) != len(sciencelist)/2 and len(skylist) != len(sciencelist):
+    if len(skyframelist) != len(sciencelist)/2 and len(skyframelist) != len(sciencelist):
         print "\n#####################################################################"
         print "#####################################################################"
         print ""
@@ -440,7 +496,7 @@ def makeSkyList(skylist, sciencelist, obsDir):
     # Calculate time of each sky frame. Store the calculated time and the frame name in skytimes, a
     # 2D list of [skyframe_time, skyframe_name] pairs.
     # Eg: [[39049.3, 'N20130527S0241'], [39144.3, 'N20130527S0244'], [39328.8, 'N20130527S0247'], [39590.3, 'N20130527S0250']]
-    for item in skylist:
+    for item in skyframelist:
         # Strip off the trailing newline.
         item = str(item).strip()
         # Calculate the time of the sky frame.
