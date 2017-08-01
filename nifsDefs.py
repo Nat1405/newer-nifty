@@ -39,42 +39,42 @@ def loadSortSave():
         telDirList = open("telluricDirectoryList.txt", "r").readlines()
         telDirList = [entry.strip() for entry in telDirList]
     except IOError:
-        print "\n#####################################################################"
-        print "#####################################################################"
-        print ""
-        print "     WARNING in Nifty: no telluric data found. Setting telDirList to "
-        print "                       an empty list."
-        print ""
-        print "#####################################################################"
-        print "#####################################################################\n"
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in Nifty: no telluric data found. Setting telDirList to ")
+        logging.info("                       an empty list.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
         telDirList = []
     # Load science observation directories.
     try:
         obsDirList = open("scienceDirectoryList.txt", "r").readlines()
         obsDirList = [entry.strip() for entry in obsDirList]
     except IOError:
-        print "\n#####################################################################"
-        print "#####################################################################"
-        print ""
-        print "     WARNING in Nifty: no science data found. Setting obsDirList to "
-        print "                       an empty list."
-        print ""
-        print "#####################################################################"
-        print "#####################################################################\n"
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in Nifty: no science data found. Setting obsDirList to ")
+        logging.info("                       an empty list.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
         obsDirList = []
     # Load calibration directories.
     try:
         calDirList = open("calibrationDirectoryList.txt", "r").readlines()
         calDirList = [entry.strip() for entry in calDirList]
     except IOError:
-        print "\n#####################################################################"
-        print "#####################################################################"
-        print ""
-        print "     WARNING in Nifty: no science data found. Setting calDirList to "
-        print "                       an empty list."
-        print ""
-        print "#####################################################################"
-        print "#####################################################################\n"
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in Nifty: no science data found. Setting calDirList to ")
+        logging.info("                       an empty list.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
         calDirList = []
 
     return obsDirList, telDirList, calDirList
@@ -196,20 +196,20 @@ def checkOverCopy(filelist, path, over):
                 if os.path.exists(raw+'/'+entry):
                     shutil.copy(raw+'/'+entry, path)
                 else:
-                    print 'SKIPPED ', entry
+                    logging.info('SKIPPED ', entry)
         else:
             for entry in missingRaw:
                 if os.path.exists(raw+'/'+entry):
                     shutil.copy(raw+'/'+entry, path)
                 else:
-                    print 'SKIPPED ', entry
+                    logging.info('SKIPPED ', entry)
 
     else:
         for entry in filelist:
             if os.path.exists(raw+'/'+entry):
                 shutil.copy(raw+'/'+entry, path)
             else:
-                print 'SKIPPED ', entry
+                logging.info('SKIPPED ', entry)
 
     return
 
@@ -310,7 +310,7 @@ def checkEntry(entry, entryType, filelist):
         if entry in header[1]:
             pass
         else:
-            print "\n Program number was entered incorrectly.\n"
+            logging.info("\n Program number was entered incorrectly.\n")
             raise SystemExit
 
     if entryType == 'date':
@@ -318,7 +318,7 @@ def checkEntry(entry, entryType, filelist):
         if entry in header[1].replace('-',''):
             pass
         else:
-            print "\n Date was entered incorrectly or there is no NIFS data for the date given. Please make sure the date has been entered as such: YYYYDDMM.\n"
+            logging.info("\n Date was entered incorrectly or there is no NIFS data for the date given. Please make sure the date has been entered as such: YYYYDDMM.\n")
             raise SystemExit
 
 #-----------------------------------------------------------------------------#
@@ -332,15 +332,15 @@ def checkLists(original_list, path, prefix, suffix):
         if os.path.exists(path+'/'+prefix+image+suffix):
             new_list.append(image)
         else:
-            print '\n', image, '.fits not being processed due to error in image.\n'
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING: ", image, " .fits was removed from a list after a checkLists call."
-            print "               An iraf task may have failed. "
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info('\n', image, '.fits not being processed due to error in image.\n')
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING: ", image, " .fits was removed from a list after a checkLists call.")
+            logging.info("               An iraf task may have failed. ")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
 
             pass
@@ -392,8 +392,8 @@ def OLD_makeSkyList(skyframelist, objlist, obsDir):
         sky = str(sky).strip()
         stime = timeCalc(sky+'.fits')
         skytime.append(stime)
-    print skytime
-    print objtime
+    logging.info(skytime)
+    logging.info(objtime)
 
     templist = []
     for time in objtime:
@@ -415,7 +415,7 @@ def OLD_makeSkyList(skyframelist, objlist, obsDir):
         n=0
         for j in range(len(objtime)):
             if abs(skytime[i]-objtime[j])<abs(skytime[i+1]-objtime[j]):
-                print skyframelist[i]+b[0][:n]
+                logging.info(skyframelist[i]+b[0][:n])
                 writeList(skyframelist[i]+b[0][:n], 'skyframelist', obsDir)
                 if n>0:
                     shutil.copyfile(skyframelist[i]+'.fits', skyframelist[i]+b[0][:n]+'.fits')
@@ -471,11 +471,11 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
             obs2                    sky2            sky1
             obs3                    sky3            sky2
     """
-    print "\n#############################################################"
-    print "#                                                           #"
-    print "#  Matching science frames with sky frames closest in time  #"
-    print "#                                                           #"
-    print "#############################################################\n"
+    logging.info("\n#############################################################")
+    logging.info("#                                                           #")
+    logging.info("#  Matching science frames with sky frames closest in time  #")
+    logging.info("#                                                           #")
+    logging.info("#############################################################\n")
     # Do some tests first.
     # Check that data is either:
     # ABA ABA ABA- one sky frame per two science frames.
@@ -483,14 +483,14 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
     #
     # If it is neither warn user to verify that sky frames were matched with science frames correctly.
     if len(skyframelist) != len(sciencelist)/2 and len(skyframelist) != len(sciencelist):
-        print "\n#####################################################################"
-        print "#####################################################################"
-        print ""
-        print "     WARNING in reduce: it appears science frames and sky frames were not"
-        print "                        taken in an ABA ABA or AB AB pattern."
-        print ""
-        print "#####################################################################"
-        print "#####################################################################\n"
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in reduce: it appears science frames and sky frames were not")
+        logging.info("                        taken in an ABA ABA or AB AB pattern.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
     skytimes = []
     prepared_sky_list = []
     # Calculate time of each sky frame. Store the calculated time and the frame name in skytimes, a
@@ -504,7 +504,7 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
         # Store the sky frame time and corresponding sky frame name in skytimes.
         templist = [skytime, item]
         skytimes.append(templist)
-    print "scienceframelist:      skyframelist:      time delta (between observation UT start times from .fits headers):"
+    logging.info("scienceframelist:      skyframelist:      time delta (between observation UT start times from .fits headers):")
     for item in sciencelist:
         # Calculate time of the science frame in seconds.
         item = str(item).strip()
@@ -515,8 +515,8 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
         # Append the name corresponding to the minimum time difference to prepared_sky_list.
         prepared_sky_list.append(sorted_by_closest_time[0][1])
         # Print the scienceframe, matching skyframe and time difference side by side for later comparison.
-        print "  ", item, "       ", sorted_by_closest_time[0][1], "        ", abs(sciencetime - sorted_by_closest_time[0][0])
-    print "\n"
+        logging.info("  ", item, "       ", sorted_by_closest_time[0][1], "        "), abs(sciencetime - sorted_by_closest_time[0][0])
+    logging.info("\n")
     return prepared_sky_list
 
 #-----------------------------------------------------------------------------#

@@ -76,24 +76,24 @@ def start(dir, tel, sort, over, copy, program, date):
     logging.info('#                                  #')
     logging.info('####################################\n')
 
-    print '\n####################################'
-    print '#                                  #'
-    print '#  Start NIFS sorting and copying  #'
-    print '#                                  #'
-    print '####################################\n'
+    logging.info("'\n####################################'")
+    logging.info("'#                                  #'")
+    logging.info("'#  Start NIFS sorting and copying  #'")
+    logging.info("'#                                  #'")
+    logging.info("'####################################\n'")
 
 
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
     # Exit if -q <path to raw frame files> and -c True are specified at command line (cannot copy from
     # Gemini North internal network AND use local raw data).
     if dir and copy:
-        print "\n Error in sort. Cannot specify -q AND -c True (local raw files directory AND copy files from Gemini network).\n"
+        logging.info("\n Error in sort. Cannot specify -q AND -c True (local raw files directory AND copy files from Gemini network).\n")
         raise SystemExit
 
     # Make sure that a path to raw files directory is provided if -s False is specified.
     if not sort:
         if not dir:
-            print "\nError in sort. -s False was specified but no path to raw data was found. \nDid you provide a path to raw files with -q ?\n"
+            logging.info("\nError in sort. -s False was specified but no path to raw data was found. \nDid you provide a path to raw files with -q ?\n")
             raise SystemExit
 
 
@@ -145,16 +145,16 @@ def start(dir, tel, sort, over, copy, program, date):
         try:
             import gemini_sort
         except ImportError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: gemini_sort.py module is needed to find NIFS data"
-            print "                      within the Gemini Internal Network. This option"
-            print "                      is only available when the pipeline is run at"
-            print "                      the observatory."
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: gemini_sort.py module is needed to find NIFS data")
+            logging.info("                      within the Gemini Internal Network. This option")
+            logging.info("                      is only available when the pipeline is run at")
+            logging.info("                      the observatory.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
             raise SystemExit
         else:
             gemini_sort.start(tel, sort, over, copy, program, date)
@@ -163,7 +163,7 @@ def start(dir, tel, sort, over, copy, program, date):
 
     # Exit if no or incorrectly formatted input is given.
     else:
-        print "\nERROR in sort: Enter a program ID, observation date, or directory where the raw files are located.\n"
+        logging.info("\nERROR in sort: Enter a program ID, observation date, or directory where the raw files are located.\n")
         raise SystemExit
 
     os.chdir(path)
@@ -231,9 +231,9 @@ def makeSortFiles(dir):
     # Sort by opening the .fits headers, reading header data into variables and sorting based on those variables.
     # DOES NOT COPY RAW .fits DATA IN THIS STEP
     os.chdir(Raw)
-    print "Raw file directory is: ", Raw
+    logging.info("Raw file directory is: "), Raw
 
-    print "\nI am making lists of each type of file."
+    logging.info("\nI am making lists of each type of file.")
 
     # Make a list of all the files in the Raw directory.
     rawfiles = glob.glob('N*.fits')
@@ -369,15 +369,15 @@ def makeSortFiles(dir):
     os.chdir(path)
 
     # Print information for user.
-    print "\nTotal number of files found by type.\n"
-    print "Length allfilelist (science and telluric frames): ", len(allfilelist)
-    print "Length arclist (arc frames): ", len(arclist)
-    print "Length arcdarklist (arc dark frames): ", len(arcdarklist)
-    print "Length flatlist (lamps on flat frames): ", len(flatlist)
-    print "Length flatdarklist (lamps off flat frames): ", len(flatdarklist)
-    print "Length ronchilist (ronchi flat frames): ", len(ronchilist)
-    print "Length skyframelist (science sky frames): ", len(skyframelist)
-    print "Length telskyframelist (telluric sky frames): ", len(telskyframelist)
+    logging.info("\nTotal number of files found by type.\n")
+    logging.info("Length allfilelist (science and telluric frames): "), len(allfilelist)
+    logging.info("Length arclist (arc frames): "), len(arclist)
+    logging.info("Length arcdarklist (arc dark frames): "), len(arcdarklist)
+    logging.info("Length flatlist (lamps on flat frames): "), len(flatlist)
+    logging.info("Length flatdarklist (lamps off flat frames): "), len(flatdarklist)
+    logging.info("Length ronchilist (ronchi flat frames): "), len(ronchilist)
+    logging.info("Length skyframelist (science sky frames): "), len(skyframelist)
+    logging.info("Length telskyframelist (telluric sky frames): "), len(telskyframelist)
 
     # Store number of telluric, telluric, sky, telluric sky and acquisition frames in number_files_to_be_copied.
     number_files_to_be_copied = len(allfilelist)
@@ -386,7 +386,7 @@ def makeSortFiles(dir):
     number_calibration_files_to_be_copied = len(arclist) + len(arcdarklist) +\
                          len(flatlist) + len(flatdarklist) + len(ronchilist)
 
-    print "\nTotal number of frames to be copied: ", number_files_to_be_copied + number_calibration_files_to_be_copied
+    logging.info("\nTotal number of frames to be copied: "), number_files_to_be_copied + number_calibration_files_to_be_copied
 
     return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyframelist, telskyframelist, obsidDateList, sciImageList
 
@@ -401,10 +401,10 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
     number_files_to_be_copied = len(allfilelist)
 
     # Initialize a counter to track how many files were copied. If this is different than
-    # number_files_to_be_copied print a warning for the user at the end of sortObs.
+    # number_files_to_be_copied logging.info("a warning for the user at the end of sortObs.")
     number_files_that_were_copied = 0
 
-    print "\n\nMaking new directories and copying files. In this step I will process " + str(number_files_to_be_copied) +\
+    logging.info("\n\nMaking new directories and copying files. In this step I will process ") + str(number_files_to_be_copied) +\
             " files."
 
     # List of paths sorted by object and date. ['path/to/object1/date1', 'path/to/object1/date2'].
@@ -423,7 +423,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
         Raw = path+'/Raw'
 
     # Make new sorted directories to copy files in to.
-    print "\nMaking new directories.\n"
+    logging.info("\nMaking new directories.\n")
 
     # All data is sorted by science frame data.
     # For each science frame, create a "science_object_name/date/" directory in
@@ -495,7 +495,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
 
 
     # Copy science and acquisition frames to the appropriate directory.
-    print "\nCopying Science and Acquisitions.\nCopying science frames.\nNow copying: "
+    logging.info("\nCopying Science and Acquisitions.\nCopying science frames.\nNow copying: ")
 
     for i in range(len(allfilelist)):
         header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
@@ -517,7 +517,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
         # those directories that store the names of the science frames and sky frames for later
         # use by the pipeline.
         if obsclass=='science':
-            print allfilelist[i][0]
+            logging.info("allfilelist[i][0]")
             objDir = path+'/'+obj
             shutil.copy(Raw+'/'+allfilelist[i][0], objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
             number_files_that_were_copied += 1
@@ -533,7 +533,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
         # Copy the most recent acquisition in each set to a new directory to be optionally
         # used later by the user for checks (not used by the pipeline).
         if obsclass=='acq' and obsclass2=='science':
-            print allfilelist[i][0]
+            logging.info("allfilelist[i][0]")
             # create an Acquisitions directory in objDir/YYYYMMDD/grating
             if not os.path.exists(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/'):
                 os.makedirs(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
@@ -544,7 +544,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
     # Copy telluric frames to the appropriate folder.
     # Note: Because the 'OBJECT' of a telluric file header is different then the
     # science target, we need to sort by date, grating AND most recent time.
-    print "\nCopying telluric frames.\nNow copying: "
+    logging.info("\nCopying telluric frames.\nNow copying: ")
     for i in range(len(allfilelist)):
         header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
 
@@ -558,7 +558,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
 
 
         if obsclass=='partnerCal':
-            print allfilelist[i][0]
+            logging.info("allfilelist[i][0]")
             timeList = []
             for k in range(len(obsDirList)):
                 # Make sure date and gratings match.
@@ -614,12 +614,12 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
     #------------------------------ TESTS -------------------------------------#
 
     # Check to see which files were not copied.
-    print "\nChecking for non-copied science, tellurics and acquisitions.\n"
+    logging.info("\nChecking for non-copied science, tellurics and acquisitions.\n")
     for i in range(len(allfilelist)):
-        # Check the copied flag. If not 0, print the entry.
+        # Check the copied flag. If not 0, logging.info("the entry.")
         if allfilelist[i][1] != 0:
-            print allfilelist[i][0], allfilelist[i][2],  " was not copied."
-    print "\nEnd non-copied science, tellurics and acquisitions.\n"
+            logging.info(allfilelist[i][0], allfilelist[i][2],  " was not copied.")
+    logging.info("\nEnd non-copied science, tellurics and acquisitions.\n")
 
     # Check that all science frames were copied.
     count_from_raw_files = len(sciImageList)
@@ -631,12 +631,12 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
                 count += 1
 
     if count_from_raw_files != count:
-        print "\nWARNING: ", count_from_raw_files - count, " science images (or sky frames) \
-        were not copied.\n"
+        logging.info("\nWARNING: ", count_from_raw_files - count, ") science images (or sky frames) \
+        were not copied.\n")
     else:
-        print "\nExpected number of science and sky frames copied.\n"
+        logging.info("\nExpected number of science and sky frames copied.\n")
 
-    print "\n\nDone sorting and copying science and tellurics. Moving on to Calibrations.\n\n"
+    logging.info("\nDone sorting and copying science and tellurics. Moving on to Calibrations.\n")
 
     os.chdir(path)
 
@@ -663,7 +663,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     expected_count = len(arcdarklist) + len(arclist) + len(flatlist)\
           + len(flatdarklist) + len(ronchilist)
 
-    print "\nI am attempting to sort ", expected_count, " files.\n"
+    logging.info("\nI am attempting to sort ", expected_count, " files.\n")
 
     # To make sure data was copied later in the pipeline:
     # Add a small copied flag to each frame in calibration file lists.
@@ -718,7 +718,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # Create Calibrations directories in each of the observation date directories based on existence of
     # lamps on flats. Eg: YYYYMMDD/Calibrations
     # Sort lamps on flats.
-    print "\nSorting flats:"
+    logging.info("\nSorting flats:")
     # Create a flag so we only warn about non-standard gratings once.
     grating_warning_flag = False
     for i in range(len(flatlist)):
@@ -726,15 +726,15 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
         obsid = header[0].header['OBSID']
         grating = header[0].header['GRATING'][0:1]
         if grating not in ["K", "J", "H", "Z"]:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: non-standard (non K, J, H, K) grating encountered. "
-            print "                      NIFTY has not been tested with non-standard"
-            print "                      gratings!"
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: non-standard (non K, J, H, K) grating encountered. ")
+            logging.info("                      NIFTY has not been tested with non-standard")
+            logging.info("                      gratings!")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
@@ -751,7 +751,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                         # Copy lamps on flats to appropriate directory.
                         shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatlist[i][1] = 0
-                        print flatlist[i][0]
+                        logging.info("flatlist[i][0]")
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # Create a flatlist in the relevent directory.
@@ -760,7 +760,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                         writeList(flatlist[i][0], 'flatlist', path)
 
     # Sort lamps off flats.
-    print "\nSorting lamps off flats:"
+    logging.info("\nSorting lamps off flats:")
     for i in range(len(flatdarklist)):
         os.chdir(Raw)
         header = astropy.io.fits.open(flatdarklist[i][0])
@@ -773,14 +773,14 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                     if date in objDir:
                         shutil.copy('./'+flatdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatdarklist[i][1] = 0
-                        print flatdarklist[i][0]
+                        logging.info("flatdarklist[i][0]")
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # Create a flatdarklist in the relevant directory.
                         writeList(flatdarklist[i][0], 'flatdarklist', path)
 
     # Sort ronchi flats.
-    print "\nSorting ronchi flats:"
+    logging.info("\nSorting ronchi flats:")
     for i in range(len(ronchilist)):
         os.chdir(Raw)
         header = astropy.io.fits.open(ronchilist[i][0])
@@ -793,14 +793,14 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                     if date in objDir:
                         shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations_'+grating+'/')
                         ronchilist[i][1] = 0
-                        print ronchilist[i][0]
+                        logging.info("ronchilist[i][0]")
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # create a ronchilist in the relevant directory
                         writeList(ronchilist[i][0], 'ronchilist', path)
 
     # Sort arcs.
-    print "\nSorting arcs:"
+    logging.info("\nSorting arcs:")
     for i in range(len(arclist)):
         header = astropy.io.fits.open(arclist[i][0])
         obsid = header[0].header['OBSID']
@@ -810,14 +810,14 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             if date in objDir:
                 shutil.copy('./'+arclist[i][0], objDir+'/Calibrations_'+grating+'/')
                 arclist[i][1] = 0
-                print arclist[i][0]
+                logging.info("arclist[i][0]")
                 count += 1
                 path = objDir+'/Calibrations_'+grating+'/'
                 # Create an arclist in the relevant directory.
                 writeList(arclist[i][0], 'arclist', path)
 
     # Sort arc darks.
-    print "\nSorting arc darks:"
+    logging.info("\nSorting arc darks:")
     for i in range(len(arcdarklist)):
         header = astropy.io.fits.open(arcdarklist[i][0])
         obsid = header[0].header['OBSID']
@@ -829,7 +829,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                     if date in objDir:
                         shutil.copy('./'+arcdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         arcdarklist[i][1] = 0
-                        print arcdarklist[i][0]
+                        logging.info("arcdarklist[i][0]")
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # Create an arcdarklist in the relevant directory.
@@ -838,7 +838,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # Check that each file in flatlist was copied.
     for i in range(len(flatlist)):
         if flatlist[i][1] == 1:
-            print flatlist[i][0], " was not copied."
+            logging.info(flatlist[i][0], " was not copied.")
 
 
 
@@ -851,35 +851,35 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
 
     # Check to see how many calibrations were copied.
     if expected_count - count == 0:
-        print "\nI sorted the ", expected_count, " expected calibrations.\n"
+        logging.info("\nI sorted the ", expected_count, " expected calibrations.\n")
     else:
-        print "\nI did not copy ", expected_count - count, " calibration file(s).\n"
+        logging.info("\nI did not copy ", expected_count - count, " calibration file(s).\n")
 
     # Check each calibration file list to see which ones were not copied.
     # Check that each file in flatlist was copied.
     for i in range(len(flatlist)):
         if flatlist[i][1] == 1:
-            print flatlist[i][0], " from flatlist was not copied."
+            logging.info(flatlist[i][0], " from flatlist was not copied.")
 
     # Check that each file in flatdarklist was copied.
     for i in range(len(flatdarklist)):
         if flatdarklist[i][1] == 1:
-            print flatdarklist[i][0], " from flatdarklist was not copied."
+            logging.info(flatdarklist[i][0], " from flatdarklist was not copied.")
 
     # Check that each file in ronchilist was copied.
     for i in range(len(ronchilist)):
         if ronchilist[i][1] == 1:
-            print ronchilist[i][0], " from ronchilist was not copied."
+            logging.info(ronchilist[i][0], " from ronchilist was not copied.")
 
     # Check that each file in arclist was copied.
     for i in range(len(arclist)):
         if arclist[i][1] == 1:
-            print arclist[i][0], " from arclist was not copied."
+            logging.info(arclist[i][0], " from arclist was not copied.")
 
     # Check that each file in arcdarklist was copied.
     for i in range(len(arcdarklist)):
         if arcdarklist[i][1] == 1:
-            print arcdarklist[i][0], " from arcdarklist was not copied."
+            logging.info(arcdarklist[i][0], " from arcdarklist was not copied.")
 
 
     # Change back to original working directory.
@@ -895,7 +895,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # arcdarklist exists and has more than one file.
     # ronchilist exists and has more than one file.
 
-    print "\nChecking that each science image has required calibration data. "
+    logging.info("\nChecking that each science image has required calibration data. ")
     # For each science image, read its header data and try to change to the appropriate directory.
     # Check that:
     for i in range(len(sciImageList)):
@@ -913,37 +913,37 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             os.chdir(path1+'/'+obj+'/'+date+'/'+grat+'/obs'+obsid+'/')
             os.chdir('../../Calibrations_'+grat+'/')
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no Calibrations directory found for "
-            print "                      science frame ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no Calibrations directory found for ")
+            logging.info("                      science frame "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
             continue
 
         # flatlist exists and has more than one file.
         try:
             flatlist = open('flatlist', "r").readlines()
             if len(flatlist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 lamps on flat frame found for science"
-                print "                      frame ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 lamps on flat frame found for science")
+                logging.info("                      frame "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no flatlist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no flatlist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
             # Crash now because later sorting requires having a list of lamps on flats.
             raise SystemExit
 
@@ -951,89 +951,89 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
         try:
             flatdarklist = open('flatdarklist', "r").readlines()
             if len(flatdarklist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 lamps off flat frame found for science"
-                print "                      frame ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 lamps off flat frame found for science")
+                logging.info("                      frame "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no flatdarklist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no flatdarklist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # arclist exists and has more than one file.
         try:
             arclist = open('arclist', "r").readlines()
             if len(arclist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 arc frame found for science frame"
-                print "                      ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 arc frame found for science frame")
+                logging.info("                      "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no arclist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no arclist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # arcdarklist exists and has more than one file.
         try:
             arcdarklist = open('arcdarklist', "r").readlines()
             if len(arcdarklist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 dark arc frame found for science frame"
-                print "                      ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 dark arc frame found for science frame")
+                logging.info("                      "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no arcdarklist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no arcdarklist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # ronchilist exists and has more than one file.
         try:
             ronchilist = open('ronchilist', "r").readlines()
             if len(ronchilist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 ronchi flat frame found for science frame"
-                print "                      ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 ronchi flat frame found for science frame")
+                logging.info("                      "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no ronchilist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no ronchilist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         os.chdir(path1)
 
@@ -1061,7 +1061,7 @@ def sortTels(telDirList, obsDirList):
 
     """
 
-    print "\nI am matching science images with tellurics closest in time.\n"
+    logging.info("\nI am matching science images with tellurics closest in time.\n")
 
     # Store current working directory for later use.
     path = os.getcwd()
@@ -1174,14 +1174,14 @@ def sortTels(telDirList, obsDirList):
             try:
                 sciImageList = open('objlist', "r").readlines()
             except IOError:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: science ", science_observation_name
-                print "                      does not contain science images."
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: science "), science_observation_name
+                logging.info("                      does not contain science images.")
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
 
 
                 sciImageList = open('skyframelist', "r").readlines()
@@ -1196,28 +1196,28 @@ def sortTels(telDirList, obsDirList):
             # Check that directory obsname matches header obsname.
             temp_obs_name = 'obs' + science_header[0].header['OBSID'][-3:].replace('-','')
             if science_observation_name != temp_obs_name:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: science ", science_observation_name, " :"
-                print "                      observation name data in headers and directory"
-                print "                      do not match."
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: science ", science_observation_name, " :")
+                logging.info("                      observation name data in headers and directory")
+                logging.info("                      do not match.")
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
 
             # Check that a tellurics directory exists.
             if os.path.exists('../Tellurics/'):
                 os.chdir('../Tellurics/')
             else:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: telluric directory for science ", science_observation_name
-                print "                      does not exist."
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: telluric directory for science "), science_observation_name
+                logging.info("                      does not exist.")
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
 
             found_telluric_flag = False
 
@@ -1247,17 +1247,17 @@ def sortTels(telDirList, obsDirList):
 
             if not found_telluric_flag:
                 os.chdir('../')
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: no tellurics data found for science ", science_observation_name
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: no tellurics data found for science "), science_observation_name
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
 
 
             else:
-                print "\nFound telluric data for all science observations.\n"
+                logging.info("\nFound telluric data for all science observations.\n")
             # TO DO:
             # Optional: open that telluric image and store time in telluric_time
             # Check that abs(telluric_time - science_time) < 1.5 hours
@@ -1293,7 +1293,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
     else:
         Raw = path+'/Raw'
 
-    print "\nGetting list of paths to science observations."
+    logging.info("\nGetting list of paths to science observations.")
     for i in range(len(allfilelist)):
         # Make a 2D list of paths to science observations and the time of each one.
         header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
@@ -1316,7 +1316,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             allfilelist[i][1] = 0
 
     # Get list of paths to Tellurics/ot_observation_id directories.
-    print "\nGetting list of paths to telluric observations."
+    logging.info("\nGetting list of paths to telluric observations.")
     for i in range(len(allfilelist)):
         header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
 
@@ -1330,7 +1330,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
 
         # Match tellurics to science data by date, grating and time.
         if obsclass=='partnerCal':
-            print allfilelist[i][0]
+            logging.info("allfilelist[i][0]")
             timeList = []
             for k in range(len(obsDirList)):
                 # Make sure date and gratings match.
@@ -1369,7 +1369,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
 
 
     # Check that each science observation has valid telluric data.
-    print "\nChecking that each science observation has valid telluric data."
+    logging.info("\nChecking that each science observation has valid telluric data.")
     # For each science observation:
     for i in range(len(obsDirList)):
         os.chdir(obsDirList[i][1])
@@ -1379,14 +1379,14 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
         try:
             scienceFrameList = open('objlist', "r").readlines()
         except IOError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: science ", science_observation_name
-            print "                      does not contain science images."
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: science "), science_observation_name
+            logging.info("                      does not contain science images.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
 
             scienceFrameList = open('skyframelist', "r").readlines()
@@ -1401,28 +1401,28 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
         # Check that directory obsname matches header obsname.
         temp_obs_name = 'obs' + science_header[0].header['OBSID'][-3:].replace('-','')
         if science_observation_name != temp_obs_name:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: science ", science_observation_name, " :"
-            print "                      observation name data in headers and directory"
-            print "                      do not match."
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: science ", science_observation_name, " :")
+            logging.info("                      observation name data in headers and directory")
+            logging.info("                      do not match.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # Check that a tellurics directory exists.
         if os.path.exists('../Tellurics/'):
             os.chdir('../Tellurics/')
         else:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: telluric directory for science ", science_observation_name
-            print "                      does not exist."
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: telluric directory for science "), science_observation_name
+            logging.info("                      does not exist.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         found_telluric_flag = False
 
@@ -1452,17 +1452,17 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
 
         if not found_telluric_flag:
             os.chdir('../')
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no tellurics data found for science ", science_observation_name
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no tellurics data found for science "), science_observation_name
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
 
         else:
-            print "\nFound telluric data for all science observations."
+            logging.info("\nFound telluric data for all science observations.")
         # TO DO:
         # Optional: open that telluric image and store time in telluric_time
         # Check that abs(telluric_time - science_time) < 1.5 hours
@@ -1479,7 +1479,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
     # arcdarklist exists and has more than one file.
     # ronchilist exists and has more than one file.
 
-    print "\nChecking that each science image has required calibration data. "
+    logging.info("\nChecking that each science image has required calibration data. ")
     # For each science image, read its header data and try to change to the appropriate directory.
     # Check that:
     for i in range(len(sciImageList)):
@@ -1497,137 +1497,137 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             os.chdir(path+'/'+obj+'/'+date+'/'+grat+'/obs'+obsid+'/')
             os.chdir('../../Calibrations_'+grat+'/')
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no Calibrations directory found for "
-            print "                      science frame ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no Calibrations directory found for ")
+            logging.info("                      science frame "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
             continue
 
         # flatlist exists and has more than one file.
         try:
             flatlist = open('flatlist', "r").readlines()
             if len(flatlist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 lamps on flat frame found for science"
-                print "                      frame ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 lamps on flat frame found for science")
+                logging.info("                      frame "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no flatlist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no flatlist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # flatdarklist exists and has more than one file.
         try:
             flatdarklist = open('flatdarklist', "r").readlines()
             if len(flatdarklist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 lamps off flat frame found for science"
-                print "                      frame ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 lamps off flat frame found for science")
+                logging.info("                      frame "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no flatdarklist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no flatdarklist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # arclist exists and has more than one file.
         try:
             arclist = open('arclist', "r").readlines()
             if len(arclist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 arc frame found for science frame"
-                print "                      ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 arc frame found for science frame")
+                logging.info("                      "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no arclist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no arclist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # arcdarklist exists and has more than one file.
         try:
             arcdarklist = open('arcdarklist', "r").readlines()
             if len(arcdarklist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 dark arc frame found for science frame"
-                print "                      ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 dark arc frame found for science frame")
+                logging.info("                      "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no arcdarklist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no arcdarklist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         # ronchilist exists and has more than one file.
         try:
             ronchilist = open('ronchilist', "r").readlines()
             if len(ronchilist) <= 1:
-                print "\n#####################################################################"
-                print "#####################################################################"
-                print ""
-                print "     WARNING in sort: only 1 ronchi flat frame found for science frame"
-                print "                      ", sciImageList[i]
-                print ""
-                print "#####################################################################"
-                print "#####################################################################\n"
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 ronchi flat frame found for science frame")
+                logging.info("                      "), sciImageList[i]
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
         except OSError:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in sort: no ronchilist found for science frame"
-            print "                      ", sciImageList[i]
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no ronchilist found for science frame")
+            logging.info("                      "), sciImageList[i]
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
         os.chdir(path)
 
-    print "Done checking that each science image has required calibration data.\n"
+    logging.info("Done checking that each science image has required calibration data.\n")
 
     # Check to see what files were copied.
-    print "\nChecking for non-copied science, tellurics and acquisitions.\n"
+    logging.info("\nChecking for non-copied science, tellurics and acquisitions.\n")
     for i in range(len(allfilelist)):
-        # Check the copied flag. If not 0, print the entry.
+        # Check the copied flag. If not 0, logging.info("the entry.")
         if allfilelist[i][1] != 0:
-            print allfilelist[i][0], allfilelist[i][2],  " was not copied."
-    print "\nEnd non-copied science, tellurics and acquisitions.\n"
+            logging.info(allfilelist[i][0], allfilelist[i][2],  " was not copied.")
+    logging.info("\nEnd non-copied science, tellurics and acquisitions.\n")
 
     # Check that all science frames were copied.
     count_from_raw_files = len(sciImageList)
@@ -1639,10 +1639,10 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
                 count += 1
 
     if count_from_raw_files != count:
-        print "\nWARNING: ", count_from_raw_files - count, " science images (or sky frames) \
-        were not copied.\n"
+        logging.info("\nWARNING: ", count_from_raw_files - count, ") science images (or sky frames) \
+        were not copied.\n")
     else:
-        print "\nExpected number of science and sky frames copied.\n"
+        logging.info("\nExpected number of science and sky frames copied.\n")
 
     # ---------------------------- End Tests --------------------------------- #
 

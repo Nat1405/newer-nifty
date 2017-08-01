@@ -92,11 +92,11 @@ def start(
     logging.info('#                                               #')
     logging.info('#################################################')
 
-    print '\n#################################################'
-    print '#                                               #'
-    print '# Start the NIFS Science and Telluric Reduction #'
-    print '#                                               #'
-    print '#################################################\n'
+    logging.info('\n#################################################')
+    logging.info('#                                               #')
+    logging.info('# Start the NIFS Science and Telluric Reduction #')
+    logging.info('#                                               #')
+    logging.info('#################################################\n')
 
     # Set up/prepare IRAF.
     iraf.gemini()
@@ -195,7 +195,7 @@ def start(
                 skyframelist = open("skyframelist", "r").readlines()
                 skyframelist = [frame.strip() for frame in skyframelist]
             except:
-                print "\nNo sky frames were found for standard star. Please make a skyframelist in the telluric directory\n"
+                logging.info("\nNo sky frames were found for standard star. Please make a skyframelist in the telluric directory\n")
                 raise SystemExit
             sky = skyframelist[0]
         else:
@@ -215,26 +215,26 @@ def start(
         # input is not valid.
         valindex = start
         while valindex > stop  or valindex < 1 or stop > 7:
-            print "\n#####################################################################"
-            print "#####################################################################"
-            print ""
-            print "     WARNING in reduce: invalid start/stop values of observation"
-            print "                           reduction steps."
-            print ""
-            print "#####################################################################"
-            print "#####################################################################\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in reduce: invalid start/stop values of observation")
+            logging.info("                           reduction steps.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
 
             valindex = int(raw_input("\nPlease enter a valid start value (1 to 7, default 1): "))
             stop = int(raw_input("\nPlease enter a valid stop value (1 to 7, default 7): "))
 
 
         # Print the current directory of data being reduced.
-        print "\n#################################################################################"
-        print "                                   "
-        print "  Currently working on reductions in"
-        print "  in ", observationDirectory
-        print "                                   "
-        print "#################################################################################\n"
+        logging.info("\n#################################################################################")
+        logging.info("                                   ")
+        logging.info("  Currently working on reductions in")
+        logging.info("  in "), observationDirectory
+        logging.info("                                   ")
+        logging.info("#################################################################################\n")
 
 
         while valindex <= stop :
@@ -246,11 +246,11 @@ def start(
             if valindex == 1:
                 objlist = prepare(objlist, shift, sflat_bpm, log, over)
                 skyframelist = prepare(skyframelist, shift, sflat_bpm, log, over)
-                print "\n##############################################################################"
-                print ""
-                print "  STEP 1: Prepare raw data ->n - COMPLETED "
-                print ""
-                print "##############################################################################\n"
+                logging.info("\n##############################################################################")
+                logging.info("")
+                logging.info("  STEP 1: Prepare raw data ->n - COMPLETED ")
+                logging.info("")
+                logging.info("##############################################################################\n")
 
             ###########################################################################
             ##  STEP 2: Sky Subtraction ->sn                                         ##
@@ -269,11 +269,11 @@ def start(
                     skySubtractTel(objlist, "gn"+sky, log, over)
                 else:
                     skySubtractObj(objlist, skyframelist, log, over)
-                print "\n##############################################################################"
-                print ""
-                print "  STEP 2: Sky Subtraction ->sn - COMPLETED "
-                print ""
-                print "##############################################################################\n"
+                logging.info("\n##############################################################################")
+                logging.info("")
+                logging.info("  STEP 2: Sky Subtraction ->sn - COMPLETED ")
+                logging.info("")
+                logging.info("##############################################################################\n")
 
             ##############################################################################
             ##  STEP 3: Flat field, slice, subtract dark and correct bad pixels ->brsn  ##
@@ -282,11 +282,11 @@ def start(
             elif valindex == 3:
                 applyFlat(objlist, flat, log, over, kind)
                 fixBad(objlist, log, over)
-                print "\n##############################################################################"
-                print ""
-                print "  STEP 3: Flat field and correct bad pixels ->brsn - COMPLETED "
-                print ""
-                print "##############################################################################\n"
+                logging.info("\n##############################################################################")
+                logging.info("")
+                logging.info("  STEP 3: Flat field and correct bad pixels ->brsn - COMPLETED ")
+                logging.info("")
+                logging.info("##############################################################################\n")
 
 
             ###########################################################################
@@ -296,11 +296,11 @@ def start(
             elif valindex == 4:
                 fitCoords(objlist, arc, ronchi, log, over, kind)
                 transform(objlist, log, over)
-                print "\n##############################################################################"
-                print ""
-                print "  STEP 4: Derive and apply 2D to 3D transformation ->tfbrsn - COMPLETED "
-                print ""
-                print "##############################################################################\n"
+                logging.info("\n##############################################################################")
+                logging.info("")
+                logging.info("  STEP 4: Derive and apply 2D to 3D transformation ->tfbrsn - COMPLETED ")
+                logging.info("")
+                logging.info("##############################################################################\n")
 
             ###########################################################################
             ##  STEP 5a: For telluric data derive a telluric correction ->gxtfbrsn   ##
@@ -327,12 +327,12 @@ def start(
                     applyTelluricIraf(objlist, obsid, telinter, log, over)
                     makeCube('atfbrsn', objlist, tel, observationDirectory, log, over)
 
-                print "\n##############################################################################"
-                print ""
-                print "  STEP 5: Derive or apply telluric correction and make"
-                print "          a data cube ->gxtfbrsn or ->catgbrsn - COMPLETED"
-                print ""
-                print "##############################################################################\n"
+                logging.info("\n##############################################################################")
+                logging.info("")
+                logging.info("  STEP 5: Derive or apply telluric correction and make")
+                logging.info("          a data cube ->gxtfbrsn or ->catgbrsn - COMPLETED")
+                logging.info("")
+                logging.info("##############################################################################\n")
 
             #############################################################################
             ##   STEP 6: Create a 3D cube from science data ->ctfbrsn                  ##
@@ -345,13 +345,13 @@ def start(
                     makeCube('tfbrsn', objlist, tel, observationDirectory, log, over)
 
                 elif kind == "Telluric":
-                   print "\nNo cube being made for tellurics.\n"
+                   logging.info("\nNo cube being made for tellurics.\n")
 
-                print "\n##############################################################################"
-                print ""
-                print "  STEP 6: Create a 3D cube from science data ->ctfbrsn - COMPLETED "
-                print ""
-                print "##############################################################################\n"
+                logging.info("\n##############################################################################")
+                logging.info("")
+                logging.info("  STEP 6: Create a 3D cube from science data ->ctfbrsn - COMPLETED ")
+                logging.info("")
+                logging.info("##############################################################################\n")
 
             ###########################################################################
             ##  STEP 7: Create an efficiency spectrum ->fcatfbrsgn or ->fctfbrsgn    ##
@@ -362,19 +362,19 @@ def start(
                         createEfficiencySpectrum(
                             observationDirectory, path, continuuminter, hlineinter,
                             hline_method, spectemp, mag, log, over)
-                print "\n##############################################################################"
-                print ""
-                print "  STEP 7: Perform a flux calibration ->fcatfbrsn or ->fctfbrsn - COMPLETED "
-                print ""
-                print "##############################################################################\n"
+                logging.info("\n##############################################################################")
+                logging.info("")
+                logging.info("  STEP 7: Perform a flux calibration ->fcatfbrsn or ->fctfbrsn - COMPLETED ")
+                logging.info("")
+                logging.info("##############################################################################\n")
 
             valindex += 1
 
-        print "\n##############################################################################"
-        print ""
-        print "  COMPLETE - Reductions completed for ", observationDirectory
-        print ""
-        print "##############################################################################\n"
+        logging.info("\n##############################################################################")
+        logging.info("")
+        logging.info("  COMPLETE - Reductions completed for "), observationDirectory
+        logging.info("")
+        logging.info("##############################################################################\n")
 
     # Return to directory script was begun from.
     os.chdir(path)
@@ -407,7 +407,7 @@ def prepare(inlist, shiftima, sflat_bpm, log, over):
             if over:
                 os.remove("n"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping prepare_list"
+                logging.info("Output file exists and -over not set - skipping prepare_list")
                 continue
         iraf.nfprepare(frame, rawpath="", shiftimage=shiftima, fl_vardq="yes", bpm=sflat_bpm, fl_int='yes', fl_corr='no', fl_nonl='no', logfile=log)
     inlist = checkLists(inlist, '.', 'n', '.fits')
@@ -423,7 +423,7 @@ def combineImages(inlist, out, log, over):
         if over:
             iraf.delete(out+".fits")
         else:
-            print "Output file exists and -over not set - skipping combine_ima"
+            logging.info("Output file exists and -over not set - skipping combine_ima")
             return
 
     iraf.gemcombine(listit(inlist,"n"),output=out,fl_dqpr='yes', fl_vardq='yes',masktype="none", combine="median", logfile=log)
@@ -437,7 +437,7 @@ def copyImage(input, output, over):
         if over:
             iraf.delete(output)
         else:
-            print "Output file exists and -over not set - skipping copy_ima"
+            logging.info("Output file exists and -over not set - skipping copy_ima")
             return
 
     iraf.copy('n'+input[0]+'.fits', output)
@@ -454,7 +454,7 @@ def skySubtractObj(objlist, skyframelist, log, over):
            if over:
                os.remove("sn"+frame+".fits")
            else:
-               print "Output file exists and -over not set - skipping skysub_list"
+               logging.info("Output file exists and -over not set - skipping skysub_list")
                continue
         iraf.gemarith ("n"+frame, "-", "n"+sky, "sn"+frame, fl_vardq="yes", logfile=log)
 
@@ -468,7 +468,7 @@ def skySubtractTel(tellist, sky, log, over):
             if over:
                 os.remove("sn"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping skySubtractTel."
+                logging.info("Output file exists and -over not set - skipping skySubtractTel.")
                 continue
         iraf.gemarith ("n"+frame, "-", sky, "sn"+frame, fl_vardq="yes", logfile=log)
 
@@ -496,7 +496,7 @@ def applyFlat(objlist, flat, log, over, kind, dark=""):
             if over:
                 os.remove("rsn"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping apply_flat_list"
+                logging.info("Output file exists and -over not set - skipping apply_flat_list")
                 continue
         iraf.nsreduce("sn"+frame, fl_cut="yes", fl_nsappw="yes", fl_dark="no", fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="yes",logfile=log)
 
@@ -520,7 +520,7 @@ def fixBad(objlist, log, over):
             if over:
                 os.remove("brsn"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping fixbad_list"
+                logging.info("Output file exists and -over not set - skipping fixbad_list")
                 continue
         iraf.nffixbad("rsn"+frame,logfile=log)
 
@@ -546,7 +546,7 @@ def fitCoords(objlist, arc, ronchi, log, over, kind):
             if over:
                 os.remove("fbrsn"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping fitcoord_list"
+                logging.info("Output file exists and -over not set - skipping fitcoord_list")
                 continue
         iraf.nsfitcoords("brsn"+frame, lamptransf=arc, sdisttransf=ronchi, lxorder=3, lyorder=2, sxorder=3, syorder=3, logfile=log)
 
@@ -573,7 +573,7 @@ def transform(objlist, log, over):
             if over:
                 iraf.delete("tfbrsn"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping transform_list"
+                logging.info("Output file exists and -over not set - skipping transform_list")
                 continue
         iraf.nstransform("fbrsn"+frame, logfile=log)
 
@@ -597,7 +597,7 @@ def makeCube(pre, objlist, tel, observationDirectory, log, over):
             if over:
                 iraf.delete("c"+pre+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping make_cube_list"
+                logging.info("Output file exists and -over not set - skipping make_cube_list")
                 continue
         if tel:
             iraf.nifcube (pre+frame, outcubes = 'c'+pre+frame, logfile=log)
@@ -633,7 +633,7 @@ def makeTelluric(objlist, log, over):
             if over:
                 iraf.delete("xtfbrsn"+frame+".fits")
             else:
-                print "Output file exists and -over not set - skipping extraction in make_telluric"
+                logging.info("Output file exists and -over not set - skipping extraction in make_telluric")
                 continue
 
         iraf.nfextract("tfbrsn"+frame, outpref="x", xc=15.0, yc=33.0, diameter=2.5, fl_int='no', logfile=log)
@@ -646,7 +646,7 @@ def makeTelluric(objlist, log, over):
             if over:
                 iraf.delete("gxtfbrsn"+telluric+".fits")
             else:
-                print "Output file exists and -over not set - skipping gemcombine in make_telluric"
+                logging.info("Output file exists and -over not set - skipping gemcombine in make_telluric")
                 return
         iraf.gemcombine(listit(objlist,"xtfbrsn"),output="gxtfbrsn"+telluric, statsec="[*]", combine="median",masktype="none",fl_vardq="yes", logfile=log)
     else:
@@ -684,7 +684,7 @@ def applyTelluricPython(over):
 
 
         telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
-        print "\nFound a finalcorrectionspectrum in\n", telDir
+        logging.info("\nFound a finalcorrectionspectrum in\n"), telDir
         # Open the final correction spectrum file as "telluric". Create a numpy array the same length
         # as the telluric spectrum with each element a wavelength matching that of the telluric.
 
@@ -707,7 +707,7 @@ def applyTelluricPython(over):
         tempDir = observationDirectory.split(os.sep)
         if tempDir[-1] in objlist:
             os.chdir(observationDirectory)
-            print "\nWorking to apply tellurics in:\n", observationDirectory
+            logging.info("\nWorking to apply tellurics in:\n"), observationDirectory
             scilist = glob.glob('c*.fits')
             for frame in scilist:
                 # TODO: this will break if for some reason we don't do something like the sky subtraction... Perhaps we should
@@ -715,12 +715,12 @@ def applyTelluricPython(over):
                 if frame.replace('ctfbrsn','').replace('.fits', '') in objlist:
                     if os.path.exists(frame[0]+'p'+frame[1:]):
                         if not over:
-                            print 'Output already exists and -over- not set - skipping telluric correction and flux calibration'
+                            logging.info('Output already exists and -over- not set - skipping telluric correction and flux calibration')
                             continue
                         if over:
                             os.remove(frame[0]+'p'+frame[1:])
                             pass
-                    print "\nApplying python telluric correction to: \n", frame
+                    logging.info("\nApplying python telluric correction to: \n"), frame
                     np.set_printoptions(threshold=np.nan)
 
                     # Read in cube data and create a 1D array "cubewave" of the wavelengths found in the cube.
@@ -756,12 +756,12 @@ def applyTelluricPython(over):
                         sciairmass = cube[0].header['AIRMASS']
                         airmcor = True
                     except:
-                        print "No airmass found in header. No airmass correction being performed on ", frame, " .\n"
+                        logging.info("No airmass found in header. No airmass correction being performed on ", frame, " .\n")
                         airmcor= False
 
                     if airmcor:
                         airmassCorrection = sciairmass/telairmass
-                        print "\nDoing an airmass correction; correction factor is ", airmassCorrection
+                        logging.info("\nDoing an airmass correction; correction factor is "), airmassCorrection
                         # If effspec[i] is between 0 and 1, apply an airmass correction by multiplying ln(effspec[i]) by the correction factor.
                         for i in range(len(effspec)):
                             if effspec[i]>0. and effspec[i]<1.:
@@ -816,7 +816,7 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
             try:
                 telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
             except:
-                print "No telluric spectrum found in ", telDir
+                logging.info("No telluric spectrum found in "), telDir
                 os.chdir('..')
                 continue
             shutil.copy(telluric+'.fits', observationDirectory)
@@ -842,11 +842,11 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
                             else:
                                 iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', xc=15.0, yc=33.0, calspec=telluric, fl_inter = telinter, logfile=log)
                         else:
-                            print "Output file exists and -over not set - skipping nftelluric in applyTelluric"
+                            logging.info("Output file exists and -over not set - skipping nftelluric in applyTelluric")
                     elif not os.path.exists('atfbrsn'+scienceList[i]+'.fits'):
-                        print '\ntfbrsn'+scienceList[i]
-                        print telluric
-                        print telinter
+                        logging.info('\ntfbrsn'+scienceList[i])
+                        logging.info(telluric)
+                        logging.info(telinter)
                         if telinter == "yes":
                             iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', calspec=telluric, fl_inter = telinter, logfile=log)
                         else:
@@ -861,7 +861,7 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
                     elif not os.path.exists('cont'+scienceList[i]+'.fits'):
                         MEFarithpy('atfbrsgn'+scienceList[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+scienceList[i]+'.fits')
                     else:
-                        print "Output file exists and -over not set - skipping continuum division in applyTelluric"
+                        logging.info("Output file exists and -over not set - skipping continuum division in applyTelluric")
 
                     # multiply science by blackbody
                     for bb in bblist:
@@ -875,7 +875,7 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
                             elif not os.path.exists('bbatfbrsgn'+scienceList[i]+'.fits'):
                                 MEFarithpy('cont'+scienceList[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrsgn'+scienceList[i]+'.fits')
                             else:
-                                print "Output file exists and -over- not set - skipping blackbody calibration in applyTelluric"
+                                logging.info("Output file exists and -over- not set - skipping blackbody calibration in applyTelluric")
                     '''
                     i+=1
         os.chdir('../Tellurics')
@@ -930,17 +930,17 @@ def createEfficiencySpectrum(
 
     iraffunctions.chdir(telluricDirectory)
 
-    print ' I am starting to create telluric correction spectrum and blackbody spectrum'
+    logging.info(' I am starting to create telluric correction spectrum and blackbody spectrum')
     logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')
 
     # open and define standard star spectrum and its relevant header keywords
     try:
         combined_extracted_1d_spectra = str(open('telluricfile', 'r').readlines()[0]).strip()
     except:
-        print "No telluricfile found in ", telluricDirectory
+        logging.info("No telluricfile found in "), telluricDirectory
         return
     if not os.path.exists('objtellist'):
-        print "No objtellist found in ", telluricDirectory
+        logging.info("No objtellist found in "), telluricDirectory
         return
 
 
@@ -965,18 +965,18 @@ def createEfficiencySpectrum(
     # find standard star spectral type, temperature, and magnitude
     mag2mass(name, path, spectemp, mag, band)
 
-    print "\n##############################################################################"
-    print ""
-    print "  STEP 7b - Find standard star information - COMPLETED "
-    print "            Contents of starfile:\n"
-    print "Band:   Magnitude:   Temperature:"
+    logging.info("\n##############################################################################")
+    logging.info("")
+    logging.info("  STEP 7b - Find standard star information - COMPLETED ")
+    logging.info("            Contents of starfile:\n")
+    logging.info("Band:   Magnitude:   Temperature:")
     """if data.find('!starfile') != -1:
         f = open('starfile')
         for line in f:
-            print line,
+            logging.info(line,)
         f.close()"""
-    print ""
-    print "##############################################################################\n"
+    logging.info("")
+    logging.info("##############################################################################\n")
 
     # File for recording shift/scale from calls to "telluric"
     telluric_shift_scale_record = open('telluric_hlines.txt', 'w')
@@ -988,7 +988,7 @@ def createEfficiencySpectrum(
             iraf.delete("final_tel_no_hlines_no_norm"+band+'.fits')
         else:
             no_hline = True
-            print "Output file exists and -over- not set - skipping H line removal"
+            logging.info("Output file exists and -over- not set - skipping H line removal")
 
     if hline_method == "vega" and not no_hline:
         vega(combined_extracted_1d_spectra, band, path, hlineinter, airmass_std, telluric_shift_scale_record, log, over)
@@ -1037,7 +1037,7 @@ def createEfficiencySpectrum(
         star_kelvin = float(lines[0].replace('\n','').split()[3])
         #Extract mag from std_star.txt file and convert to erg/cm2/s/A, for a rough flux scaling
         #find out if a matching band mag exists in std_star.txt
-        print "Band = ", band
+        logging.info("Band = "), band
         if band == 'K':
             star_mag = lines[0].replace('\n','').split()[2]
             star_mag = float(star_mag)
@@ -1049,11 +1049,11 @@ def createEfficiencySpectrum(
             star_mag = float(star_mag)
         else:
             #if not then just set to 1; no relative flux cal. attempted
-            print "\nNo ", band, " magnitude found for this star. A relative flux ",\
+            logging.info("\nNo ", band, " magnitude found for this star. A relative flux "),\
                                  "calibration will be performed.\n"
-            print "star_kelvin=", star_kelvin
+            logging.info("star_kelvin="), star_kelvin
             star_mag = 1
-            print "star_mag=", star_mag
+            logging.info("star_mag="), star_mag
 
         effspec(telluricDirectory, combined_extracted_1d_spectra, \
                 star_mag, star_kelvin, over)
@@ -1179,7 +1179,7 @@ def mag2mass(name, path, spectemp, mag, band):
 
         #Exit if the lookup found nothing.
         if 'Noastronomicalobjectfound' in search_error:
-            print "ERROR: no object was found at the coordinates you entered. You'll need to supply information in a file; see the manual for instructions."
+            logging.info("ERROR: no object was found at the coordinates you entered. You'll need to supply information in a file; see the manual for instructions.")
 
         #If >1 object found, decrease search radius and try again
         if 'Numberofrows:' in search_error:
@@ -1193,7 +1193,7 @@ def mag2mass(name, path, spectemp, mag, band):
 
         #If that didn't return anything, exit and let the user sort it out
         if 'Noastronomicalobjectfound' in search_error:
-            print "ERROR: didn't find a star at your coordinates within a search radius of 10 or 1 arcsec. You'll need to supply information in a file; see the manual for instructions."
+            logging.info("ERROR: didn't find a star at your coordinates within a search radius of 10 or 1 arcsec. You'll need to supply information in a file; see the manual for instructions.")
             sys.exit()
 
 
@@ -1211,10 +1211,10 @@ def mag2mass(name, path, spectemp, mag, band):
                 else:
                     count += 1
                 aux += 1
-            print html2[aux:numi+1]
+            logging.info(html2[aux:numi+1])
             spectral_type = str(html2[numi][0:3])
             if count > 0:
-                print "ERROR: problem with SIMBAD output. You'll need to supply the spectral type or temperature in the command line prompt."
+                logging.info("ERROR: problem with SIMBAD output. You'll need to supply the spectral type or temperature in the command line prompt.")
                 sys.exit()
 
 
@@ -1239,7 +1239,7 @@ def mag2mass(name, path, spectemp, mag, band):
                         Jmag = html2[i][1:index]
                 i+=1
                 if i>len(html2):
-                    print "ERROR: problem with SIMBAD output. You'll need to supply the magniture in the command line prompt."
+                    logging.info("ERROR: problem with SIMBAD output. You'll need to supply the magniture in the command line prompt.")
 
 
         if not Kmag:
@@ -1266,13 +1266,13 @@ def mag2mass(name, path, spectemp, mag, band):
                         count+=1
 
             if count > 0:
-                print "ERROR: can't find a temperature for spectral type", spectral_type,". You'll need to supply information in a file; see the manual for instructions."
+                logging.info("ERROR: can't find a temperature for spectral type", spectral_type,". You'll need to supply information in a file; see the manual for instructions.")
                 sys.exit()
 
 
         # Write results to std_star.txt
         if (Kmag or Jmag or Hmag) and Kmag!='x' and magfind:
-            print "magnitudes retrieved OK"
+            logging.info("magnitudes retrieved OK")
             sf.write('k K '+Kmag+' '+kelvin+'\n')
             sf.write('h H '+Hmag+' '+kelvin+'\n')
             sf.write('j J '+Jmag+' '+kelvin+'\n')
@@ -1281,7 +1281,7 @@ def mag2mass(name, path, spectemp, mag, band):
         elif (Kmag or Jmag or Hmag) and Kmag!='x' and not magfind:
             sf.write('k K '+Kmag+' '+kelvin+'\n')
         elif Kmag=='x':
-            print "WARNING: no magnitudes found for standard star. Doing relative flux calibration only."
+            logging.info("WARNING: no magnitudes found for standard star. Doing relative flux calibration only.")
             sf.write('k K N/A '+kelvin+' \n')
             sf.write('h H N/A '+kelvin+' \n')
             sf.write('j J N/A '+kelvin+' \n')
@@ -1351,7 +1351,7 @@ def vega(spectrum, band, path, hlineinter, airmass, telluric_shift_scale_record,
                 os.remove("tell_nolines"+band+".fits")
                 tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/runtimeData/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
             else:
-                print "Output file exists and -over not set - skipping H line correction"
+                logging.info("Output file exists and -over not set - skipping H line correction")
     else:
         tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/runtimeData/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=1., dscale=0.05, offset=0, smooth=1, cursor='', mode='al', Stdout=1)
 
@@ -1368,7 +1368,7 @@ def vega(spectrum, band, path, hlineinter, airmass, telluric_shift_scale_record,
             os.remove("final_tel_no_hlines_no_norm"+band+".fits")
             iraf.imarith(operand1='tell_nolines'+band, op='/', operand2=norm, result='final_tel_no_hlines_no_norm'+band, title='', divzero=0.0, hparams='', pixtype='', calctype='', verbose='yes', noact='no', mode='al')
         else:
-            print "Output file exists and -over not set - skipping H line normalization"
+            logging.info("Output file exists and -over not set - skipping H line normalization")
     else:
         iraf.imarith(operand1='tell_nolines'+band, op='/', operand2=norm, result='final_tel_no_hlines_no_norm'+band, title='', divzero=0.0, hparams='', pixtype='', calctype='', verbose='yes', noact='no', mode='al')
 
@@ -1402,7 +1402,7 @@ def linefit_manual(spectrum, band):
             with open("final_tel_no_hlines_no_norm"+band+".fits") as f: pass
             break
         except IOError as e:
-            print "It looks as if you didn't use the i key to write out the lineless spectrum. We'll have to try again. --> Re-entering splot"
+            logging.info("It looks as if you didn't use the i key to write out the lineless spectrum. We'll have to try again. --> Re-entering splot")
             iraf.splot(images=spectrum, new_image='final_tel_no_hlines_no_norm'+band, save_file='../PRODUCTS/lorentz_hlines.txt', overwrite='yes')
 
 #-------------------------------------------------------------------------------#
@@ -1425,11 +1425,11 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     h = 6.62618e-34
     k = 1.3807e-23
 
-    print 'Input Standard spectrum for flux calibration is ', combined_extracted_1d_spectra
+    logging.info('Input Standard spectrum for flux calibration is ', combined_extracted_1d_spectra)
 
     if os.path.exists('c'+combined_extracted_1d_spectra+'.fits'):
         if not over:
-            print 'Output already exists and -over- not set - calculation of efficiency spectrum'
+            logging.info('Output already exists and -over- not set - calculation of efficiency spectrum')
             return
         if over:
             os.remove('c'+combined_extracted_1d_spectra+'.fits')
@@ -1486,11 +1486,11 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     # Evaluate the function at the given temperature and coefficients to return a constant. Return e**result as the f0 constant.
     f0 = np.exp(f0FunctionIncomplete(coeff, T))
 
-    print tel_bb
-    print exptime
-    print (final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]])
-    print (10**(0.4*mag))
-    print (f0)**-1
+    logging.info(tel_bb)
+    logging.info(exptime)
+    logging.info((final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]]))
+    logging.info((10**(0.4*mag)))
+    logging.info((f0)**-1)
 
     effspec =  (tel_bb/exptime)*(final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]])*(10**(0.4*mag))*(f0)**-1
 
@@ -1503,4 +1503,4 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
 #-------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    print "nifsScience"
+    logging.info("nifsScience")

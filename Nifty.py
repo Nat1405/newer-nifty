@@ -47,18 +47,6 @@ startTime = str(datetime.now())
 
 def launch():
 
-    print "\n####################################"
-    print "#                                  #"
-    print "#              NIFTY               #"
-    print "#   NIFS Date Reduction Pipeline   #"
-    print "#         Version", __version__, "          #"
-    print "#         July 25th, 2017          #"
-    print "#     Marie Lemoine-Busserolle     #"
-    print "# Gemini Observatory, Hilo, Hawaii #"
-    print "#                                  #"
-    print "####################################\n"
-
-
     # Format logging options.
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
@@ -67,17 +55,29 @@ def launch():
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    # This lets us print to stdout AND a logfile. Cool, huh?
+    # This lets us logging.info(to stdout AND a logfile. Cool, huh?
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(message)s')
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-    # Make sure to change this if you change the default logfile.
-    logging.info('Log file is Nifty.log')
 
     # Enable Debugging break points. Used for testing.
     debug = False
+
+    logging.info("\n####################################")
+    logging.info("#                                  #")
+    logging.info("#             NIFTY                #")
+    logging.info("#   NIFS Date Reduction Pipeline   #")
+    logging.info("#         Version "+ __version__+ "           #")
+    logging.info("#         July 25th, 2017          #")
+    logging.info("#     Marie Lemoine-Busserolle     #")
+    logging.info("# Gemini Observatory, Hilo, Hawaii #")
+    logging.info("#                                  #")
+    logging.info("####################################\n")
+
+    # Make sure to change this if you change the default logfile.
+    logging.info('The log file is Nifty.log.')
 
     parser = OptionParser()
     parser.add_option('-d', '--date', dest='to', type='string', action='store', help='specify the date when the data were observed; e.g. YYYYMMDD (used ONLY within the GEMINI network)')
@@ -155,9 +155,9 @@ def launch():
         copy = True
 
     # Ask the user about what reduction steps and substeps they would like to perform.
-    print "\nGood day! Press enter to accept default reduction options."
+    logging.info("\nGood day! Press enter to accept default reduction options.")
     if not repeat:
-        fullRun = raw_input("Do a full data reduction with default settings? [no]: ")
+        fullRun = raw_input("\nDo a full data reduction with default settings? [no]: ")
         fullRun = fullRun or "no"
         if fullRun == "no":
             # "Select in". User has to turn individual steps on.
@@ -169,7 +169,7 @@ def launch():
             tel = raw_input("Apply a telluric correction? [no]: ")
             tel = tel or False
 
-            print "\nReduction options: "
+            logging.info("\nReduction options: ")
             # See if we want to reduce the baseline calibrations. And if so, which substeps
             # to perform.
             red = raw_input("Reduce baseline calibrations? [no]: ")
@@ -279,7 +279,7 @@ def launch():
             options = json.load(json_file)
             oldVersion = options['__version__']
             if oldVersion != __version__:
-                print "WARNING: different versions of Nifty being used!"
+                logging.info("WARNING: different versions of Nifty being used!")
             date = options['date']
             program = options['program']
             rawPath = options['rawPath']
@@ -307,11 +307,11 @@ def launch():
             telinter = options['telinter']
             use_pq_offsets = options['use_pq_offsets']
 
-    # Print user parameters for future reference.
-    print "\nUser parameters for this run (can also be found in user_options.json):"
+    # logging.info(user parameters for future reference.
+    logging.info("\nUser parameters for this run (can also be found in user_options.json):")
     for i in options:
-        print i, options[i]
-    print ""
+        logging.info(i, options[i])
+    logging.info("")
 
     # Begin running indivual reduction scripts.
 
@@ -327,15 +327,15 @@ def launch():
         # Don't use sortScript at all; read the paths to data from textfiles.
         obsDirList, telDirList, calDirList = loadSortSave()
 
-    print '\nobsDirList : '
+    logging.info("\nobsDirList : ")
     for i in range(len(obsDirList)):
-        print obsDirList[i]
-    print '\ntelDirList : '
+        logging.info(obsDirList[i])
+    logging.info("\ntelDirList : ")
     for i in range(len(telDirList)):
-        print telDirList[i]
-    print '\ncalDirList : '
+        logging.info(telDirList[i])
+    logging.info("\ncalDirList : ")
     for i in range(len(calDirList)):
-        print calDirList[i]
+        logging.info(calDirList[i])
 
     # Here is where the work happens.
     # Five major reduction steps.
@@ -382,19 +382,12 @@ def launch():
         if debug:
             a = raw_input('About to enter merge to merge cubes.')
         mergeScript.start(obsDirList, use_pq_offsets, over)
-        print obsDirList
 
     logging.info('###############################')
     logging.info('#                             #')
     logging.info('#              FIN            #')
     logging.info('#                             #')
     logging.info('###############################')
-
-    print '###############################'
-    print '#                             #'
-    print '#             FIN             #'
-    print '#                             #'
-    print '###############################'
 
     return
 
