@@ -132,14 +132,12 @@ If using the vega_tweak or other interactive line removal method, the lines can 
 in a splot environment (commands found here: http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?splot.hlp).
 The most useful commands for this are:
 
-k + (g, l or v)
-Mark two continuum points and fit a single line profile. The second key selects the
+- k + (g, l or v) - Mark two continuum points and fit a single line profile. The second key selects the
 type of profile: g for gaussian, l for lorentzian, and v for voigt. Any other second key
 defaults to gaussian. The center, continuum at the center, core intensity, integrated flux,
 equivalent width, and FWHMs are printed and saved in the log file. See d for fitting multiple profiles and - to subtract the fit.
 
-w
-Window the graph. For further help type ? to the "window:" prompt or see help under gtools.
+- w - Window the graph. For further help type ? to the "window:" prompt or see help under gtools.
 To cancel the windowing use a.
 
 It is necessary to press 'i' before 'q' once the h-lines have been removed in order to save the changes.
