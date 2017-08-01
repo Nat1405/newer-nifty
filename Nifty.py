@@ -189,8 +189,8 @@ def launch():
             telStop = telStop or 7
             # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
             # Set the h-line removal method with the vega() function in nifsReduce as default.
-            hline_method = raw_input("H-line removal method? [vega_tweak]: ")
-            hline_method = hline_method or "vega_tweak"
+            hline_method = raw_input("H-line removal method? [vega]: ")
+            hline_method = hline_method or "vega"
             # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
             hlineinter = raw_input("Interative H-line removal? [no]: ")
             hlineinter = hlineinter or False
@@ -268,7 +268,7 @@ def launch():
                 telStart = 1
                 telStop = 7
                 telluric_correction_method = telluric_correction_method or "python"
-                hline_method = "vega_tweak"
+                hline_method = "vega"
                 hlineinter = False
                 continuuminter = False
                 telinter = False

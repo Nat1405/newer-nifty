@@ -1,11 +1,15 @@
 # Nifty
-A Python Data Reduction Pipeline for Gemini-North Near-Infrared Integral Field Spectrometer (NIFS)
+The Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
+Field Spectrometer (NIFS).
 
-This is a new data reduction python pipeline that uses the GEMINI IRAF package to reduce NIFS data. It is offers that complete data reduction process from sorting the data to producing a final combined flux calibrated and wavelength calibrated cube with the full S/N for a science target.
+This is a new data reduction python pipeline that uses Astroconda and the Gemini
+Iraf Package to reduce  data. It offers a complete data reduction process from
+sorting the data to producing a final combined flux calibrated and wavelength calibrated
+cube with the full S/N for a science target.
 
-This pipeline is open source, but is not supported by Gemini Observaory.
+This pipeline is open source but is not supported by Gemini Observatory.
 
-Any feedback and comments (mbusserolle@gemini.edu) are welcome !
+Any feedback and comments (mbusserolle@gemini.edu) are welcome!
 
 ________________________________________________________________________________________________________________________________________
 ----------------------------------------------------------------------------------------------------------------------------------------
@@ -20,7 +24,7 @@ ________________________________________________________________________________
 HOW TO SUBMIT BUGS AND REQUESTS
 
 Very important: DO NOT SUBMIT A GEMINI HELPDESK TICKET.
-If you want to report a problem, use the Gemini Data Reduction Forum thread  
+If you want to report a problem, use the Gemini Data Reduction Forum thread
 (http://drforum.gemini.edu/topic/nifs-python-data-reduction-pipeline/) or create an issue in this repo.
 
 ________________________________________________________________________________________________________________________________________
@@ -28,18 +32,13 @@ ________________________________________________________________________________
 
 INSTALLATION
 
-1. Install the Gemini IRAF package (http://www.gemini.edu/sciops/data-and-results/processing-software). Requirements for the Gemini IRAF package can be found at  : http://www.gemini.edu/sciops/data-and-results/processing-software/requirements
-
-2. Nifty is composed of these necessary scripts (all need to be located in the same directory) which are found in this repo:
-
-Main.py
-sort.py
-calibration.py
-nifsScience.py
-nifsFluxCalib.py
-nifsTelluric.py
-nifsMerge.py
-defs.py
+1. Install Astroconda. Instructions can be found on Gemini's website `here. <http://www.gemini.edu/node/12665>`
+2. Download the latest release of Nifty from `here.<https://github.com/Nat1405/newer-nifty/releases>`
+3. Unpack the .zip or .tar file.
+4. In a terminal cd into the unpacked Nifty directory. When you type "ls" you should see
+   several files like "Nifty.py, nifsSort.py, etc.".
+5. TODO(nat): add a way to verify the download with an md5.
+5. You're ready to go! Launch Nifty by typing "python Nifty.py" or making it executable and typing "./Nifty.py".
 
 The following files need to be located in the same directory as the scripts:
 
@@ -63,7 +62,7 @@ OTHER COMMAND LINE OPTIONS
 -s   or    --sort		if specified then the data will be sorted and file lists (i.e. objlist, skylist, flatlist)  will be created; data is sorted as follows:
 				SCIENCE:	Object Name/Date/Grating/OBSID	e.g.  HD14004/20100401/K/obs107
 				TELLURIC:   Sci Object Name/Date/Grating/Tellurics/OBSID        e.g.  HD14004/20100401/K/Tellurics/obs109
-				CALIBRATIONS:   Sci Object Name/Date/Calibrations         e.g.  HD14004/20100401/Calibrations	  		   	
+				CALIBRATIONS:   Sci Object Name/Date/Calibrations         e.g.  HD14004/20100401/Calibrations
 -r   or   --noreduce	   	if specified then the baseline calibrations will not be reduced; this option is useful when the calibration data has already been reduced
 -a   or  --redstart                   to specify the starting step of the baseline calibration reductions; any integer value from 1 to 3 may be chosen; the default is 1; SEE BASELINE CALIBRATION REDUCTION STEPS BELOW
 -z   or   --redstop		to specify the stopping step of the baseline calibration reductions; any integer value from 1 to 4 may be chosen; the default is 6; SEE BASELINE CALIBRATION REDUCTION STEPS BELOW
@@ -163,7 +162,7 @@ It is necessary to press 'i' before 'q' once the h-lines have been removed in or
 MERGING
 
 Cubes can be shifted using QFits View (this is currently necessary for
-very faint objects) and then combined using nifsMerge.py by prepending the name of each file with the prefix "shif" and saving them in the observation directory (where the reduced science data is stored).  
+very faint objects) and then combined using nifsMerge.py by prepending the name of each file with the prefix "shif" and saving them in the observation directory (where the reduced science data is stored).
 
 EXAMPLE COMMAND LINE PROMPTS
 
