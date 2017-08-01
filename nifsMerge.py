@@ -4,7 +4,7 @@ import pexpect as p
 import time
 from pyraf import iraf
 from pyraf import iraffunctions
-import pyfits
+import astropy.io.fits
 from nifsDefs import datefmt, writeList, listit
 
 
@@ -166,7 +166,7 @@ def start(obsDirList, use_pq_offsets, over=""):
 
         if use_pq_offsets:
             # Set the zero point p and q offsets to the p and q offsets of the first cube in each list of cubes.
-            header = pyfits.open(cubes[0])
+            header = astropy.io.fits.open(cubes[0])
             p0 = header[0].header['POFFSET']
             q0 = header[0].header['QOFFSET']
             foff = open('offsets.txt', 'w')
@@ -189,7 +189,7 @@ def start(obsDirList, use_pq_offsets, over=""):
             # Skip the first cube!
             if i == 0:
                 continue
-            header2 = pyfits.open(cubes[i])
+            header2 = astropy.io.fits.open(cubes[i])
             suffix = cubes[i][-8:-5]
 
             # If user wants to merge using p and q offsets, grab those from .fits headers.
@@ -255,7 +255,7 @@ def start(obsDirList, use_pq_offsets, over=""):
         iraffunctions.chdir(Merged)
         gratlist = []
         for i in range(len(mergedCubes)):
-            cubeheader = pyfits.open(mergedCubes[i])
+            cubeheader = astropy.io.fits.open(mergedCubes[i])
             grat = cubeheader[0].header['GRATING']
             gratlist.append(grat)
         for n in range(len(gratlist)):
@@ -287,12 +287,12 @@ def start(obsDirList, use_pq_offsets, over=""):
 
 
 def waveshift(cubelist, grat):
-    cubeheader0 = pyfits.open(cubelist[0])
+    cubeheader0 = astropy.io.fits.open(cubelist[0])
     wstart0 = cubeheader0[1].header['CRVAL3']
     fwave = open('waveoffsets{0}.txt'.format(grat[0]), 'w')
     fwave.write('%d\t%d\t%d\n' % (0., 0., 0.,))
     for i in range(len(cubelist)):
-        cubeheader = pyfits.open(cubelist[i])
+        cubeheader = astropy.io.fits.open(cubelist[i])
         wstart = cubeheader[1].header['CRVAL3']
         wdelt = cubeheader[1].header['CD3_3']
         waveoff = int(round((wstart0-wstart)/wdelt))

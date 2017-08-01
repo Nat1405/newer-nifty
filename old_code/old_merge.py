@@ -85,7 +85,7 @@ def mergeOld(obsDirList, over=""):
             # set the zero point p and q offsets to the p and q offsets of the first cube in each sequence (assumed to have a p and q of 0)
             print cubes
             print cubelist
-            header = pyfits.open(cubes[0])
+            header = astropy.io.fits.open(cubes[0])
             p0 = header[0].header['POFFSET']
             q0 = header[0].header['QOFFSET']
             refCube = "cube"+cubes[0][-8:-5]
@@ -104,7 +104,7 @@ def mergeOld(obsDirList, over=""):
             foff.write('%d\t%d\t%d\n' % (0, 0, 0))
         for i in range(len(cubes)-1):
             i+=1
-            header2 = pyfits.open(cubes[i])
+            header2 = astropy.io.fits.open(cubes[i])
             # find the p and q offsets of the other cubes in the sequence
             poff = header2[0].header['POFFSET']
             qoff = header2[0].header['QOFFSET']

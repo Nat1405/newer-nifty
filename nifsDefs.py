@@ -1,5 +1,5 @@
 import time
-import sys, calendar, pyfits, urllib, shutil, glob, os, fileinput
+import sys, calendar, astropy.io.fits, urllib, shutil, glob, os, fileinput
 import numpy as np
 from xml.dom.minidom import parseString
 import logging
@@ -355,7 +355,7 @@ def writeCenters(objlist):
 
     centers = []
     for image in objlist:
-        header = pyfits.open(image+'.fits')
+        header = astropy.io.fits.open(image+'.fits')
         poff = header[0].header['XOFFSET']
         qoff = header[0].header['YOFFSET']
         if objlist.index(image)==0:
@@ -537,7 +537,7 @@ def convertRAdec(ra, dec):
 def timeCalc(image):
     """Read time from .fits header. Convert to a float of seconds.
     """
-    telheader = pyfits.open(image)
+    telheader = astropy.io.fits.open(image)
     UT = telheader[0].header['UT']
     secs = float(UT[6:10])
     mins = float(UT[3:5])
@@ -552,8 +552,8 @@ def MEFarithpy(MEF, image, op, result):
 
     if os.path.exists(result):
         os.remove(result)
-    scimage = pyfits.open(MEF+'.fits')
-    arithim = pyfits.open(image+'.fits')
+    scimage = astropy.io.fits.open(MEF+'.fits')
+    arithim = astropy.io.fits.open(image+'.fits')
     for i in range(88):
         if scimage[i].name=='SCI':
             if op=='multiply':
@@ -571,7 +571,7 @@ def MEFarith(MEF, image, op, result):
     for i in range(1,88):
         iraf.fxinsert(input=MEF+'['+str(i)+']', output=result+'['+str(i)+']', groups='', verbose = 'no')
     for i in range(1,88):
-        header = pyfits.open(result)
+        header = astropy.io.fits.open(result)
         extname = header[i].header['EXTNAME']
         if extname == 'SCI':
             iraf.imarith(operand1=result+'['+str(i)+']', op=op, operand2 = image, result = result+'['+str(i)+', overwrite]', divzero = 0.0)
@@ -583,7 +583,7 @@ def MEFarithOLD(MEF, image, out, op, result):
     if os.path.exists(out+'.fits'):
         os.remove(out+'.fits')
     for i in range(1,88):
-        header = pyfits.open(MEF+'.fits')
+        header = astropy.io.fits.open(MEF+'.fits')
         extname = header[i].header['EXTNAME']
         if extname == 'DQ' or extname == 'VAR':
             iraf.imarith(operand1=MEF+'['+str(i)+']', op='*', operand2 = '1', result = out)

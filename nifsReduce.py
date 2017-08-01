@@ -11,8 +11,8 @@ import time
 import logging
 import pexpect as p
 from pyraf import iraf, iraffunctions
-import pyfits
-from pyfits import getdata, getheader
+import astropy.io.fits
+from astropy.io.fits import getdata, getheader
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy import arange, array, exp
@@ -601,7 +601,7 @@ def makeCube(pre, objlist, tel, observationDirectory, log, over):
                 continue
         if tel:
             iraf.nifcube (pre+frame, outcubes = 'c'+pre+frame, logfile=log)
-            hdulist = pyfits.open('c'+pre+frame+'.fits', mode = 'update')
+            hdulist = astropy.io.fits.open('c'+pre+frame+'.fits', mode = 'update')
 #            hdulist.info()
             exptime = hdulist[0].header['EXPTIME']
             cube = hdulist[1].data
@@ -689,7 +689,7 @@ def applyTelluricPython(over):
         # as the telluric spectrum with each element a wavelength matching that of the telluric.
 
         # Open the final correction spectrum so that we use its data.
-        telluric = pyfits.open(telluric+'.fits')
+        telluric = astropy.io.fits.open(telluric+'.fits')
         # Find the starting wavelength and the wavelength increment from the science header.
         wstart = telluric[1].header['CRVAL1']
         wdelt = telluric[1].header['CD1_1']
@@ -724,7 +724,7 @@ def applyTelluricPython(over):
                     np.set_printoptions(threshold=np.nan)
 
                     # Read in cube data and create a 1D array "cubewave" of the wavelengths found in the cube.
-                    # Open a data cube with pyfits. Read the data header to find the starting wavelength and wavelength increment.
+                    # Open a data cube with astropy.io.fits. Read the data header to find the starting wavelength and wavelength increment.
                     # From readCube docstring:
                     #       Create a 1D array with length equal to the spectral dimension of the cube.
                     #    For each element in array, element[i] = starting wavelength + (i * wavelength increment).
@@ -865,7 +865,7 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
 
                     # multiply science by blackbody
                     for bb in bblist:
-                        objheader = pyfits.open(observationDirectory+'/'+scienceList[i]+'.fits')
+                        objheader = astropy.io.fits.open(observationDirectory+'/'+scienceList[i]+'.fits')
                         exptime = objheader[0].header['EXPTIME']
                         if str(int(exptime)) in bb:
                             if over:
@@ -944,7 +944,7 @@ def createEfficiencySpectrum(
         return
 
 
-    telheader = pyfits.open(combined_extracted_1d_spectra+'.fits')
+    telheader = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
     band = telheader[0].header['GRATING'][0]
     RA = telheader[0].header['RA']
     Dec = telheader[0].header['DEC']
@@ -1023,7 +1023,7 @@ def createEfficiencySpectrum(
             os.chdir(telluricDirectory)
             os.chdir('../../'+item)
         else:
-            objheader = pyfits.open(item+'.fits')
+            objheader = astropy.io.fits.open(item+'.fits')
             exptime = objheader[0].header['EXPTIME']
             if not exptimelist or exptime not in exptimelist:
                 exptimelist.append(int(exptime))
@@ -1085,7 +1085,7 @@ def extrap1d(interpolator):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def readCube(cube):
-    """Open a data cube with pyfits. Read the data header to find the starting wavelength and wavelength increment.
+    """Open a data cube with astropy.io.fits. Read the data header to find the starting wavelength and wavelength increment.
         Create a 1D array with length equal to the spectral dimension of the cube.
         For each element in array, element[i] = starting wavelength + (i * wavelength increment).
 
@@ -1095,7 +1095,7 @@ def readCube(cube):
 
     """
     # read cube into an HDU list
-    cube = pyfits.open(cube)
+    cube = astropy.io.fits.open(cube)
 
     # find the starting wavelength and the wavelength increment from the science header of the cube
     wstart = cube[1].header['CRVAL3']
@@ -1435,7 +1435,7 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
             os.remove('c'+combined_extracted_1d_spectra+'.fits')
             pass
 
-    combined_spectra_file = pyfits.open(combined_extracted_1d_spectra+'.fits')
+    combined_spectra_file = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
     band = combined_spectra_file[0].header['GRATING'][0]
     exptime = float(combined_spectra_file[0].header['EXPTIME'])
     telfilter = combined_spectra_file[0].header['FILTER']
@@ -1463,7 +1463,7 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     blackbodySpectrum = (blackbodyFunction(bb_spectrum_wavelengths*1e-10, T))*1e-7
 
     # Divide final telluric correction spectrum by blackbody spectrum.
-    final_telluric = pyfits.open('final_tel_no_hlines_no_norm'+band+'.fits')
+    final_telluric = astropy.io.fits.open('final_tel_no_hlines_no_norm'+band+'.fits')
     # Multiply by the gain to go from ADU to counts.
     final_telluric[0].data *= 2.8
     tel_bb = final_telluric[0].data/blackbodySpectrum
