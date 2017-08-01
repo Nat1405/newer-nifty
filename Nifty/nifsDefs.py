@@ -80,6 +80,21 @@ def loadSortSave():
     return obsDirList, telDirList, calDirList
 
 #-----------------------------------------------------------------------------#
+def getParam(prompt, default, helpMessage="No help implemented yet!"):
+    """Get a parameter from the user interactively. Also sets a default and
+    displays a help message if a user types "h" or "help".
+    """
+    while True:
+        param = raw_input(prompt)
+        param = param or default
+        if param == "h" or param == "help":
+            print "\n"+helpMessage+"\n"
+        else:
+            break
+    print param
+    return param
+
+#-----------------------------------------------------------------------------#
 
 def getFitsHeader(fitsFile, fitsKeyWords):
     """ imported from /astro/sos/da/scisoft/das/daLog/MakeDaDataCheckLogDefs.py """

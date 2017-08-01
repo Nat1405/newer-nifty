@@ -18,12 +18,13 @@ Copyright
 For more details, please read the LICENSE.
 
 
-HOW TO SUBMIT BUGS AND REQUESTS
+How to Submit Bugs and Requests
 -------------------------------
 
-Very important: DO NOT SUBMIT A GEMINI HELPDESK TICKET.
-If you want to report a problem, use the Gemini Data Reduction Forum thread
-(http://drforum.gemini.edu/topic/nifs-python-data-reduction-pipeline/) or create an issue in this repo.
+Very important: **do not submit a Gemini help desk ticket!**.
+
+If you want to report a problem, use the `Gemini Data Reduction Forum thread <http://drforum.gemini.edu/topic/nifs-python-data-reduction-pipeline/>`
+or create an issue in this repo.
 
 Installation
 ============
@@ -32,9 +33,8 @@ Installation
 2. Download the latest release of Nifty from `here.<https://github.com/Nat1405/newer-nifty/releases>`
 3. Unpack the .zip or .tar file.
 4. In a terminal change into the unpacked Nifty directory. When you type "ls" you should see
-   several files like "Nifty.py, nifsSort.py, etc.".
+   several files like "Nifty.py, nifsSort.py, etc.". You're ready to go!
 5. TODO(nat): add a way to verify the download with an md5.
-5. You're ready to go! Launch Nifty by typing "python Nifty.py" or making it executable and typing "./Nifty.py".
 
 You should see the following directory structure:
 
@@ -79,8 +79,55 @@ To do a full reduction accepting all the defaults, you can either type:
 or type "yes" at the first interactive prompt that asks if you would like to do a
 full default reduction.
 
-Overview of Major Reduction Steps
----------------------------------
+Input
+-----
+
+You can provide input to Nifty in three ways:
+
+- Interactive input
+- A user_options.json file
+- Command line arguments
+
+To provide interactive input run Nifty with no command line options by typing:
+
+.. code-block:: text
+
+   python Nifty.py
+
+Note that the data reduction parameters are saved to a new user_options.json file
+at the end of an interactive input session.
+
+To have Nifty load its parameters from a user_options.json use the -r or -l command line arguments. These arguments are equivalent.
+
+.. code-block:: text
+
+   python Nifty.py -r
+
+or:
+
+.. code-block:: text
+
+   python Nifty.py -l
+
+Command Line Arguments
+----------------------
+
+Nifty supports several command line arguments. Using these with a user_options.json input file
+makes Nifty integrate well with shell scripts.
+
+Nifty may be invoked with the following command line options:
+
+**-l**
+  Load. Load data reduction parameters from a user_options.json file.
+**-r**
+  Repeat. Repeat the last data reduction, loading parameters from a user_options.json file.
+  Equivalent to -l, Load.
+**-f**
+  Full automatic run. Do a full automatic data reduction copying parameters from the included default_input.json.
+
+
+
+
 
 
 
