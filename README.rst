@@ -194,19 +194,37 @@ Recipes
 =======
 
 1. To perform sorting, calibration data reductions, and science reductions without the telluric correction and without producing a merged cube:
-python Main.py -q users/name/reduction/Raw -t -k -m
+
+.. code-block:: text
+
+    python Main.py -q users/name/reduction/Raw -t -k -m
 
 2. To perform sorting, calibration data reductions, and science reductions without telluric correction and produce a merged cube:
-python Main.py -q users/name/reduction/Raw -t -k
+
+.. code-block:: text
+
+    python Main.py -q users/name/reduction/Raw -t -k
 
 3. To perform sorting, calibration data reductions, and science reductions without the telluric correction, no flux calibration, and produce a merged cube:
-python Main.py -q users/name/reduction/Raw -f -1
+
+.. code-block:: text
+
+    python Main.py -q users/name/reduction/Raw -f -1
 
 4. To perform sorting, calibration data reductions, and science reductions with the telluric correction (interactively), flux calibration, and produce a merged cube:
-python Main.py -q users/name/reduction/Raw -w
+
+.. code-block:: text
+
+    python Main.py -q users/name/reduction/Raw -w
 
 5. To start the script by producing a merged cube (all the science data must already be reduced):
-python Main.py -q users/name/reduction/Raw -s -r -n -t -k
+
+.. code-block:: text
+
+    python Main.py -q users/name/reduction/Raw -s -r -n -t -k
 
 6. To start the script by performing the telluric correction and produce a merged cube (assuming the telluric data and science data have already been reduced)
-python Main.py -q users/name/reduction/Raw -s -r -k -b 8
+
+.. code-block:: text
+
+    python Main.py -q users/name/reduction/Raw -s -r -k -b 8
