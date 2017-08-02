@@ -65,28 +65,30 @@ You're ready to begin reducing data!
 
 You should see the following directory structure:
 
-|_ Nifty.py
-|_ nifsSort.py
-|_ nifsBaselineCalibration.py
-|_ nifsReduce.py
-|_ nifsMerge.py
-|_ nifsDefs.py
-|____ runtimeData/
-|  |____ h_wave.data
-|  |____ j_wave.data
-|  |____ k_wave.data
-|____ docs/
-|  |____ nifs_pipeline_june_2015.pdf
-|____ extras/
-|  |____ geminiSort.py
-|____ tests/
-|  |____ generate_response_curve.py
-|  |____ hk.txt
-|  |____ nftelluric_modified.cl
-|_ .gitignore
-|_ LICENSE
-|_ README.rst
-|_ spec-file-osx-64.txt
+.. code-block:: text
+
+    |_ Nifty.py
+    |_ nifsSort.py
+    |_ nifsBaselineCalibration.py
+    |_ nifsReduce.py
+    |_ nifsMerge.py
+    |_ nifsDefs.py
+    |____ runtimeData/
+    |  |____ h_wave.data
+    |  |____ j_wave.data
+    |  |____ k_wave.data
+    |____ docs/
+    |  |____ nifs_pipeline_june_2015.pdf
+    |____ extras/
+    |  |____ geminiSort.py
+    |____ tests/
+    |  |____ generate_response_curve.py
+    |  |____ hk.txt
+    |  |____ nftelluric_modified.cl
+    |_ .gitignore
+    |_ LICENSE
+    |_ README.rst
+    |_ spec-file-osx-64.txt
 
 *Nifty.py is the main control script of the pipeline.*
 
