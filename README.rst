@@ -88,8 +88,10 @@ You should see the following directory structure:
 |_ README.rst
 |_ spec-file-osx-64.txt
 
+*Nifty.py is the main control script of the pipeline.*
+
 Quick Start
------------
+===========
 
 To launch Nifty with interactive input, type:
 
@@ -110,7 +112,7 @@ or type "yes" at the first interactive prompt that asks if you would like to do 
 full default reduction.
 
 Input
------
+=====
 
 You can provide input to Nifty in three ways:
 
@@ -145,7 +147,7 @@ Command Line Arguments
 Nifty supports several command line arguments. Using these with a user_options.json input file
 makes Nifty integrate well with shell scripts.
 
-Nifty may be invoked with the following command line options:
+Nifty may be invoked with the following command line arguments:
 
 **-l**
   Load. Load data reduction parameters from a user_options.json file.
@@ -155,16 +157,11 @@ Nifty may be invoked with the following command line options:
 **-f**
   Full automatic run. Do a full automatic data reduction copying parameters from the included default_input.json.
 
-
-
-
-
-
-
-Note:
+Notes
 =====
 
-OBJECT AND SKY FRAMES
+Object and Sky frame differentiation
+------------------------------------
 
 If the sorting script does not create a skylist in the object or telluric observation
 directories this means that the offsets between sky frames and object frames were smaller
@@ -175,52 +172,7 @@ lines 194, 245, and 492 for object sky images and in lines 198, 249, and 495 for
 H-Line Removal
 --------------
 
-The H-line removal can be done non-interactively, but it is advised that this be performed
-interactively and using the "vega_tweak" method in order to accurately scale the vega spectrum.
-In the interactive mode for the initial scaling and call to "telluric" these are the cursor keys
-and colon commands (from http://iraf.net/irafhelp.php?val=telluric&help=Help+Page):
-
-- ? - print help
-- a - automatic RMS minimization within sample regions
-- c - toggle calibration spectrum display
-- d - toggle data spectrum display
-- e - expand (double) the step for the current selection
-- q - quit
-- r - redraw the graphs
-- s - add or reset sample regions
-- w - window commands (see :/help for additional information)
-- x - graph and select from corrected shifted candidates
-- y - graph and select from corrected scaled candidates
-
-- :help           - print help
-- :shift  [value] - print or reset the current shift
-- :scale  [value] - print or reset the current scale
-- :dshift [value] - print or reset the current shift step
-- :dscale [value] - print or reset the current scale step
-- :offset [value] - print or reset the current offset between spectra
-- :sample [value] - print or reset the sample regions
-- :smooth [value] - print or reset the smoothing box size
-
-To decrease the scale or shift value, the cursor must be under the spectrum and to increase
-these values the cursor must be above the spectrum. Occasionally, this will not work in which
-case the value can be designated with a colon command.
-
-If using the vega_tweak or other interactive line removal method, the lines can be removed
-in a splot environment (commands found here: http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?splot.hlp).
-The most useful commands for this are:
-
-- k + (g, l or v)
-Mark two continuum points and fit a single line profile. The second key selects the
-type of profile: g for gaussian, l for lorentzian, and v for voigt. Any other second key
-defaults to gaussian. The center, continuum at the center, core intensity, integrated flux,
-equivalent width, and FWHMs are printed and saved in the log file. See d for fitting multiple profiles and - to subtract the fit.
-
-- w
-Window the graph. For further help type ? to the "window:" prompt or see help under gtools.
-To cancel the windowing use a.
-
-It is necessary to press 'i' before 'q' once the h-lines have been removed in order to save the changes.
-
+See hline_removal.rst for more info.
 
 Interactive Merging
 -------------------
@@ -229,8 +181,17 @@ Cubes can be shifted using QFits View (this is currently necessary for
 very faint objects) and then combined using nifsMerge.py by prepending the name of each
 file with the prefix "shif" and saving them in the observation directory (where the reduced science data is stored).
 
-Some Recipes
-------------
+Merging
+-------
+
+.. TODO(nat): improve this.
+
+One can use custom offsets for each cube to merge by specifying use_pq_offsets==False.
+The pipeline will pause and wait for you to create an appropriate offsets.txt in the appropriate
+directory.
+
+Recipes
+=======
 
 1. To perform sorting, calibration data reductions, and science reductions without the telluric correction and without producing a merged cube:
 python Main.py -q users/name/reduction/Raw -t -k -m

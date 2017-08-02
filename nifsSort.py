@@ -363,14 +363,14 @@ def makeSortFiles(dir):
 
     # Print information for user.
     logging.info("\nTotal number of files found by type.\n")
-    logging.info("Length allfilelist (science and telluric frames): "), len(allfilelist)
-    logging.info("Length arclist (arc frames): "), len(arclist)
-    logging.info("Length arcdarklist (arc dark frames): "), len(arcdarklist)
-    logging.info("Length flatlist (lamps on flat frames): "), len(flatlist)
-    logging.info("Length flatdarklist (lamps off flat frames): "), len(flatdarklist)
-    logging.info("Length ronchilist (ronchi flat frames): "), len(ronchilist)
-    logging.info("Length skyframelist (science sky frames): "), len(skyframelist)
-    logging.info("Length telskyframelist (telluric sky frames): "), len(telskyframelist)
+    logging.info("Length allfilelist (science and telluric frames): " +  str(len(allfilelist)))
+    logging.info("Length arclist (arc frames): " + str(len(arclist)))
+    logging.info("Length arcdarklist (arc dark frames): " + str(len(arcdarklist)))
+    logging.info("Length flatlist (lamps on flat frames): " + str(len(flatlist)))
+    logging.info("Length flatdarklist (lamps off flat frames): "+str(len(flatdarklist)))
+    logging.info("Length ronchilist (ronchi flat frames): "+str(len(ronchilist)))
+    logging.info("Length skyframelist (science sky frames): "+str(len(skyframelist)))
+    logging.info("Length telskyframelist (telluric sky frames): "+str(len(telskyframelist)))
 
     # Store number of telluric, telluric, sky, telluric sky and acquisition frames in number_files_to_be_copied.
     number_files_to_be_copied = len(allfilelist)
@@ -379,7 +379,7 @@ def makeSortFiles(dir):
     number_calibration_files_to_be_copied = len(arclist) + len(arcdarklist) +\
                          len(flatlist) + len(flatdarklist) + len(ronchilist)
 
-    logging.info("\nTotal number of frames to be copied: "), number_files_to_be_copied + number_calibration_files_to_be_copied
+    logging.info("\nTotal number of frames to be copied: " + str(number_files_to_be_copied + number_calibration_files_to_be_copied))
 
     return allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyframelist, telskyframelist, obsidDateList, sciImageList
 
@@ -509,7 +509,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
         # those directories that store the names of the science frames and sky frames for later
         # use by the pipeline.
         if obsclass=='science':
-            logging.info("allfilelist[i][0]")
+            logging.info(allfilelist[i][0])
             objDir = path+'/'+obj
             shutil.copy(Raw+'/'+allfilelist[i][0], objDir+'/'+date+'/'+grat+'/obs'+obsid+'/')
             number_files_that_were_copied += 1
@@ -525,7 +525,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
         # Copy the most recent acquisition in each set to a new directory to be optionally
         # used later by the user for checks (not used by the pipeline).
         if obsclass=='acq' and obsclass2=='science':
-            logging.info("allfilelist[i][0]")
+            logging.info(allfilelist[i][0])
             # create an Acquisitions directory in objDir/YYYYMMDD/grating
             if not os.path.exists(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/'):
                 os.makedirs(path+'/'+obj2+'/'+date+'/'+grat+'/Acquisitions/')
@@ -550,7 +550,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
 
 
         if obsclass=='partnerCal':
-            logging.info("allfilelist[i][0]")
+            logging.info(allfilelist[i][0])
             timeList = []
             for k in range(len(obsDirList)):
                 # Make sure date and gratings match.
@@ -610,7 +610,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
     for i in range(len(allfilelist)):
         # Check the copied flag. If not 0, logging.info("the entry.")
         if allfilelist[i][1] != 0:
-            logging.info(allfilelist[i][0], allfilelist[i][2],  " was not copied.")
+            logging.info(str(allfilelist[i][0]) + " " + str(allfilelist[i][2]) + " was not copied.")
     logging.info("\nEnd non-copied science, tellurics and acquisitions.\n")
 
     # Check that all science frames were copied.
@@ -623,7 +623,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
                 count += 1
 
     if count_from_raw_files != count:
-        logging.info("\nWARNING: ", count_from_raw_files - count, ") science images (or sky frames) \
+        logging.info("\nWARNING: " + str(count_from_raw_files - count) + " science frames (or sky frames) \
         were not copied.\n")
     else:
         logging.info("\nExpected number of science and sky frames copied.\n")
@@ -655,7 +655,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     expected_count = len(arcdarklist) + len(arclist) + len(flatlist)\
           + len(flatdarklist) + len(ronchilist)
 
-    logging.info("\nI am attempting to sort ", expected_count, " files.\n")
+    logging.info("\nI am attempting to sort " + str(expected_count) + " files.\n")
 
     # To make sure data was copied later in the pipeline:
     # Add a small copied flag to each frame in calibration file lists.
@@ -743,7 +743,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                         # Copy lamps on flats to appropriate directory.
                         shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatlist[i][1] = 0
-                        logging.info("flatlist[i][0]")
+                        logging.info(flatlist[i][0])
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # Create a flatlist in the relevent directory.
@@ -765,7 +765,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                     if date in objDir:
                         shutil.copy('./'+flatdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatdarklist[i][1] = 0
-                        logging.info("flatdarklist[i][0]")
+                        logging.info(flatdarklist[i][0])
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # Create a flatdarklist in the relevant directory.
@@ -785,7 +785,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                     if date in objDir:
                         shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations_'+grating+'/')
                         ronchilist[i][1] = 0
-                        logging.info("ronchilist[i][0]")
+                        logging.info(ronchilist[i][0])
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # create a ronchilist in the relevant directory
@@ -802,7 +802,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             if date in objDir:
                 shutil.copy('./'+arclist[i][0], objDir+'/Calibrations_'+grating+'/')
                 arclist[i][1] = 0
-                logging.info("arclist[i][0]")
+                logging.info(arclist[i][0])
                 count += 1
                 path = objDir+'/Calibrations_'+grating+'/'
                 # Create an arclist in the relevant directory.
@@ -821,7 +821,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                     if date in objDir:
                         shutil.copy('./'+arcdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         arcdarklist[i][1] = 0
-                        logging.info("arcdarklist[i][0]")
+                        logging.info(arcdarklist[i][0])
                         count += 1
                         path = objDir+'/Calibrations_'+grating+'/'
                         # Create an arcdarklist in the relevant directory.
@@ -830,7 +830,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
     # Check that each file in flatlist was copied.
     for i in range(len(flatlist)):
         if flatlist[i][1] == 1:
-            logging.info(flatlist[i][0], " was not copied.")
+            logging.info(str(flatlist[i][0])+ " was not copied.")
 
 
 
@@ -843,35 +843,35 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
 
     # Check to see how many calibrations were copied.
     if expected_count - count == 0:
-        logging.info("\nI sorted the ", expected_count, " expected calibrations.\n")
+        logging.info("\nI sorted the " + str(expected_count) + " expected calibrations.\n")
     else:
-        logging.info("\nI did not copy ", expected_count - count, " calibration file(s).\n")
+        logging.info("\nI did not copy " + str(expected_count - count) + " calibration file(s).\n")
 
     # Check each calibration file list to see which ones were not copied.
     # Check that each file in flatlist was copied.
     for i in range(len(flatlist)):
         if flatlist[i][1] == 1:
-            logging.info(flatlist[i][0], " from flatlist was not copied.")
+            logging.info(str(flatlist[i][0])+ " from flatlist was not copied.")
 
     # Check that each file in flatdarklist was copied.
     for i in range(len(flatdarklist)):
         if flatdarklist[i][1] == 1:
-            logging.info(flatdarklist[i][0], " from flatdarklist was not copied.")
+            logging.info(str(flatdarklist[i][0])+ " from flatdarklist was not copied.")
 
     # Check that each file in ronchilist was copied.
     for i in range(len(ronchilist)):
         if ronchilist[i][1] == 1:
-            logging.info(ronchilist[i][0], " from ronchilist was not copied.")
+            logging.info(str(ronchilist[i][0])+ " from ronchilist was not copied.")
 
     # Check that each file in arclist was copied.
     for i in range(len(arclist)):
         if arclist[i][1] == 1:
-            logging.info(arclist[i][0], " from arclist was not copied.")
+            logging.info(str(arclist[i][0])+ " from arclist was not copied.")
 
     # Check that each file in arcdarklist was copied.
     for i in range(len(arcdarklist)):
         if arcdarklist[i][1] == 1:
-            logging.info(arcdarklist[i][0], " from arcdarklist was not copied.")
+            logging.info(str(arcdarklist[i][0])+ " from arcdarklist was not copied.")
 
 
     # Change back to original working directory.
@@ -909,7 +909,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no Calibrations directory found for ")
-            logging.info("                      science frame "), sciImageList[i]
+            logging.info("                      science frame "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -923,7 +923,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 lamps on flat frame found for science")
-                logging.info("                      frame "), sciImageList[i]
+                logging.info("                      frame "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -932,7 +932,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no flatlist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -947,7 +947,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 lamps off flat frame found for science")
-                logging.info("                      frame "), sciImageList[i]
+                logging.info("                      frame "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -956,7 +956,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no flatdarklist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -969,7 +969,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 arc frame found for science frame")
-                logging.info("                      "), sciImageList[i]
+                logging.info("                      "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -978,7 +978,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no arclist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -991,7 +991,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 dark arc frame found for science frame")
-                logging.info("                      "), sciImageList[i]
+                logging.info("                      "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1000,7 +1000,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no arcdarklist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1013,7 +1013,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 ronchi flat frame found for science frame")
-                logging.info("                      "), sciImageList[i]
+                logging.info("                      "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1022,7 +1022,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGr
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no ronchilist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1169,7 +1169,7 @@ def sortTels(telDirList, obsDirList):
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
-                logging.info("     WARNING in sort: science "), science_observation_name
+                logging.info("     WARNING in sort: science "+str(science_observation_name))
                 logging.info("                      does not contain science images.")
                 logging.info("")
                 logging.info("#####################################################################")
@@ -1191,7 +1191,7 @@ def sortTels(telDirList, obsDirList):
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
-                logging.info("     WARNING in sort: science ", science_observation_name, " :")
+                logging.info("     WARNING in sort: science "+str(science_observation_name)+ " :")
                 logging.info("                      observation name data in headers and directory")
                 logging.info("                      do not match.")
                 logging.info("")
@@ -1205,7 +1205,7 @@ def sortTels(telDirList, obsDirList):
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
-                logging.info("     WARNING in sort: telluric directory for science "), science_observation_name
+                logging.info("     WARNING in sort: telluric directory for science "+str(science_observation_name))
                 logging.info("                      does not exist.")
                 logging.info("")
                 logging.info("#####################################################################")
@@ -1242,7 +1242,7 @@ def sortTels(telDirList, obsDirList):
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
-                logging.info("     WARNING in sort: no tellurics data found for science "), science_observation_name
+                logging.info("     WARNING in sort: no tellurics data found for science "+str(science_observation_name))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1277,7 +1277,6 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
     for i in range(len(allfilelist)):
          tempList.append(allfilelist[i][0])
     allfilelist = tempList'''
-
 
     path = os.getcwd()
     if dir:
@@ -1322,7 +1321,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
 
         # Match tellurics to science data by date, grating and time.
         if obsclass=='partnerCal':
-            logging.info("allfilelist[i][0]")
+            logging.info(allfilelist[i][0])
             timeList = []
             for k in range(len(obsDirList)):
                 # Make sure date and gratings match.
@@ -1374,7 +1373,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
-            logging.info("     WARNING in sort: science "), science_observation_name
+            logging.info("     WARNING in sort: science "+str(science_observation_name))
             logging.info("                      does not contain science images.")
             logging.info("")
             logging.info("#####################################################################")
@@ -1396,7 +1395,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
-            logging.info("     WARNING in sort: science ", science_observation_name, " :")
+            logging.info("     WARNING in sort: science "+ str(science_observation_name)+ " :")
             logging.info("                      observation name data in headers and directory")
             logging.info("                      do not match.")
             logging.info("")
@@ -1410,7 +1409,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
-            logging.info("     WARNING in sort: telluric directory for science "), science_observation_name
+            logging.info("     WARNING in sort: telluric directory for science "+str(science_observation_name))
             logging.info("                      does not exist.")
             logging.info("")
             logging.info("#####################################################################")
@@ -1447,7 +1446,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
-            logging.info("     WARNING in sort: no tellurics data found for science "), science_observation_name
+            logging.info("     WARNING in sort: no tellurics data found for science "+str(science_observation_name))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1493,7 +1492,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no Calibrations directory found for ")
-            logging.info("                      science frame "), sciImageList[i]
+            logging.info("                      science frame "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1507,7 +1506,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 lamps on flat frame found for science")
-                logging.info("                      frame "), sciImageList[i]
+                logging.info("                      frame "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1516,7 +1515,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no flatlist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1529,7 +1528,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 lamps off flat frame found for science")
-                logging.info("                      frame "), sciImageList[i]
+                logging.info("                      frame "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1538,7 +1537,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no flatdarklist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1551,7 +1550,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 arc frame found for science frame")
-                logging.info("                      "), sciImageList[i]
+                logging.info("                      "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1560,7 +1559,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no arclist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1573,7 +1572,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 dark arc frame found for science frame")
-                logging.info("                      "), sciImageList[i]
+                logging.info("                      "+str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1582,7 +1581,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no arcdarklist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      "+ str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1595,7 +1594,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: only 1 ronchi flat frame found for science frame")
-                logging.info("                      "), sciImageList[i]
+                logging.info("                      " + str(sciImageList[i]))
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
@@ -1604,7 +1603,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
             logging.info("#####################################################################")
             logging.info("")
             logging.info("     WARNING in sort: no ronchilist found for science frame")
-            logging.info("                      "), sciImageList[i]
+            logging.info("                      " + str(sciImageList[i]))
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
@@ -1618,7 +1617,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
     for i in range(len(allfilelist)):
         # Check the copied flag. If not 0, logging.info("the entry.")
         if allfilelist[i][1] != 0:
-            logging.info(allfilelist[i][0], allfilelist[i][2],  " was not copied.")
+            logging.info(str(allfilelist[i][0]) + " " + str(allfilelist[i][2]) +  " was not copied.")
     logging.info("\nEnd non-copied science, tellurics and acquisitions.\n")
 
     # Check that all science frames were copied.
@@ -1631,7 +1630,7 @@ def getPaths(allfilelist, objDateGratingList, sciImageList, dir):
                 count += 1
 
     if count_from_raw_files != count:
-        logging.info("\nWARNING: ", count_from_raw_files - count, ") science images (or sky frames) \
+        logging.info("\nWARNING: "+ str(count_from_raw_files - count) + " science images (or sky frames) \
         were not copied.\n")
     else:
         logging.info("\nExpected number of science and sky frames copied.\n")

@@ -307,7 +307,7 @@ def launch():
     #    copy = True
 
     # logging.info(user parameters for future reference.
-    logging.info("\nUser parameters for this run:")
+    logging.info("\nUser parameters for this run:\n")
     for i in options:
         logging.info(str(i) + " " + str(options[i]))
     logging.info("")
