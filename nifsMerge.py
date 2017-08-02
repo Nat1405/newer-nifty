@@ -258,17 +258,24 @@ def start(obsDirList, use_pq_offsets, over=""):
             cubeheader = astropy.io.fits.open(mergedCubes[i])
             grat = cubeheader[0].header['GRATING']
             gratlist.append(grat)
-        for n in range(len(gratlist)):
+        print "gratlist is: ", gratlist
+        for n in range(len(gratlist)): # For each unique grating
+            # Grab the indices of the cubes associated with that grating.
             indices = [k for k, x in enumerate(gratlist) if x==gratlist[n]]
+            print n
+            print "indices are: ", indices
             newcubelist = []
             for ind in indices:
                 newcubelist.append(mergedCubes[ind])
             waveshift(newcubelist, grat)
+            print newcubelist
             for i in range(len(newcubelist)):
+                # Build an input string containing all the cubes to combine.
                 if i==0:
                     inputstring = newcubelist[i]+'[1]'
                 else:
                     inputstring += ','+newcubelist[i]+'[1]'
+            print "input string is ", inputstring
             if os.path.exists('temp_merged'+gratlist[n][0]+'.fits'):
                 if over:
                     iraf.delete('temp_merged'+gratlist[n][0]+'.fits')
@@ -290,13 +297,13 @@ def waveshift(cubelist, grat):
     cubeheader0 = astropy.io.fits.open(cubelist[0])
     wstart0 = cubeheader0[1].header['CRVAL3']
     fwave = open('waveoffsets{0}.txt'.format(grat[0]), 'w')
-    fwave.write('%d\t%d\t%d\n' % (0., 0., 0.,))
+    fwave.write('%d %d %d\n' % (0, 0, 0))
     for i in range(len(cubelist)):
         cubeheader = astropy.io.fits.open(cubelist[i])
         wstart = cubeheader[1].header['CRVAL3']
         wdelt = cubeheader[1].header['CD3_3']
         waveoff = int(round((wstart0-wstart)/wdelt))
-        fwave.write('%d\t%d\t%d\n' % (0., 0., waveoff))
+        fwave.write('%d %d %d\n' % (waveoff, 0, 0))
     fwave.close()
 
 #---------------------------------------------------------------------------------------------------------------------------------------#

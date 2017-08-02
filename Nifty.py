@@ -300,7 +300,7 @@ def launch():
             telinter = options['telinter']
             use_pq_offsets = options['use_pq_offsets']
         # Make sure to overwrite user_options.json with the latest parameters!
-        shutil.copy('./runtimeData/default_input.json', 'user_options.json')
+        # shutil.copy('./runtimeData/default_input.json', 'user_options.json')
 
     # If a date or program is provided set copy to True. Used within Gemini network.
     #if date or program:
