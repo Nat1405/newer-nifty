@@ -76,13 +76,6 @@ def start(dir, tel, sort, over, copy, program, date):
     logging.info('#                                  #')
     logging.info('####################################\n')
 
-    logging.info("'\n####################################'")
-    logging.info("'#                                  #'")
-    logging.info("'#  Start NIFS sorting and copying  #'")
-    logging.info("'#                                  #'")
-    logging.info("'####################################\n'")
-
-
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
     # Exit if -q <path to raw frame files> and -c True are specified at command line (cannot copy from
     # Gemini North internal network AND use local raw data).
@@ -404,8 +397,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
     # number_files_to_be_copied logging.info("a warning for the user at the end of sortObs.")
     number_files_that_were_copied = 0
 
-    logging.info("\n\nMaking new directories and copying files. In this step I will process ") + str(number_files_to_be_copied) +\
-            " files."
+    logging.info("\n\nMaking new directories and copying files. In this step I will process " + str(number_files_to_be_copied) + " files.")
 
     # List of paths sorted by object and date. ['path/to/object1/date1', 'path/to/object1/date2'].
     objDirList = []

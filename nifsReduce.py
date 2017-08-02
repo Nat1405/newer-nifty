@@ -364,7 +364,7 @@ def start(
                             hline_method, spectemp, mag, log, over)
                 logging.info("\n##############################################################################")
                 logging.info("")
-                logging.info("  STEP 7: Perform a flux calibration ->fcatfbrsn or ->fctfbrsn - COMPLETED ")
+                logging.info("  STEP 7c: Perform a flux calibration ->fcatfbrsn or ->fctfbrsn - COMPLETED ")
                 logging.info("")
                 logging.info("##############################################################################\n")
 
@@ -770,7 +770,6 @@ def applyTelluricPython(over):
                                 effspec[i] = np.exp(effspec[i])
 
                     plt.plot(effspec,"r--")
-                    a = raw_input("Pause!")
                     # Divide each spectrum in the cubedata array by the efficiency spectrum*exptime.
                     for i in range(cube[1].header['NAXIS2']):         # NAXIS2 is the y axis of the final cube.
                         for j in range(cube[1].header['NAXIS1']):     # NAXIS1 is the x axis of the final cube.
@@ -967,14 +966,7 @@ def createEfficiencySpectrum(
 
     logging.info("\n##############################################################################")
     logging.info("")
-    logging.info("  STEP 7b - Find standard star information - COMPLETED ")
-    logging.info("            Contents of starfile:\n")
-    logging.info("Band:   Magnitude:   Temperature:")
-    """if data.find('!starfile') != -1:
-        f = open('starfile')
-        for line in f:
-            logging.info(line,)
-        f.close()"""
+    logging.info("  STEP 7a - Find standard star information - COMPLETED ")
     logging.info("")
     logging.info("##############################################################################\n")
 
@@ -1012,6 +1004,12 @@ def createEfficiencySpectrum(
     if hline_method == "none":
         #need to copy files so have right names for later use
         iraf.imcopy(input=combined_extracted_1d_spectra+'[sci,'+str(1)+']', output="final_tel_no_hlines_no_norm"+band, verbose='no')
+
+    logging.info("\n##############################################################################")
+    logging.info("")
+    logging.info("  STEP 7b - Apply or do not apply hline correction to standard star - COMPLETED ")
+    logging.info("")
+    logging.info("##############################################################################\n")
 
     # make a list of exposure times from the science images that use this standard star spectrum for the telluric correction
     # used to make flux calibrated blackbody spectra

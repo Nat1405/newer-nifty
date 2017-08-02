@@ -29,12 +29,39 @@ or create an issue in this repo.
 Installation
 ============
 
-1. Install Astroconda. Instructions can be found on Gemini's website `here. <http://www.gemini.edu/node/12665>`
-2. Download the latest release of Nifty from `here.<https://github.com/Nat1405/newer-nifty/releases>`
+.. 1. Install Astroconda. Instructions can be found on Gemini's website `here. <http://www.gemini.edu/node/12665>`
+.. This will work but doesn't guarantee an identical pipeline every time.
+1. Make sure you have Anaconda installed. We tested Nifty with Anaconda 4.4.0.
+   You can grab the latest version `here<https://www.continuum.io/downloads>`
+   **Important: do not activate an environment yet. We will create a new one in step 5.**
+2. Make sure your terminal is using a bash shell. This should print something similar to /bin/bash.
+
+.. code-block:: text
+
+    echo $SHELL
+
+2. Download the latest release of Nifty from `github.<https://github.com/Nat1405/newer-nifty/releases>`
 3. Unpack the .zip or .tar file.
-4. In a terminal change into the unpacked Nifty directory. When you type "ls" you should see
-   several files like "Nifty.py, nifsSort.py, etc.". You're ready to go!
-5. TODO(nat): add a way to verify the download with an md5.
+4. Within a terminal change into the unpacked Nifty directory. When you type "ls" you should see
+   several files like "Nifty.py, nifsSort.py and environment-file.txt.".
+5. From the spec-file-osx-64.txt create a new conda environment. This helps ensure you are
+   using identical python modules to those used during testing. For more info on creating
+   identical environments see `here.<https://conda.io/docs/using/envs.html#build-identical-conda-environments>`
+.. code-block:: text
+
+    conda create --name niftyconda --file spec-file-osx-64.txt
+
+6. Activate the new "niftyconda" environment.
+
+..code-block:: text
+
+    source activate niftyconda
+
+.. Insert photo of the new prompt.
+
+You should see (niftyconda) appear before your shell prompt.
+
+You're ready to begin reducing data!
 
 You should see the following directory structure:
 
@@ -53,10 +80,13 @@ You should see the following directory structure:
 |____ extras/
 |  |____ geminiSort.py
 |____ tests/
-   |____ generate_response_curve.py
-   |____ hk.txt
-   |____ nftelluric_modified.cl
-
+|  |____ generate_response_curve.py
+|  |____ hk.txt
+|  |____ nftelluric_modified.cl
+|_ .gitignore
+|_ LICENSE
+|_ README.rst
+|_ spec-file-osx-64.txt
 
 Quick Start
 -----------

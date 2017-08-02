@@ -712,8 +712,6 @@ def wavecal(arc, log, over, path):
         my_thresh=100.0
         interactive = 'yes'
 
-    print clist
-    a = raw_input("Pause")
     # Establish wavelength calibration for arclamp spectra. Output: A series of
     # files in a "database/" directory containing the wavelength solutions of
     # each slice and a reduced arc frame "wrgn"+ARC+".fits".
