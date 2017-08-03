@@ -661,20 +661,24 @@ def makeTelluric(objlist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def applyTelluricPython(over):
-
+    """Python method to divide each spaxel by an efficiency spectrum.
+    Assumes function is called from a science observation directory.
+    Args:
+        over(bool): overwite old files.
+    """
     observationDirectory = os.getcwd()
+    # Get the efficiency spectrum we will use to do a telluric correction and flux calibration at the same time.
     os.chdir('../Tellurics')
+    # Find a list of all the telluric observation directories.
     telDirList_temp = glob.glob('*')
-
     tempDir = os.path.split(observationDirectory)
     telDirList = []
     for telDir in telDirList_temp:
         telDirList.append(tempDir[0]+'/Tellurics/'+telDir)
     for telDir in telDirList:
-        # change to the telluric directory
+        # Change to the telluric directory.
         os.chdir(telDir)
-
-        # open the corrected telluric
+        # Make sure an objtellist is present.
         try:
             objlist = open('objtellist', 'r').readlines()
             objlist = [item.strip() for item in objlist]
@@ -682,7 +686,7 @@ def applyTelluricPython(over):
             os.chdir('..')
             continue
 
-
+        # Open the correction efficiency spectrum.
         telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
         logging.info("\nFound a finalcorrectionspectrum in\n"), telDir
         # Open the final correction spectrum file as "telluric". Create a numpy array the same length
@@ -735,7 +739,6 @@ def applyTelluricPython(over):
 
                     # Interpolate a function using the telluric spectrum.
                     # From scipy.interp1d help:
-                    #   Interpolate a 1D function.
                     #   interp1d(x,y)
                     efficiencySpectrumFunction = interp1d(effwave, effspec, bounds_error = None, fill_value=0.)
                     # Extend the function to allow extrapolation.
@@ -1047,8 +1050,15 @@ def createEfficiencySpectrum(
             star_mag = float(star_mag)
         else:
             #if not then just set to 1; no relative flux cal. attempted
-            logging.info("\nNo ", band, " magnitude found for this star. A relative flux "),\
-                                 "calibration will be performed.\n"
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in nifsReduce: No " + str(band) + " band magnitude found for this star.")
+            logging.info("                            No relative flux calibration will be performed.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
             logging.info("star_kelvin="), star_kelvin
             star_mag = 1
             logging.info("star_mag="), star_mag
@@ -1239,15 +1249,12 @@ def mag2mass(name, path, spectemp, mag, band):
                 if i>len(html2):
                     logging.info("ERROR: problem with SIMBAD output. You'll need to supply the magniture in the command line prompt.")
 
-
         if not Kmag:
             Kmag = 'nothing'
         if not Jmag:
             Jmag = 'nothing'
         if not Hmag:
             Hmag = 'nothing'
-
-
 
         if tempfind:
             #Find temperature for this spectral type in kelvinfile

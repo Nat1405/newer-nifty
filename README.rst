@@ -167,9 +167,9 @@ Object and Sky frame differentiation
 
 If the sorting script does not create a skylist in the object or telluric observation
 directories this means that the offsets between sky frames and object frames were smaller
-than expected. A skylist can be manually created and saved in the appropriate directory, or
-the limit placed on the offset can be changed. In sort.py the limit set on "rad" can be lowered in
-lines 194, 245, and 492 for object sky images and in lines 198, 249, and 495 for telluric sky images.
+than expected. A skyframelist can be manually created and saved in the appropriate directory, or
+the limit placed on the offset can be changed. To lower the limit manually do a search in nifsSort.py
+for "skyframelist.append(entry)" and change the <= <value_in_arcseconds> to something new.
 
 H-Line Removal
 --------------
@@ -194,39 +194,39 @@ directory.
 
 Recipes
 =======
-
+**These are pretty much all depreciated.** TODO(nat): update these.
 1. To perform sorting, calibration data reductions, and science reductions without the telluric correction and without producing a merged cube:
 
 .. code-block:: text
 
-    python Main.py -q users/name/reduction/Raw -t -k -m
+    python Nifty.py -q users/name/reduction/Raw -t -k -m
 
 2. To perform sorting, calibration data reductions, and science reductions without telluric correction and produce a merged cube:
 
 .. code-block:: text
 
-    python Main.py -q users/name/reduction/Raw -t -k
+    python Nifty.py -q users/name/reduction/Raw -t -k
 
 3. To perform sorting, calibration data reductions, and science reductions without the telluric correction, no flux calibration, and produce a merged cube:
 
 .. code-block:: text
 
-    python Main.py -q users/name/reduction/Raw -f -1
+    python Nifty.py -q users/name/reduction/Raw -f -1
 
 4. To perform sorting, calibration data reductions, and science reductions with the telluric correction (interactively), flux calibration, and produce a merged cube:
 
 .. code-block:: text
 
-    python Main.py -q users/name/reduction/Raw -w
+    python Nifty.py -q users/name/reduction/Raw -w
 
 5. To start the script by producing a merged cube (all the science data must already be reduced):
 
 .. code-block:: text
 
-    python Main.py -q users/name/reduction/Raw -s -r -n -t -k
+    python Nifty.py -q users/name/reduction/Raw -s -r -n -t -k
 
 6. To start the script by performing the telluric correction and produce a merged cube (assuming the telluric data and science data have already been reduced)
 
 .. code-block:: text
 
-    python Main.py -q users/name/reduction/Raw -s -r -k -b 8
+    python Nifty.py -q users/name/reduction/Raw -s -r -k -b 8
