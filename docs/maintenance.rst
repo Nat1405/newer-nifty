@@ -44,6 +44,10 @@ warnings and updates were written using templates in the included snippets.cson 
 Where possible, nat used 2D (and higher) dimensional lists to implement error
 checking flags. These are particularly prominent in sort.
 
+Variables and functions were named using conventions in the
+`Python Style Guide.<https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_
+Specifically a mix of camelCase and lower_case_with_underscores was used.
+
 Known Issues
 ============
 
@@ -52,7 +56,6 @@ Nifty.py
 
 nifsSort.py
 -----------
-
 
 nifsBaselineCalibration.py
 --------------------------
@@ -79,6 +82,9 @@ General Issues
 --------------
 - A longstanding bug in `astropy<https://github.com/astropy/astropy/pull/960>`_ has made it
   difficult to build Nifty as a binary executable.
+- The conversion of print statements to logging.info() statements was messy. Some of these
+  may still not be properly converted and will throw nasty tracebacks. However these seem to
+  have no effect on the functionioning of the code.
 
 Future Work
 ===========

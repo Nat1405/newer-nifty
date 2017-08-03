@@ -1140,7 +1140,7 @@ def mag2mass(name, path, spectemp, mag, band):
     """
 
     starfile = 'std_star.txt'
-    kelvinfile = path+'/runtimeData/starstemp.txt'
+    kelvinfile = path+'/runtimeData/new_starstemp.txt'
 
     sf = open(starfile,'w')
     klf = open (kelvinfile)
@@ -1271,7 +1271,7 @@ def mag2mass(name, path, spectemp, mag, band):
                         count+=1
 
             if count > 0:
-                logging.info("ERROR: can't find a temperature for spectral type", spectral_type,". You'll need to supply information in a file; see the manual for instructions.")
+                logging.info("ERROR: can't find a temperature for spectral type"+ str(spectral_type)+". You'll need to supply information in a file; see the manual for instructions.")
                 sys.exit()
 
 

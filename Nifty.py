@@ -87,13 +87,13 @@ def launch():
     #parser.add_option('-o', '--over', dest = 'over', default = False, action = 'store_true', help = 'overwrite old files')
     #parser.add_option('-c', '--copy', dest = 'copy', default = False, action = 'store_true', help = 'copy raw data from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)')
     #parser.add_option('-s', '--sort', dest = 'sort', default = True, action = 'store_false', help = 'sort data')
-    parser.add_option('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from user_options.json.')
+    parser.add_option('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeDate/user_options.json.')
     #parser.add_option('-k', '--notelred', dest = 'telred', default= 'True', action = 'store_false', help = 'don\'t reduce telluric data')
     #parser.add_option('-g', '--fluxcal', dest = 'fluxcal', default = 'True', action = 'store_true', help = ' perform flux calibration')
     #parser.add_option('-t', '--telcorr', dest = 'tel', default= 'False', action = 'store_true', help = 'perform telluric correction')
     #parser.add_option('-e', '--stdspectemp', dest = 'spectemp', action = 'store', help = 'specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000')
     #parser.add_option('-f', '--stdmag', dest = 'mag', action = 'store', help = 'specify the IR magnitude of the standard star; if you do not wish to do a flux calibration then enter -f x')
-    parser.add_option('-l', '--load', dest = 'repeat', default = False, action = 'store_true', help = 'Load data reduction parameters from user_options.json. Equivalent to -r and --repeat.')
+    parser.add_option('-l', '--load', dest = 'repeat', default = False, action = 'store_true', help = 'Load data reduction parameters from runtimeDate/user_options.json. Equivalent to -r and --repeat.')
     parser.add_option('-f', '--fullRun', dest = 'fullRun', default = False, action = 'store_true', help = 'Do a full run from default_input.json')
     #parser.add_option('-y', '--continter', dest = 'continter', default = 'False', action = 'store_true', help = 'do the continuum fitting in the flux calibration interactively')
     #parser.add_option('-a', '--redstart', dest = 'rstart',  type='int', action = 'store', help = 'choose the starting point of the daycal reduction; any integer from 1 to 6')
@@ -257,17 +257,17 @@ def launch():
             options['telluric_correction_method'] = telluric_correction_method
             options['telinter'] = telinter
             options['use_pq_offsets'] = use_pq_offsets
-            with open('user_options.json', 'w') as outfile:
+            with open('runtimeDate/user_options.json', 'w') as outfile:
                 json.dump(options, outfile, indent=4)
 
     if repeat or fullRun:
-        # Read and use parameters of the last run from user_options.json.
+        # Read and use parameters of the last run from runtimeDate/user_options.json.
         if fullRun:
-            f = './runtimeData/default_input.json'
-            logging.info("\nData reduction parameters were copied from ./runtimeData/default_input.json.")
+            f = './recipes/default_input.json'
+            logging.info("\nData reduction parameters were copied from ./recipes/default_input.json.")
         else:
-            f = 'user_options.json'
-            logging.info("\nData reduction parameters were copied from user_options.json.")
+            f = 'runtimeDate/user_options.json'
+            logging.info("\nData reduction parameters were copied from runtimeDate/user_options.json.")
         with open(f) as json_file:
             options = json.load(json_file)
             oldVersion = options['__version__']
@@ -299,8 +299,8 @@ def launch():
             telluric_correction_method = options['telluric_correction_method']
             telinter = options['telinter']
             use_pq_offsets = options['use_pq_offsets']
-        # Make sure to overwrite user_options.json with the latest parameters!
-        # shutil.copy('./runtimeData/default_input.json', 'user_options.json')
+        # Make sure to overwrite runtimeDate/user_options.json with the latest parameters!
+        # shutil.copy('./recipes/default_input.json', 'runtimeDate/user_options.json')
 
     # If a date or program is provided set copy to True. Used within Gemini network.
     #if date or program:

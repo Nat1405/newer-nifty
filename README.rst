@@ -53,7 +53,7 @@ Installation
 
 6. Activate the new "niftyconda" environment.
 
-..code-block:: text
+.. code-block:: text
 
     source activate niftyconda
 
@@ -61,7 +61,7 @@ Installation
 
 You should see (niftyconda) appear before your shell prompt.
 
-You're ready to begin reducing data!
+You're ready to begin!
 
 You should see the following directory structure:
 
@@ -77,6 +77,9 @@ You should see the following directory structure:
     |  |____ h_wave.data
     |  |____ j_wave.data
     |  |____ k_wave.data
+    |  |____ default_input.json
+    |  |____ new_starstemp.txt
+    |  |____ vega_ext.fits
     |____ docs/
     |  |____ nifs_pipeline_june_2015.pdf
     |____ extras/
@@ -90,7 +93,7 @@ You should see the following directory structure:
     |_ README.rst
     |_ spec-file-osx-64.txt
 
-*Nifty.py is the main control script of the pipeline.*
+*Nifty.py* is the main control script of the pipeline.
 
 Quick Start
 ===========
@@ -104,7 +107,7 @@ To launch Nifty with interactive input, type:
 Nifty will let you select parameters for the data reduction. Press enter to accept
 the default options.
 
-To do a full reduction accepting all the defaults, you can either type:
+To do a full data reduction from the defaults listed in default_input.json:
 
 .. code-block:: text
 
@@ -119,7 +122,7 @@ Input
 You can provide input to Nifty in three ways:
 
 - Interactive input
-- A user_options.json file
+- A runtimeDate/user_options.json file
 - Command line arguments
 
 To provide interactive input run Nifty with no command line options by typing:
@@ -128,10 +131,10 @@ To provide interactive input run Nifty with no command line options by typing:
 
    python Nifty.py
 
-Note that the data reduction parameters are saved to a new user_options.json file
+Note that the data reduction parameters are saved to a new runtimeDate/user_options.json file
 at the end of an interactive input session.
 
-To have Nifty load its parameters from a user_options.json use the -r or -l command line arguments. These arguments are equivalent.
+To have Nifty load its parameters from a runtimeDate/user_options.json use the -r or -l command line arguments. These arguments are equivalent.
 
 .. code-block:: text
 
@@ -146,18 +149,40 @@ or:
 Command Line Arguments
 ----------------------
 
-Nifty supports several command line arguments. Using these with a user_options.json input file
+Nifty supports several command line arguments. Using these with a runtimeDate/user_options.json input file
 makes Nifty integrate well with shell scripts.
 
 Nifty may be invoked with the following command line arguments:
 
-**-l**
-  Load. Load data reduction parameters from a user_options.json file.
+**-l <recipe_name>**
+  Load the specified recipe from recipes/. If no recipe name is provided default_input.json is used.
+  .. TODO(nat): actually implement this!
 **-r**
-  Repeat. Repeat the last data reduction, loading parameters from a user_options.json file.
-  Equivalent to -l, Load.
+  Repeat. Repeat the last data reduction, loading parameters from a runtimeDate/user_options.json file.
+  Equivalent to -l with
 **-f**
   Full automatic run. Do a full automatic data reduction copying parameters from the included default_input.json.
+
+Editable Control Files
+======================
+
+At several points Nifty reads and writes data from textfiles. These files are found in the runtimeData/
+directory. They are:
+
+Modifed line lists; we used calibration line lists from `GNIRS<http://www.gemini.edu/sciops/instruments/gnirs/calibration/arc-lamp-ids>`_
+- h_test_one_argon.dat
+A modified list of wavelength calibration lines in the H band that we found worked well.
+- j_test_one_argon.dat
+A modified list of wavelength calibration lines in the J band that we found worked well.
+- k_test_two_argon.dat
+A modified list of wavelength calibration lines in the K band that we found worked well.
+- new_starstemp.txt
+Effective temperatures for each spectral type are stored in this.
+- vega_ext.fits
+Spectra of Vega in the z, J, H and K bands are included in the 4 extensions of this.
+-runtimeDate/user_options.json saves the parameters of the latest data reduction. **It is updated after each data reduction.**
+
+
 
 Notes
 =====
@@ -195,6 +220,10 @@ directory.
 Recipes
 =======
 **These are pretty much all depreciated.** TODO(nat): update these.
+
+We have built several data reduction recipes that you may find useful. These consist of
+runtimeDate/user_options.json files that are loaded with the -l flag.
+
 1. To perform sorting, calibration data reductions, and science reductions without the telluric correction and without producing a merged cube:
 
 .. code-block:: text
