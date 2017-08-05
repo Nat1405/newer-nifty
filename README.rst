@@ -122,7 +122,7 @@ Input
 You can provide input to Nifty in three ways:
 
 - Interactive input
-- A runtimeDate/user_options.json file
+- A runtimeData/user_options.json file
 - Command line arguments
 
 To provide interactive input run Nifty with no command line options by typing:
@@ -131,10 +131,10 @@ To provide interactive input run Nifty with no command line options by typing:
 
    python Nifty.py
 
-Note that the data reduction parameters are saved to a new runtimeDate/user_options.json file
+Note that the data reduction parameters are saved to a new runtimeData/user_options.json file
 at the end of an interactive input session.
 
-To have Nifty load its parameters from a runtimeDate/user_options.json use the -r or -l command line arguments. These arguments are equivalent.
+To have Nifty load its parameters from a runtimeData/user_options.json use the -r or -l command line arguments. These arguments are equivalent.
 
 .. code-block:: text
 
@@ -149,7 +149,7 @@ or:
 Command Line Arguments
 ----------------------
 
-Nifty supports several command line arguments. Using these with a runtimeDate/user_options.json input file
+Nifty supports several command line arguments. Using these with a runtimeData/user_options.json input file
 makes Nifty integrate well with shell scripts.
 
 Nifty may be invoked with the following command line arguments:
@@ -158,7 +158,7 @@ Nifty may be invoked with the following command line arguments:
   Load the specified recipe from recipes/. If no recipe name is provided default_input.json is used.
   .. TODO(nat): actually implement this!
 **-r**
-  Repeat. Repeat the last data reduction, loading parameters from a runtimeDate/user_options.json file.
+  Repeat. Repeat the last data reduction, loading parameters from a runtimeData/user_options.json file.
   Equivalent to -l with
 **-f**
   Full automatic run. Do a full automatic data reduction copying parameters from the included default_input.json.
@@ -180,7 +180,7 @@ A modified list of wavelength calibration lines in the K band that we found work
 Effective temperatures for each spectral type are stored in this.
 - vega_ext.fits
 Spectra of Vega in the z, J, H and K bands are included in the 4 extensions of this.
--runtimeDate/user_options.json saves the parameters of the latest data reduction. **It is updated after each data reduction.**
+-runtimeData/user_options.json saves the parameters of the latest data reduction. **It is updated after each data reduction.**
 
 
 
@@ -222,7 +222,7 @@ Recipes
 **These are pretty much all depreciated.** TODO(nat): update these.
 
 We have built several data reduction recipes that you may find useful. These consist of
-runtimeDate/user_options.json files that are loaded with the -l flag.
+runtimeData/user_options.json files that are loaded with the -l flag.
 
 1. To perform sorting, calibration data reductions, and science reductions without the telluric correction and without producing a merged cube:
 

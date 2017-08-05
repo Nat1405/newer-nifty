@@ -94,7 +94,7 @@ def start(obsDirList, calDirList, over, start, stop):
                         --->Tellurics/
                             --->ot_observation_name/
                                 -->N*.fits (telluric .fits files)
-                                --->objtellist (text file matching telluric and science data.
+                                --->scienceMatchedTellsList (text file matching telluric and science data.
                                                 See comments in telSort for more info.)
                                 --->skyframelist (text file storing names of telluric sky frames)
                                 --->tellist (text file storing names of telluric object frames)
@@ -106,7 +106,7 @@ def start(obsDirList, calDirList, over, start, stop):
     # Store current working directory for later use.
     path = os.getcwd()
     # Enable optional debugging pauses.
-    debug = False
+    debug = True
 
     # Set up the logging file.
     FORMAT = '%(asctime)s %(message)s'
@@ -234,6 +234,8 @@ def start(obsDirList, calDirList, over, start, stop):
             #############################################################################
 
             if valindex == 1:
+                if debug:
+                    a = raw_input("About to enter step 1.")
                 getShift(calflat, over, log)
                 print "\n###################################################################"
                 print ""
@@ -248,6 +250,8 @@ def start(obsDirList, calDirList, over, start, stop):
             #############################################################################
 
             elif valindex == 2:
+                if debug:
+                    a = raw_input("About to enter step 2.")
                 makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
                 print "\n###################################################################"
                 print ""
@@ -263,6 +267,8 @@ def start(obsDirList, calDirList, over, start, stop):
             ############################################################################
 
             elif valindex == 3:
+                if debug:
+                    a = raw_input("About to enter step 3.")
                 reduceArc(arclist, arc, arcdarklist, arcdark, log, over)
                 wavecal(arc, log, over, path)
                 print "\n###################################################################"
@@ -279,6 +285,8 @@ def start(obsDirList, calDirList, over, start, stop):
             ######################################################################################
 
             elif valindex == 4:
+                if debug:
+                    a = raw_input("About to enter step 4.")
                 ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
                 print "\n###################################################################"
                 print ""

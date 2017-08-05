@@ -30,13 +30,13 @@ def loadSortSave():
         - Science directories,
         - Telluric directories, and
         - Calibration directories
-        from scienceDirectoryList.txt, telluricDirectoryList.txt and calibrationDirectoryList.txt in
+        from runtimeData/scienceDirectoryList.txt, runtimeData/telluricDirectoryList.txt and runtimeData/calibrationDirectoryList.txt in
         the main Nifty directory.
     """
     # Don't use sortScript at all; read the paths to data from textfiles.
     # Load telluric observation directories.
     try:
-        telDirList = open("telluricDirectoryList.txt", "r").readlines()
+        telDirList = open("runtimeData/telluricDirectoryList.txt", "r").readlines()
         telDirList = [entry.strip() for entry in telDirList]
     except IOError:
         logging.info("\n#####################################################################")
@@ -50,7 +50,7 @@ def loadSortSave():
         telDirList = []
     # Load science observation directories.
     try:
-        obsDirList = open("scienceDirectoryList.txt", "r").readlines()
+        obsDirList = open("runtimeData/scienceDirectoryList.txt", "r").readlines()
         obsDirList = [entry.strip() for entry in obsDirList]
     except IOError:
         logging.info("\n#####################################################################")
@@ -64,7 +64,7 @@ def loadSortSave():
         obsDirList = []
     # Load calibration directories.
     try:
-        calDirList = open("calibrationDirectoryList.txt", "r").readlines()
+        calDirList = open("runtimeData/calibrationDirectoryList.txt", "r").readlines()
         calDirList = [entry.strip() for entry in calDirList]
     except IOError:
         logging.info("\n#####################################################################")

@@ -63,7 +63,7 @@ def launch():
     logger.addHandler(ch)
 
     # Enable Debugging break points. Used for testing.
-    debug = False
+    debug = True
 
     logging.info("\n####################################")
     logging.info("#                                  #")
@@ -87,14 +87,14 @@ def launch():
     #parser.add_option('-o', '--over', dest = 'over', default = False, action = 'store_true', help = 'overwrite old files')
     #parser.add_option('-c', '--copy', dest = 'copy', default = False, action = 'store_true', help = 'copy raw data from /net/wikiwiki/dataflow (used ONLY within the GEMINI network)')
     #parser.add_option('-s', '--sort', dest = 'sort', default = True, action = 'store_false', help = 'sort data')
-    parser.add_option('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeDate/user_options.json.')
+    parser.add_option('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeData/user_options.json.')
     #parser.add_option('-k', '--notelred', dest = 'telred', default= 'True', action = 'store_false', help = 'don\'t reduce telluric data')
-    #parser.add_option('-g', '--fluxcal', dest = 'fluxcal', default = 'True', action = 'store_true', help = ' perform flux calibration')
+    #parser.add_option('-g', '--efficiencySpectrumCorrection', dest = 'efficiencySpectrumCorrection', default = 'True', action = 'store_true', help = ' perform flux calibration')
     #parser.add_option('-t', '--telcorr', dest = 'tel', default= 'False', action = 'store_true', help = 'perform telluric correction')
     #parser.add_option('-e', '--stdspectemp', dest = 'spectemp', action = 'store', help = 'specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000')
     #parser.add_option('-f', '--stdmag', dest = 'mag', action = 'store', help = 'specify the IR magnitude of the standard star; if you do not wish to do a flux calibration then enter -f x')
-    parser.add_option('-l', '--load', dest = 'repeat', default = False, action = 'store_true', help = 'Load data reduction parameters from runtimeDate/user_options.json. Equivalent to -r and --repeat.')
-    parser.add_option('-f', '--fullRun', dest = 'fullRun', default = False, action = 'store_true', help = 'Do a full run from default_input.json')
+    parser.add_option('-l', '--load', dest = 'repeat', default = False, action = 'store_true', help = 'Load data reduction parameters from runtimeData/user_options.json. Equivalent to -r and --repeat.')
+    parser.add_option('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full Reduction from default_input.json')
     #parser.add_option('-y', '--continter', dest = 'continter', default = 'False', action = 'store_true', help = 'do the continuum fitting in the flux calibration interactively')
     #parser.add_option('-a', '--redstart', dest = 'rstart',  type='int', action = 'store', help = 'choose the starting point of the daycal reduction; any integer from 1 to 6')
     #parser.add_option('-z', '--redstop', dest = 'rstop',  type='int', action = 'store', help = 'choose the stopping point of the daycal reduction; any integer from 1 to 6')
@@ -113,18 +113,18 @@ def launch():
     spectemp = None
 
     repeat = options.repeat
-    fullRun = options.fullRun
+    fullReduction = options.fullReduction
 
     # Ask the user about what reduction steps and substeps they would like to perform.
     logging.info("\nGood day! Press enter to accept default reduction options.")
-    # Check if the user specified at command line to repeat the last run or do a full default data reduction.
-    if not repeat and not fullRun:
-        fullRun = getParam(
-                    "Do a full data reduction with default settings? [no]: ",
+    # Check if the user specified at command line to repeat the last Reduction or do a full default data reduction.
+    if not repeat and not fullReduction:
+        fullReduction = getParam(
+                    "Do a full data reduction with default parameters loaded from runtimeData/default_input.json? [no]: ",
                     False,
-                    "Type yes to start a full data reduction based off the included default_input.json file."
+                    "Type yes to start Nifty with data reduction input parameters loaded from runtimeData/default_input.json file."
         )
-        if fullRun == False:
+        if fullReduction == False:
             # "Select in". User has to turn individual steps on.
             sort = getParam(
             "Sort data? [no]: ",
@@ -164,8 +164,8 @@ def launch():
             1
             )
             telStop = getParam(
-            "Stopping point of science and telluric reductions? [7]: ",
-            7
+            "Stopping point of science and telluric reductions? [6]: ",
+            6
             )
             # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
             # Set the h-line removal method with the vega() function in nifsReduce as default.
@@ -200,10 +200,10 @@ def launch():
             1
             )
             sciStop = getParam(
-            "Stopping point of science and telluric reductions? [7]: ",
-            7
+            "Stopping point of science and telluric reductions? [6]: ",
+            6
             )
-            fluxcal = getParam(
+            efficiencySpectrumCorrection = getParam(
             "Do a flux calibration? [no]: ",
             False
             )
@@ -244,7 +244,7 @@ def launch():
             options['telred'] = telred
             options['spectemp'] = spectemp
             options['mag'] = mag
-            options['fluxcal'] = fluxcal
+            options['efficiencySpectrumCorrection'] = efficiencySpectrumCorrection
             options['rstart']= rstart
             options['rstop'] = rstop
             options['telStart'] = telStart
@@ -257,17 +257,17 @@ def launch():
             options['telluric_correction_method'] = telluric_correction_method
             options['telinter'] = telinter
             options['use_pq_offsets'] = use_pq_offsets
-            with open('runtimeDate/user_options.json', 'w') as outfile:
+            with open('runtimeData/user_options.json', 'w') as outfile:
                 json.dump(options, outfile, indent=4)
 
-    if repeat or fullRun:
-        # Read and use parameters of the last run from runtimeDate/user_options.json.
-        if fullRun:
+    if repeat or fullReduction:
+        # Read and use parameters of the last Reduction from runtimeData/user_options.json.
+        if fullReduction:
             f = './recipes/default_input.json'
-            logging.info("\nData reduction parameters were copied from ./recipes/default_input.json.")
+            logging.info("\nData reduction parameters for this reduction were copied from ./recipes/default_input.json.")
         else:
-            f = 'runtimeDate/user_options.json'
-            logging.info("\nData reduction parameters were copied from runtimeDate/user_options.json.")
+            f = 'runtimeData/user_options.json'
+            logging.info("\nData reduction parameters for this reduction were copied from runtimeData/user_options.json.")
         with open(f) as json_file:
             options = json.load(json_file)
             oldVersion = options['__version__']
@@ -286,7 +286,7 @@ def launch():
             telred = options['telred']
             spectemp = options['spectemp']
             mag = options['mag']
-            fluxcal = options['fluxcal']
+            efficiencySpectrumCorrection = options['efficiencySpectrumCorrection']
             rstart = options['rstart']
             rstop = options['rstop']
             telStart = options['telStart']
@@ -299,20 +299,22 @@ def launch():
             telluric_correction_method = options['telluric_correction_method']
             telinter = options['telinter']
             use_pq_offsets = options['use_pq_offsets']
-        # Make sure to overwrite runtimeDate/user_options.json with the latest parameters!
-        # shutil.copy('./recipes/default_input.json', 'runtimeDate/user_options.json')
+
+        # Make sure to overwrite runtimeData/user_options.json with the latest parameters!
+        # shutil.copy('./recipes/default_input.json', 'runtimeData/user_options.json')
 
     # If a date or program is provided set copy to True. Used within Gemini network.
     #if date or program:
     #    copy = True
 
     # logging.info(user parameters for future reference.
-    logging.info("\nUser parameters for this run:\n")
+    logging.info("\nUser parameters for this Reduction:\n")
     for i in options:
         logging.info(str(i) + " " + str(options[i]))
     logging.info("")
+    logging.info("These parameters have been written to user_options.json.")
 
-    # Begin running indivual reduction scripts.
+    # Begin running individual reduction scripts.
 
     ###########################################################################
     ##                      STEP 1: Sort the raw data.                       ##
@@ -358,7 +360,7 @@ def launch():
                            'create telluric correction spectrum and blackbody spectrum.')
         if telred:
             reduceScript.start(
-                telDirList, calDirList, telStart, telStop, tel, telinter, fluxcal,\
+                telDirList, calDirList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                 telluric_correction_method)
 
@@ -369,7 +371,7 @@ def launch():
     if sci:
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
-        reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, fluxcal,\
+        reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, efficiencySpectrumCorrection,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                            telluric_correction_method)
 

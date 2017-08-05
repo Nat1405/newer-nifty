@@ -109,7 +109,7 @@ def start(obsDirList, use_pq_offsets, over=""):
             logging.info('I am creating a directory with date and abs ID inside Merged ')
 
         # If a list called shiftedcubes already exists then just merge those shifted cubes and continue.
-        if glob.glob("./shif*.fits"):
+        if glob.glob("./shift*.fits"):
             if over:
                 if os.path.exists('./'+obsid+'_merged.fits'):
                     os.remove('./'+obsid+'_merged.fits')
@@ -174,7 +174,7 @@ def start(obsDirList, use_pq_offsets, over=""):
             foff.close()
 
         suffix = cubes[0][-8:-5]
-        if os.path.exists('transcube'+suffix+'.fits'):
+        """if os.path.exists('transcube'+suffix+'.fits'):
             if not over:
                 logging.info('Output already exists and -over- not set - skipping im3dtran')
             if over:
@@ -182,6 +182,10 @@ def start(obsDirList, use_pq_offsets, over=""):
                 iraf.im3dtran(input = cubes[0]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
         else:
             iraf.im3dtran(input = cubes[0]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
+            """
+
+        # EXPERIMENT
+        iraf.imcopy(cubes[0]+'[SCI][*,*,*]', 'NONtranscube'+suffix+'.fits')
         shiftlist.append('cube'+suffix+'.fits')
         iraffunctions.chdir(os.getcwd())
 
@@ -195,17 +199,19 @@ def start(obsDirList, use_pq_offsets, over=""):
             # If user wants to merge using p and q offsets, grab those from .fits headers.
             if use_pq_offsets:
                 # find the p and q offsets of the other cubes in the sequence.
-                poff = header2[0].header['POFFSET']
-                qoff = header2[0].header['QOFFSET']
+                xoff = header2[0].header['POFFSET']
+                yoff = header2[0].header['QOFFSET']
                 # calculate the difference between the zero point offsets and the offsets of the other cubes and convert that to pixels
-                pShift = round((poff - p0)/pixScale)
-                qShift = round((qoff - q0)/pixScale)
+                xShift = round((xoff - p0)/pixScale)
+                yShift = round((yoff - q0)/pixScale)
                 # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
                 foff = open('offsets.txt', 'a')
-                foff.write('%d %d %d\n' % (int(pShift), 0, int(qShift)))
+                #foff.write('%d %d %d\n' % (int(xShift), 0, int(yShift)))
+                # EXPERIMENT
+                foff.write('%d\t%d\t%d\n' % (xShift, yShift, 0.))
                 foff.close()
 
-            if os.path.exists('transcube'+suffix+'.fits'):
+            """if os.path.exists('transcube'+suffix+'.fits'):
                 if not over:
                     logging.info('Output already exists and -over- not set - skipping im3dtran')
                 if over:
@@ -213,6 +219,9 @@ def start(obsDirList, use_pq_offsets, over=""):
                     iraf.im3dtran(input = cubes[i]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
             else:
                 iraf.im3dtran(input = cubes[i]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
+            """
+            # EXPERIMENT
+            iraf.imcopy(cubes[i]+'[SCI][*,*,*]', 'NONtranscube'+suffix+'.fits')
             shiftlist.append('cube'+suffix+'.fits')
 
         if not use_pq_offsets:
@@ -225,12 +234,12 @@ def start(obsDirList, use_pq_offsets, over=""):
         if os.path.exists('cube_merged.fits'):
             if over:
                 os.remove('cube_merged.fits')
-                iraf.imcombine('transcube*.fits', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
+                iraf.imcombine('NONtranscube*', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
             else:
                 logging.info('Output already exists and -over- not set - skipping imcombine')
         else:
-            iraf.imcombine('transcube*.fits', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
-        if os.path.exists('out.fits'):
+            iraf.imcombine('NONtranscube*', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
+        """if os.path.exists('out.fits'):
             if over:
                 os.remove('out.fits')
                 iraf.im3dtran(input='cube_merged[*,-*,*]', new_x=1, new_y=3, new_z=2, output = 'out.fits')
@@ -240,7 +249,9 @@ def start(obsDirList, use_pq_offsets, over=""):
         else:
             iraf.im3dtran(input='cube_merged[*,-*,*]', new_x=1, new_y=3, new_z=2, output = 'out.fits')
             iraf.fxcopy(input=cubes[0]+'[0], out.fits', output = obsidlist[n]+'_merged.fits')
+            """
         mergedCubes.append(obsidlist[n]+'_merged.fits')
+
         n+=1
         os.chdir(Merged)
 
