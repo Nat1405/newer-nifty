@@ -102,29 +102,19 @@ def start(obsDirList, calDirList, over, start, stop):
     """
     # TODO(nat): stop using first frame from list as name for combined frames. Find better names and implement
     # them in pipeline and docs.
+    # TODO(nat): Finish converting the print statements to logging.info() statements.
 
     # Store current working directory for later use.
     path = os.getcwd()
+
     # Enable optional debugging pauses.
     debug = True
-
-    # Set up the logging file.
-    FORMAT = '%(asctime)s %(message)s'
-    DATEFMT = datefmt()
-    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
-    log = os.getcwd()+'/Nifty.log'
 
     logging.info('#################################################')
     logging.info('#                                               #')
     logging.info('# Start the NIFS Baseline Calibration Reduction #')
     logging.info('#                                               #')
     logging.info('#################################################')
-
-    print '\n#################################################'
-    print '#                                               #'
-    print '# Start the NIFS Baseline Calibration Reduction #'
-    print '#                                               #'
-    print '#################################################\n'
 
     # Set up/prepare IRAF.
     iraf.gemini()
@@ -235,11 +225,11 @@ def start(obsDirList, calDirList, over, start, stop):
 
             if valindex == 1:
                 if debug:
-                    a = raw_input("About to enter step 1.")
+                    a = raw_input("About to enter step 1: locate the spectrum.")
                 getShift(calflat, over, log)
                 print "\n###################################################################"
                 print ""
-                print "    STEP 1: Determine the shift to the MDF - COMPLETED"
+                print "    STEP 1: Locate the Spectrum (Determine the shift to the MDF) - COMPLETED"
                 print ""
                 print "###################################################################\n"
 
@@ -251,11 +241,11 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 2:
                 if debug:
-                    a = raw_input("About to enter step 2.")
+                    a = raw_input("About to enter step 2: flat field.")
                 makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
                 print "\n###################################################################"
                 print ""
-                print "    STEP 2: Create Flat Field image and BPM image - COMPLETED       "
+                print "    STEP 2: Flat Field (Create Flat Field image and BPM image) - COMPLETED       "
                 print ""
                 print "###################################################################\n"
 
@@ -268,15 +258,15 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 3:
                 if debug:
-                    a = raw_input("About to enter step 3.")
+                    a = raw_input("About to enter step 3: wavelength solution.")
                 reduceArc(arclist, arc, arcdarklist, arcdark, log, over)
                 wavecal(arc, log, over, path)
                 print "\n###################################################################"
                 print ""
-                print "         STEP 3: NFPREPARE and Combine arc darks.  "
+                print "         STEP 3: Wavelength Solution (NFPREPARE and Combine arc darks.  "
                 print "                 NFPREPARE, Combine and flat field arcs."
                 print "                 Determine the wavelength solution and create the"
-                print "                 wavelength referenced arc - COMPLETED"
+                print "                 wavelength referenced arc) - COMPLETED"
                 print ""
                 print "###################################################################\n"
 
@@ -286,12 +276,12 @@ def start(obsDirList, calDirList, over, start, stop):
 
             elif valindex == 4:
                 if debug:
-                    a = raw_input("About to enter step 4.")
+                    a = raw_input("About to enter step 4: spatial distortion.")
                 ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
                 print "\n###################################################################"
                 print ""
-                print "     Step 4: Trace the spatial curvature and spectral distortion "
-                print "             in the Ronchi flat - COMPLETED"
+                print "     Step 4: Spatial Distortion (Trace the spatial curvature and spectral distortion "
+                print "             in the Ronchi flat) - COMPLETED"
                 print ""
                 print "###################################################################\n"
 
