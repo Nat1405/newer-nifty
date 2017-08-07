@@ -322,7 +322,7 @@ def launch():
 
     if sort:
         # Sort the data and calibrations.
-        obsDirList, calDirList, telDirList = sortScript.start(rawPath, tel, sort, over, copy, program, date)
+        obsDirList, calDirList, telDirList = sortScript.start(rawPath, tel, over, copy, program, date)
 
     else:
         # Don't use sortScript at all; read the paths to data from textfiles.

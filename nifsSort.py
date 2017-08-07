@@ -12,7 +12,7 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 datefmt, checkOverCopy, checkQAPIreq, checkDate, writeList, checkEntry, timeCalc
 
 
-def start(dir, tel, sort, over, copy, program, date):
+def start(dir, tel, over, copy, program, date):
     """
     nifsSort
 
@@ -45,9 +45,6 @@ def start(dir, tel, sort, over, copy, program, date):
                         -t at command line. Default: True.
         over (boolean): If True old files will be overwritten during data reduction. Specified
                         with -o at command line. Default: False.
-        sort (boolean): If False data will not be sorted. Specified with -s or --sort at
-                        command line. Default: True.
-
             FOR INTERNAL GEMINI USE:
         copy (boolean):   Specified with -c or --copy at command line. If True data
                           will be copied from Gemini network. Default: False.
@@ -65,7 +62,7 @@ def start(dir, tel, sort, over, copy, program, date):
     path = os.getcwd()
 
     # Enable optional debugging pauses.
-    debug = False
+    debug = True
 
     # Set up the logging file.
     log = os.getcwd()+'/Nifty.log'
@@ -83,13 +80,6 @@ def start(dir, tel, sort, over, copy, program, date):
         logging.info("\n Error in sort. Cannot specify -q AND -c True (local raw files directory AND copy files from Gemini network).\n")
         raise SystemExit
 
-    # Make sure that a path to raw files directory is provided if -s False is specified.
-    if not sort:
-        if not dir:
-            logging.info("\nError in sort. -s False was specified but no path to raw data was found. \nDid you provide a path to raw files with -q ?\n")
-            raise SystemExit
-
-
     ############################################################################
     ############################################################################
     #                                                                          #
@@ -103,23 +93,23 @@ def start(dir, tel, sort, over, copy, program, date):
     ############################################################################
 
 
-    # IF a local raw directory path is given with -q at command line, sort OR don't sort data.
+    # IF a local raw directory path is provided, sort data.
     if dir:
-        if sort:
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objectDateGratingList, skyframelist, telskyframelist, obsidDateList, sciImageList = makeSortFiles(dir)
-            objDirList, scienceDirectoryList, telluricDirectoryList = sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir)
-            calibrationDirectoryList = sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, dir)
-            # If a telluric correction will be performed sort the science and telluric images based on time between observations.
-            # This will NOT be executed if -t False is specified at command line.
-            if tel:
-                sortTels(telluricDirectoryList, scienceDirectoryList)
-        # IF NO sort, create lists of paths to data directories.
-        # This will ONLY be executed IF -q <path to raw image files> AND -s False are specified at command line.
-        elif not sort:
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objectDateGratingList, skyframelist, telskyframelist, obsidDateList, sciImageList = makeSortFiles(dir)
-            scienceDirectoryList, calDirList, telDirList = getPaths(allfilelist, objectDateGratingList, sciImageList, dir)
-
-
+        if debug:
+            a = raw_input("About to enter makePythonLists().")
+        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objectDateGratingList, skyframelist, telskyframelist, obsidDateList, sciImageList = makePythonLists(dir)
+        if debug:
+            a = raw_input("About to enter sortScienceAndTelluric().")
+        objDirList, scienceDirectoryList, telluricDirectoryList = sortScienceAndTelluric(allfilelist, skyframelist, telskyframelist, sciImageList, dir)
+        if debug:
+            a = raw_input("About to enter sortCalibrations().")
+        calibrationDirectoryList = sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, dir)
+        # If a telluric correction will be performed sort the science and telluric images based on time between observations.
+        # This will NOT be executed if -t False is specified at command line.
+        if tel:
+            if debug:
+                a = raw_input("About to enter matchTels().")
+            matchTels(telluricDirectoryList, scienceDirectoryList)
 
     ############################################################################
     ############################################################################
@@ -150,7 +140,7 @@ def start(dir, tel, sort, over, copy, program, date):
             logging.info("#####################################################################\n")
             raise SystemExit
         else:
-            gemini_sort.start(tel, sort, over, copy, program, date)
+            gemini_sort.start(tel, over, copy, program, date)
 
 
 
@@ -189,9 +179,10 @@ def start(dir, tel, sort, over, copy, program, date):
 ##################################################################################################################
 
 
-def makeSortFiles(dir):
+def makePythonLists(dir):
 
-    """Creates lists of file names necessary for sorting the files into the proper directories."""
+    """Creates python lists of file names by type. No directories are created and no
+    files are copied in this step."""
 
     allfilelist = [] # List of tellurics, science frames, aquisitions... But not calibrations!
     flatlist = [] # List of lamps on flat frames.
@@ -385,7 +376,7 @@ def makeSortFiles(dir):
 
 #----------------------------------------------------------------------------------------#
 
-def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
+def sortScienceAndTelluric(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
 
     """Sorts the science frames, tellurics and acquisitions into the appropriate directories based on date, grating, obsid, obsclass.
     """
@@ -394,17 +385,17 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
     number_files_to_be_copied = len(allfilelist)
 
     # Initialize a counter to track how many files were copied. If this is different than
-    # number_files_to_be_copied logging.info("a warning for the user at the end of sortObs.")
+    # number_files_to_be_copied logging.info("a warning for the user at the end of sortScienceAndTelluric.")
     number_files_that_were_copied = 0
 
     logging.info("\n\nMaking new directories and copying files. In this step I will process " + str(number_files_to_be_copied) + " files.")
 
     # List of paths sorted by object and date. ['path/to/object1/date1', 'path/to/object1/date2'].
     objDirList = []
-    # Create a 2D list obsDirList. Second part is a path to a science directory.
+    # Create a 2D list scienceDirList. Second part is a path to a science directory.
     # First part is a list of calculated times of each frame in that science directory.
     # Eg: [[[5400,6500,7200], '/path/to/first/science'], [[3400,4300,5200], '/path/to/second/science']...]
-    obsDirList = []
+    scienceDirList = []
     # List of paths to telluric directories.
     telDirList = []
 
@@ -468,22 +459,22 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
             # Create a directory for each obsid (eg. obs25) in objDir/YYYYMMDD/grating/.
             if not os.path.exists(objDir+'/'+date+'/'+grat+'/obs'+obsid):
                 os.mkdir(objDir+'/'+date+'/'+grat+'/obs'+obsid)
-                # If a new directory append time of science (or sky) frame and directory name to obsDirList.
-                obsDirList.append([[time], objDir+'/'+date+'/'+grat+'/obs'+obsid])
-            # Else if a new list or not a duplicate of the previous entry append time and directory name to obsDirList.
-            elif not obsDirList or not obsDirList[-1][1]==objDir+'/'+date+'/'+grat+'/obs'+obsid:
-                obsDirList.append([[time], objDir+'/'+date+'/'+grat+'/obs'+obsid])
+                # If a new directory append time of science (or sky) frame and directory name to scienceDirList.
+                scienceDirList.append([[time], objDir+'/'+date+'/'+grat+'/obs'+obsid])
+            # Else if a new list or not a duplicate of the previous entry append time and directory name to scienceDirList.
+            elif not scienceDirList or not scienceDirList[-1][1]==objDir+'/'+date+'/'+grat+'/obs'+obsid:
+                scienceDirList.append([[time], objDir+'/'+date+'/'+grat+'/obs'+obsid])
             # IF A DUPLICATE:
             # Append the time to an existing time list.
             #
             # Eg, before appending: [[[5400,6500,7200], '/path/to/first/science'], [[5200], '/path/to/second/science']]
-            # If we are processing the second frame in /path/to/second/science/, obsDirList[-1][1] will equal /path/to/second/science.
+            # If we are processing the second frame in /path/to/second/science/, scienceDirList[-1][1] will equal /path/to/second/science.
             # Then append the new time to the second entry.
             #
             # [[[5400,6500,7200], '/path/to/first/science'], [[5200, NEWTIMEHERE], '/path/to/second/science']]
 
-            elif obsDirList[-1][1] == objDir+'/'+date+'/'+grat+'/obs'+obsid:
-                obsDirList[-1][0].append(time)
+            elif scienceDirList[-1][1] == objDir+'/'+date+'/'+grat+'/obs'+obsid:
+                scienceDirList[-1][0].append(time)
 
 
     # Copy science and acquisition frames to the appropriate directory.
@@ -552,19 +543,19 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
         if obsclass=='partnerCal':
             logging.info(allfilelist[i][0])
             timeList = []
-            for k in range(len(obsDirList)):
+            for k in range(len(scienceDirList)):
                 # Make sure date and gratings match.
-                tempDir = obsDirList[k][1].split(os.sep)
+                tempDir = scienceDirList[k][1].split(os.sep)
                 if date in tempDir and grat in tempDir:
                     # Open the times of all science frames in science_directory.
-                    times = obsDirList[k][0]
+                    times = scienceDirList[k][0]
                     # Find difference in each time from the telluric frame we're trying to sort.
                     diffList = []
                     for b in range(len(times)):
-                        difference = abs(telluric_time-obsDirList[k][0][b])
+                        difference = abs(telluric_time-scienceDirList[k][0][b])
                         templist = []
                         templist.append(difference)
-                        templist.append(obsDirList[k][1])
+                        templist.append(scienceDirList[k][1])
                         diffList.append(templist)
                     # Find the science frame with the smallest difference.
                     minDiff = min(diffList)
@@ -597,11 +588,11 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
                 if allfilelist[i][0] in telskyframelist:
                     writeList(allfilelist[i][0], 'skyframelist', path_to_tellurics+'/Tellurics/obs'+obsid+'/')
 
-    # Modify obsDirList to a format telSort can use.
+    # Modify scienceDirList to a format telSort can use.
     tempList = []
-    for i in range(len(obsDirList)):
-        tempList.append(obsDirList[i][1])
-    obsDirList = tempList
+    for i in range(len(scienceDirList)):
+        tempList.append(scienceDirList[i][1])
+    scienceDirList = tempList
 
     #------------------------------ TESTS -------------------------------------#
 
@@ -617,7 +608,7 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
     count_from_raw_files = len(sciImageList)
 
     count = 0
-    for science_directory in obsDirList:
+    for science_directory in scienceDirList:
         for file in os.listdir(science_directory):
             if file.endswith('.fits'):
                 count += 1
@@ -632,13 +623,13 @@ def sortObs(allfilelist, skyframelist, telskyframelist, sciImageList, dir):
 
     os.chdir(path)
 
-    return objDirList, obsDirList, telDirList
+    return objDirList, scienceDirList, telDirList
 
 #----------------------------------------------------------------------------------------#
 
-def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, dir):
+def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, dir):
 
-    """Sort calibrations into the appropriate directory based on date.
+    """Sort calibrations into appropriate directories based on date.
     """
     calDirList = []
     filelist = ['arclist', 'arcdarklist', 'flatlist', 'ronchilist', 'flatdarklist']
@@ -833,13 +824,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDat
             logging.info(str(flatlist[i][0])+ " was not copied.")
 
 
-
-
-
     # ---------------------------- Tests ------------------------------------- #
-
-
-
 
     # Check to see how many calibrations were copied.
     if expected_count - count == 0:
@@ -1038,7 +1023,7 @@ def sortCals(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDat
 
 #----------------------------------------------------------------------------------------#
 
-def sortTels(telDirList, obsDirList):
+def matchTels(telDirList, obsDirList):
 
     """Matches science images with the telluric frames that are closest in time.
     Creates a file in each telluric observation directory called scienceMatchedTellsList.
