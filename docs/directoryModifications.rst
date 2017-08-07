@@ -21,9 +21,9 @@ Table of Contents
 
 - nifsBaselineCalibration_
 
-- `nifsReduce(Tellurics)<nifsReduceTelluric>`_
+- `nifsReduce(Tellurics)<nifsReduceTelluric_>`__
 
-- `nifsReduce(Science)<nifsReduceScience>`_
+- `nifsReduce(Science)<nifsReduceScience_>`__
 
 Contents of user_options.json:
 
