@@ -17,10 +17,13 @@ Add the following line to your ~/.bash_profile to create the **niftree** alias:
 Table of Contents
 -----------------
 
-nifsSort_
-nifsBaselineCalibration_
-`nifsReduce(Tellurics)<nifsReduceTelluric>`_
-`nifsReduce(Science)<nifsReduceScience>`_
+- nifsSort_
+
+- nifsBaselineCalibration_
+
+- `nifsReduce(Tellurics)<nifsReduceTelluric>`_
+
+- `nifsReduce(Science)<nifsReduceScience>`_
 
 Contents of user_options.json:
 
