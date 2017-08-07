@@ -120,9 +120,9 @@ def launch():
     # Check if the user specified at command line to repeat the last Reduction or do a full default data reduction.
     if not repeat and not fullReduction:
         fullReduction = getParam(
-                    "Do a full data reduction with default parameters loaded from runtimeData/default_input.json? [no]: ",
+                    "Do a full data reduction with default parameters loaded from \nruntimeData/default_input.json? [no]: ",
                     False,
-                    "Type yes to start Nifty with data reduction input parameters loaded from runtimeData/default_input.json file."
+                    "Type yes to start Nifty with data reduction input parameters \nloaded from runtimeData/default_input.json file."
         )
         if fullReduction == False:
             # "Select in". User has to turn individual steps on.
