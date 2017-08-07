@@ -21,11 +21,11 @@ Table of Contents
 
 - nifsBaselineCalibration_
 
-- `nifsReduce(Tellurics)<nifsReduceTelluric_>`__
+- nifsReduceTelluric_
 
-- `nifsReduce(Science)<nifsReduceScience_>`__
+- nifsReduceScience_
 
-Contents of user_options.json:
+Contents of user_options.json if you would like to reproduce this experiment:
 
 .. code-block:: text
 
@@ -1095,11 +1095,1159 @@ After Step 3: Wavelength Solution
     | |____hk.txt
     | |____nftelluric_modified.cl
 
+After Step 4: Spatial Distortion
+--------------------------------
+
+.. code-block:: text
+
+    .
+    |____.DS_Store
+    |____.gitignore
+    |____docs
+    | |____directoryModifications.rst
+    | |____example_calibrationDirectoryList.txt
+    | |____example_scienceDirectoryList.txt
+    | |____example_telluricDirectoryList.txt
+    | |____faq.rst
+    | |____hline_removal.rst
+    | |____maintenance.rst
+    | |____nifs_pipeline_june_2015.pdf
+    |____extras
+    | |____gemini_sort.py
+    | |____MANIFEST.in
+    | |____old_merge.py
+    | |____setup.py
+    | |____spec-file-osx-64.txt
+    |____HD141004
+    | |____20100401
+    | | |____Calibrations_K
+    | | | |____arcdarkfile
+    | | | |____arcdarklist
+    | | | |____arclist
+    | | | |____database
+    | | | | |____idrgnN20100410S0375_SCI_10_
+    | | | | |____idrgnN20100410S0375_SCI_11_
+    | | | | |____idrgnN20100410S0375_SCI_12_
+    | | | | |____idrgnN20100410S0375_SCI_13_
+    | | | | |____idrgnN20100410S0375_SCI_14_
+    | | | | |____idrgnN20100410S0375_SCI_15_
+    | | | | |____idrgnN20100410S0375_SCI_16_
+    | | | | |____idrgnN20100410S0375_SCI_17_
+    | | | | |____idrgnN20100410S0375_SCI_18_
+    | | | | |____idrgnN20100410S0375_SCI_19_
+    | | | | |____idrgnN20100410S0375_SCI_1_
+    | | | | |____idrgnN20100410S0375_SCI_20_
+    | | | | |____idrgnN20100410S0375_SCI_21_
+    | | | | |____idrgnN20100410S0375_SCI_22_
+    | | | | |____idrgnN20100410S0375_SCI_23_
+    | | | | |____idrgnN20100410S0375_SCI_24_
+    | | | | |____idrgnN20100410S0375_SCI_25_
+    | | | | |____idrgnN20100410S0375_SCI_26_
+    | | | | |____idrgnN20100410S0375_SCI_27_
+    | | | | |____idrgnN20100410S0375_SCI_28_
+    | | | | |____idrgnN20100410S0375_SCI_29_
+    | | | | |____idrgnN20100410S0375_SCI_2_
+    | | | | |____idrgnN20100410S0375_SCI_3_
+    | | | | |____idrgnN20100410S0375_SCI_4_
+    | | | | |____idrgnN20100410S0375_SCI_5_
+    | | | | |____idrgnN20100410S0375_SCI_6_
+    | | | | |____idrgnN20100410S0375_SCI_7_
+    | | | | |____idrgnN20100410S0375_SCI_8_
+    | | | | |____idrgnN20100410S0375_SCI_9_
+    | | | | |____idwrgnN20100401S0137_SCI_10_
+    | | | | |____idwrgnN20100401S0137_SCI_11_
+    | | | | |____idwrgnN20100401S0137_SCI_12_
+    | | | | |____idwrgnN20100401S0137_SCI_13_
+    | | | | |____idwrgnN20100401S0137_SCI_14_
+    | | | | |____idwrgnN20100401S0137_SCI_15_
+    | | | | |____idwrgnN20100401S0137_SCI_16_
+    | | | | |____idwrgnN20100401S0137_SCI_17_
+    | | | | |____idwrgnN20100401S0137_SCI_18_
+    | | | | |____idwrgnN20100401S0137_SCI_19_
+    | | | | |____idwrgnN20100401S0137_SCI_1_
+    | | | | |____idwrgnN20100401S0137_SCI_20_
+    | | | | |____idwrgnN20100401S0137_SCI_21_
+    | | | | |____idwrgnN20100401S0137_SCI_22_
+    | | | | |____idwrgnN20100401S0137_SCI_23_
+    | | | | |____idwrgnN20100401S0137_SCI_24_
+    | | | | |____idwrgnN20100401S0137_SCI_25_
+    | | | | |____idwrgnN20100401S0137_SCI_26_
+    | | | | |____idwrgnN20100401S0137_SCI_27_
+    | | | | |____idwrgnN20100401S0137_SCI_28_
+    | | | | |____idwrgnN20100401S0137_SCI_29_
+    | | | | |____idwrgnN20100401S0137_SCI_2_
+    | | | | |____idwrgnN20100401S0137_SCI_3_
+    | | | | |____idwrgnN20100401S0137_SCI_4_
+    | | | | |____idwrgnN20100401S0137_SCI_5_
+    | | | | |____idwrgnN20100401S0137_SCI_6_
+    | | | | |____idwrgnN20100401S0137_SCI_7_
+    | | | | |____idwrgnN20100401S0137_SCI_8_
+    | | | | |____idwrgnN20100401S0137_SCI_9_
+    | | | |____flatdarklist
+    | | | |____flatfile
+    | | | |____flatlist
+    | | | |____gnN20100401S0137.fits
+    | | | |____gnN20100410S0362.fits
+    | | | |____gnN20100410S0368.fits
+    | | | |____gnN20100410S0373.fits
+    | | | |____gnN20100410S0375.fits
+    | | | |____N20100401S0137.fits
+    | | | |____N20100401S0181.fits
+    | | | |____N20100410S0362.fits
+    | | | |____N20100410S0363.fits
+    | | | |____N20100410S0364.fits
+    | | | |____N20100410S0365.fits
+    | | | |____N20100410S0366.fits
+    | | | |____N20100410S0367.fits
+    | | | |____N20100410S0368.fits
+    | | | |____N20100410S0369.fits
+    | | | |____N20100410S0370.fits
+    | | | |____N20100410S0371.fits
+    | | | |____N20100410S0372.fits
+    | | | |____N20100410S0373.fits
+    | | | |____N20100410S0374.fits
+    | | | |____N20100410S0375.fits
+    | | | |____N20100410S0376.fits
+    | | | |____nN20100401S0137.fits
+    | | | |____nN20100401S0181.fits
+    | | | |____nN20100410S0362.fits
+    | | | |____nN20100410S0363.fits
+    | | | |____nN20100410S0364.fits
+    | | | |____nN20100410S0365.fits
+    | | | |____nN20100410S0366.fits
+    | | | |____nN20100410S0367.fits
+    | | | |____nN20100410S0368.fits
+    | | | |____nN20100410S0369.fits
+    | | | |____nN20100410S0370.fits
+    | | | |____nN20100410S0371.fits
+    | | | |____nN20100410S0372.fits
+    | | | |____nN20100410S0373.fits
+    | | | |____nN20100410S0374.fits
+    | | | |____nN20100410S0375.fits
+    | | | |____nN20100410S0376.fits
+    | | | |____rgnN20100401S0137.fits
+    | | | |____rgnN20100410S0362.fits
+    | | | |____rgnN20100410S0362_flat.fits
+    | | | |____rgnN20100410S0362_sflat.fits
+    | | | |____rgnN20100410S0362_sflat_bpm.pl
+    | | | |____rgnN20100410S0368.fits
+    | | | |____rgnN20100410S0368_dark.fits
+    | | | |____rgnN20100410S0375.fits
+    | | | |____ronchifile
+    | | | |____ronchilist
+    | | | |____sflat_bpmfile
+    | | | |____sflatfile
+    | | | |____shiftfile
+    | | | |____sN20100410S0362.fits
+    | | | |____wrgnN20100401S0137.fits
+    | | |____K
+    | | | |____obs107
+    | | | | |____N20100401S0182.fits
+    | | | | |____N20100401S0183.fits
+    | | | | |____N20100401S0184.fits
+    | | | | |____N20100401S0185.fits
+    | | | | |____N20100401S0186.fits
+    | | | | |____N20100401S0187.fits
+    | | | | |____N20100401S0188.fits
+    | | | | |____N20100401S0189.fits
+    | | | | |____N20100401S0190.fits
+    | | | | |____scienceFrameList
+    | | | | |____skyframelist
+    | | | |____Tellurics
+    | | | | |____obs109
+    | | | | | |____N20100401S0138.fits
+    | | | | | |____N20100401S0139.fits
+    | | | | | |____N20100401S0140.fits
+    | | | | | |____N20100401S0141.fits
+    | | | | | |____N20100401S0142.fits
+    | | | | | |____N20100401S0143.fits
+    | | | | | |____N20100401S0144.fits
+    | | | | | |____N20100401S0145.fits
+    | | | | | |____N20100401S0146.fits
+    | | | | | |____scienceMatchedTellsList
+    | | | | | |____skyframelist
+    | | | | | |____tellist
+    |____LICENSE
+    |____nifsBaselineCalibration.py
+    |____nifsBaselineCalibration.pyc
+    |____nifsDefs.py
+    |____nifsDefs.pyc
+    |____nifsMerge.py
+    |____nifsMerge.pyc
+    |____nifsReduce.py
+    |____nifsReduce.pyc
+    |____nifsSort.py
+    |____nifsSort.pyc
+    |____Nifty.log
+    |____Nifty.py
+    |____README.rst
+    |____recipes
+    |____runtimeData
+    | |____calibrationDirectoryList.txt
+    | |____default_input.json
+    | |____h_test_one_argon.dat
+    | |____j_test_one_argon.dat
+    | |____k_test_two_argon.dat
+    | |____new_starstemp.txt
+    | |____scienceDirectoryList.txt
+    | |____telluricDirectoryList.txt
+    | |____user_options.json
+    | |____vega_ext.fits
+    |____unitTests
+    | |____generate_response_curve.py
+    | |____hk.txt
+    | |____nftelluric_modified.cl
+
+After nifsBaselineCalibration
+-----------------------------
+
+No new files were created since the end of Step 4: Spatial Distortion.
+
+.. code-block:: text
+
+    .
+    |____.DS_Store
+    |____.gitignore
+    |____docs
+    | |____directoryModifications.rst
+    | |____example_calibrationDirectoryList.txt
+    | |____example_scienceDirectoryList.txt
+    | |____example_telluricDirectoryList.txt
+    | |____faq.rst
+    | |____hline_removal.rst
+    | |____maintenance.rst
+    | |____nifs_pipeline_june_2015.pdf
+    |____extras
+    | |____gemini_sort.py
+    | |____MANIFEST.in
+    | |____old_merge.py
+    | |____setup.py
+    | |____spec-file-osx-64.txt
+    |____HD141004
+    | |____20100401
+    | | |____Calibrations_K
+    | | | |____arcdarkfile
+    | | | |____arcdarklist
+    | | | |____arclist
+    | | | |____database
+    | | | | |____idrgnN20100410S0375_SCI_10_
+    | | | | |____idrgnN20100410S0375_SCI_11_
+    | | | | |____idrgnN20100410S0375_SCI_12_
+    | | | | |____idrgnN20100410S0375_SCI_13_
+    | | | | |____idrgnN20100410S0375_SCI_14_
+    | | | | |____idrgnN20100410S0375_SCI_15_
+    | | | | |____idrgnN20100410S0375_SCI_16_
+    | | | | |____idrgnN20100410S0375_SCI_17_
+    | | | | |____idrgnN20100410S0375_SCI_18_
+    | | | | |____idrgnN20100410S0375_SCI_19_
+    | | | | |____idrgnN20100410S0375_SCI_1_
+    | | | | |____idrgnN20100410S0375_SCI_20_
+    | | | | |____idrgnN20100410S0375_SCI_21_
+    | | | | |____idrgnN20100410S0375_SCI_22_
+    | | | | |____idrgnN20100410S0375_SCI_23_
+    | | | | |____idrgnN20100410S0375_SCI_24_
+    | | | | |____idrgnN20100410S0375_SCI_25_
+    | | | | |____idrgnN20100410S0375_SCI_26_
+    | | | | |____idrgnN20100410S0375_SCI_27_
+    | | | | |____idrgnN20100410S0375_SCI_28_
+    | | | | |____idrgnN20100410S0375_SCI_29_
+    | | | | |____idrgnN20100410S0375_SCI_2_
+    | | | | |____idrgnN20100410S0375_SCI_3_
+    | | | | |____idrgnN20100410S0375_SCI_4_
+    | | | | |____idrgnN20100410S0375_SCI_5_
+    | | | | |____idrgnN20100410S0375_SCI_6_
+    | | | | |____idrgnN20100410S0375_SCI_7_
+    | | | | |____idrgnN20100410S0375_SCI_8_
+    | | | | |____idrgnN20100410S0375_SCI_9_
+    | | | | |____idwrgnN20100401S0137_SCI_10_
+    | | | | |____idwrgnN20100401S0137_SCI_11_
+    | | | | |____idwrgnN20100401S0137_SCI_12_
+    | | | | |____idwrgnN20100401S0137_SCI_13_
+    | | | | |____idwrgnN20100401S0137_SCI_14_
+    | | | | |____idwrgnN20100401S0137_SCI_15_
+    | | | | |____idwrgnN20100401S0137_SCI_16_
+    | | | | |____idwrgnN20100401S0137_SCI_17_
+    | | | | |____idwrgnN20100401S0137_SCI_18_
+    | | | | |____idwrgnN20100401S0137_SCI_19_
+    | | | | |____idwrgnN20100401S0137_SCI_1_
+    | | | | |____idwrgnN20100401S0137_SCI_20_
+    | | | | |____idwrgnN20100401S0137_SCI_21_
+    | | | | |____idwrgnN20100401S0137_SCI_22_
+    | | | | |____idwrgnN20100401S0137_SCI_23_
+    | | | | |____idwrgnN20100401S0137_SCI_24_
+    | | | | |____idwrgnN20100401S0137_SCI_25_
+    | | | | |____idwrgnN20100401S0137_SCI_26_
+    | | | | |____idwrgnN20100401S0137_SCI_27_
+    | | | | |____idwrgnN20100401S0137_SCI_28_
+    | | | | |____idwrgnN20100401S0137_SCI_29_
+    | | | | |____idwrgnN20100401S0137_SCI_2_
+    | | | | |____idwrgnN20100401S0137_SCI_3_
+    | | | | |____idwrgnN20100401S0137_SCI_4_
+    | | | | |____idwrgnN20100401S0137_SCI_5_
+    | | | | |____idwrgnN20100401S0137_SCI_6_
+    | | | | |____idwrgnN20100401S0137_SCI_7_
+    | | | | |____idwrgnN20100401S0137_SCI_8_
+    | | | | |____idwrgnN20100401S0137_SCI_9_
+    | | | |____flatdarklist
+    | | | |____flatfile
+    | | | |____flatlist
+    | | | |____gnN20100401S0137.fits
+    | | | |____gnN20100410S0362.fits
+    | | | |____gnN20100410S0368.fits
+    | | | |____gnN20100410S0373.fits
+    | | | |____gnN20100410S0375.fits
+    | | | |____N20100401S0137.fits
+    | | | |____N20100401S0181.fits
+    | | | |____N20100410S0362.fits
+    | | | |____N20100410S0363.fits
+    | | | |____N20100410S0364.fits
+    | | | |____N20100410S0365.fits
+    | | | |____N20100410S0366.fits
+    | | | |____N20100410S0367.fits
+    | | | |____N20100410S0368.fits
+    | | | |____N20100410S0369.fits
+    | | | |____N20100410S0370.fits
+    | | | |____N20100410S0371.fits
+    | | | |____N20100410S0372.fits
+    | | | |____N20100410S0373.fits
+    | | | |____N20100410S0374.fits
+    | | | |____N20100410S0375.fits
+    | | | |____N20100410S0376.fits
+    | | | |____nN20100401S0137.fits
+    | | | |____nN20100401S0181.fits
+    | | | |____nN20100410S0362.fits
+    | | | |____nN20100410S0363.fits
+    | | | |____nN20100410S0364.fits
+    | | | |____nN20100410S0365.fits
+    | | | |____nN20100410S0366.fits
+    | | | |____nN20100410S0367.fits
+    | | | |____nN20100410S0368.fits
+    | | | |____nN20100410S0369.fits
+    | | | |____nN20100410S0370.fits
+    | | | |____nN20100410S0371.fits
+    | | | |____nN20100410S0372.fits
+    | | | |____nN20100410S0373.fits
+    | | | |____nN20100410S0374.fits
+    | | | |____nN20100410S0375.fits
+    | | | |____nN20100410S0376.fits
+    | | | |____rgnN20100401S0137.fits
+    | | | |____rgnN20100410S0362.fits
+    | | | |____rgnN20100410S0362_flat.fits
+    | | | |____rgnN20100410S0362_sflat.fits
+    | | | |____rgnN20100410S0362_sflat_bpm.pl
+    | | | |____rgnN20100410S0368.fits
+    | | | |____rgnN20100410S0368_dark.fits
+    | | | |____rgnN20100410S0375.fits
+    | | | |____ronchifile
+    | | | |____ronchilist
+    | | | |____sflat_bpmfile
+    | | | |____sflatfile
+    | | | |____shiftfile
+    | | | |____sN20100410S0362.fits
+    | | | |____wrgnN20100401S0137.fits
+    | | |____K
+    | | | |____obs107
+    | | | | |____N20100401S0182.fits
+    | | | | |____N20100401S0183.fits
+    | | | | |____N20100401S0184.fits
+    | | | | |____N20100401S0185.fits
+    | | | | |____N20100401S0186.fits
+    | | | | |____N20100401S0187.fits
+    | | | | |____N20100401S0188.fits
+    | | | | |____N20100401S0189.fits
+    | | | | |____N20100401S0190.fits
+    | | | | |____scienceFrameList
+    | | | | |____skyframelist
+    | | | |____Tellurics
+    | | | | |____obs109
+    | | | | | |____N20100401S0138.fits
+    | | | | | |____N20100401S0139.fits
+    | | | | | |____N20100401S0140.fits
+    | | | | | |____N20100401S0141.fits
+    | | | | | |____N20100401S0142.fits
+    | | | | | |____N20100401S0143.fits
+    | | | | | |____N20100401S0144.fits
+    | | | | | |____N20100401S0145.fits
+    | | | | | |____N20100401S0146.fits
+    | | | | | |____scienceMatchedTellsList
+    | | | | | |____skyframelist
+    | | | | | |____tellist
+    |____LICENSE
+    |____nifsBaselineCalibration.py
+    |____nifsBaselineCalibration.pyc
+    |____nifsDefs.py
+    |____nifsDefs.pyc
+    |____nifsMerge.py
+    |____nifsMerge.pyc
+    |____nifsReduce.py
+    |____nifsReduce.pyc
+    |____nifsSort.py
+    |____nifsSort.pyc
+    |____Nifty.log
+    |____Nifty.py
+    |____README.rst
+    |____recipes
+    |____runtimeData
+    | |____calibrationDirectoryList.txt
+    | |____default_input.json
+    | |____h_test_one_argon.dat
+    | |____j_test_one_argon.dat
+    | |____k_test_two_argon.dat
+    | |____new_starstemp.txt
+    | |____scienceDirectoryList.txt
+    | |____telluricDirectoryList.txt
+    | |____user_options.json
+    | |____vega_ext.fits
+    |____unitTests
+    | |____generate_response_curve.py
+    | |____hk.txt
+    | |____nftelluric_modified.cl
+
+
 .. _nifsReduceTelluric:
 
 nifsReduce(tellurics)
 =====================
 
+Before nifsReduce
+-----------------
+
+.. code-block:: text
+
+    .
+    |____.DS_Store
+    |____.gitignore
+    |____docs
+    | |____directoryModifications.rst
+    | |____example_calibrationDirectoryList.txt
+    | |____example_scienceDirectoryList.txt
+    | |____example_telluricDirectoryList.txt
+    | |____faq.rst
+    | |____hline_removal.rst
+    | |____maintenance.rst
+    | |____nifs_pipeline_june_2015.pdf
+    |____extras
+    | |____gemini_sort.py
+    | |____MANIFEST.in
+    | |____old_merge.py
+    | |____setup.py
+    | |____spec-file-osx-64.txt
+    |____HD141004
+    | |____20100401
+    | | |____Calibrations_K
+    | | | |____arcdarkfile
+    | | | |____arcdarklist
+    | | | |____arclist
+    | | | |____database
+    | | | | |____idrgnN20100410S0375_SCI_10_
+    | | | | |____idrgnN20100410S0375_SCI_11_
+    | | | | |____idrgnN20100410S0375_SCI_12_
+    | | | | |____idrgnN20100410S0375_SCI_13_
+    | | | | |____idrgnN20100410S0375_SCI_14_
+    | | | | |____idrgnN20100410S0375_SCI_15_
+    | | | | |____idrgnN20100410S0375_SCI_16_
+    | | | | |____idrgnN20100410S0375_SCI_17_
+    | | | | |____idrgnN20100410S0375_SCI_18_
+    | | | | |____idrgnN20100410S0375_SCI_19_
+    | | | | |____idrgnN20100410S0375_SCI_1_
+    | | | | |____idrgnN20100410S0375_SCI_20_
+    | | | | |____idrgnN20100410S0375_SCI_21_
+    | | | | |____idrgnN20100410S0375_SCI_22_
+    | | | | |____idrgnN20100410S0375_SCI_23_
+    | | | | |____idrgnN20100410S0375_SCI_24_
+    | | | | |____idrgnN20100410S0375_SCI_25_
+    | | | | |____idrgnN20100410S0375_SCI_26_
+    | | | | |____idrgnN20100410S0375_SCI_27_
+    | | | | |____idrgnN20100410S0375_SCI_28_
+    | | | | |____idrgnN20100410S0375_SCI_29_
+    | | | | |____idrgnN20100410S0375_SCI_2_
+    | | | | |____idrgnN20100410S0375_SCI_3_
+    | | | | |____idrgnN20100410S0375_SCI_4_
+    | | | | |____idrgnN20100410S0375_SCI_5_
+    | | | | |____idrgnN20100410S0375_SCI_6_
+    | | | | |____idrgnN20100410S0375_SCI_7_
+    | | | | |____idrgnN20100410S0375_SCI_8_
+    | | | | |____idrgnN20100410S0375_SCI_9_
+    | | | | |____idwrgnN20100401S0137_SCI_10_
+    | | | | |____idwrgnN20100401S0137_SCI_11_
+    | | | | |____idwrgnN20100401S0137_SCI_12_
+    | | | | |____idwrgnN20100401S0137_SCI_13_
+    | | | | |____idwrgnN20100401S0137_SCI_14_
+    | | | | |____idwrgnN20100401S0137_SCI_15_
+    | | | | |____idwrgnN20100401S0137_SCI_16_
+    | | | | |____idwrgnN20100401S0137_SCI_17_
+    | | | | |____idwrgnN20100401S0137_SCI_18_
+    | | | | |____idwrgnN20100401S0137_SCI_19_
+    | | | | |____idwrgnN20100401S0137_SCI_1_
+    | | | | |____idwrgnN20100401S0137_SCI_20_
+    | | | | |____idwrgnN20100401S0137_SCI_21_
+    | | | | |____idwrgnN20100401S0137_SCI_22_
+    | | | | |____idwrgnN20100401S0137_SCI_23_
+    | | | | |____idwrgnN20100401S0137_SCI_24_
+    | | | | |____idwrgnN20100401S0137_SCI_25_
+    | | | | |____idwrgnN20100401S0137_SCI_26_
+    | | | | |____idwrgnN20100401S0137_SCI_27_
+    | | | | |____idwrgnN20100401S0137_SCI_28_
+    | | | | |____idwrgnN20100401S0137_SCI_29_
+    | | | | |____idwrgnN20100401S0137_SCI_2_
+    | | | | |____idwrgnN20100401S0137_SCI_3_
+    | | | | |____idwrgnN20100401S0137_SCI_4_
+    | | | | |____idwrgnN20100401S0137_SCI_5_
+    | | | | |____idwrgnN20100401S0137_SCI_6_
+    | | | | |____idwrgnN20100401S0137_SCI_7_
+    | | | | |____idwrgnN20100401S0137_SCI_8_
+    | | | | |____idwrgnN20100401S0137_SCI_9_
+    | | | |____flatdarklist
+    | | | |____flatfile
+    | | | |____flatlist
+    | | | |____gnN20100401S0137.fits
+    | | | |____gnN20100410S0362.fits
+    | | | |____gnN20100410S0368.fits
+    | | | |____gnN20100410S0373.fits
+    | | | |____gnN20100410S0375.fits
+    | | | |____N20100401S0137.fits
+    | | | |____N20100401S0181.fits
+    | | | |____N20100410S0362.fits
+    | | | |____N20100410S0363.fits
+    | | | |____N20100410S0364.fits
+    | | | |____N20100410S0365.fits
+    | | | |____N20100410S0366.fits
+    | | | |____N20100410S0367.fits
+    | | | |____N20100410S0368.fits
+    | | | |____N20100410S0369.fits
+    | | | |____N20100410S0370.fits
+    | | | |____N20100410S0371.fits
+    | | | |____N20100410S0372.fits
+    | | | |____N20100410S0373.fits
+    | | | |____N20100410S0374.fits
+    | | | |____N20100410S0375.fits
+    | | | |____N20100410S0376.fits
+    | | | |____nN20100401S0137.fits
+    | | | |____nN20100401S0181.fits
+    | | | |____nN20100410S0362.fits
+    | | | |____nN20100410S0363.fits
+    | | | |____nN20100410S0364.fits
+    | | | |____nN20100410S0365.fits
+    | | | |____nN20100410S0366.fits
+    | | | |____nN20100410S0367.fits
+    | | | |____nN20100410S0368.fits
+    | | | |____nN20100410S0369.fits
+    | | | |____nN20100410S0370.fits
+    | | | |____nN20100410S0371.fits
+    | | | |____nN20100410S0372.fits
+    | | | |____nN20100410S0373.fits
+    | | | |____nN20100410S0374.fits
+    | | | |____nN20100410S0375.fits
+    | | | |____nN20100410S0376.fits
+    | | | |____rgnN20100401S0137.fits
+    | | | |____rgnN20100410S0362.fits
+    | | | |____rgnN20100410S0362_flat.fits
+    | | | |____rgnN20100410S0362_sflat.fits
+    | | | |____rgnN20100410S0362_sflat_bpm.pl
+    | | | |____rgnN20100410S0368.fits
+    | | | |____rgnN20100410S0368_dark.fits
+    | | | |____rgnN20100410S0375.fits
+    | | | |____ronchifile
+    | | | |____ronchilist
+    | | | |____sflat_bpmfile
+    | | | |____sflatfile
+    | | | |____shiftfile
+    | | | |____sN20100410S0362.fits
+    | | | |____wrgnN20100401S0137.fits
+    | | |____K
+    | | | |____obs107
+    | | | | |____N20100401S0182.fits
+    | | | | |____N20100401S0183.fits
+    | | | | |____N20100401S0184.fits
+    | | | | |____N20100401S0185.fits
+    | | | | |____N20100401S0186.fits
+    | | | | |____N20100401S0187.fits
+    | | | | |____N20100401S0188.fits
+    | | | | |____N20100401S0189.fits
+    | | | | |____N20100401S0190.fits
+    | | | | |____scienceFrameList
+    | | | | |____skyframelist
+    | | | |____Tellurics
+    | | | | |____obs109
+    | | | | | |____N20100401S0138.fits
+    | | | | | |____N20100401S0139.fits
+    | | | | | |____N20100401S0140.fits
+    | | | | | |____N20100401S0141.fits
+    | | | | | |____N20100401S0142.fits
+    | | | | | |____N20100401S0143.fits
+    | | | | | |____N20100401S0144.fits
+    | | | | | |____N20100401S0145.fits
+    | | | | | |____N20100401S0146.fits
+    | | | | | |____scienceMatchedTellsList
+    | | | | | |____skyframelist
+    | | | | | |____tellist
+    |____LICENSE
+    |____nifsBaselineCalibration.py
+    |____nifsBaselineCalibration.pyc
+    |____nifsDefs.py
+    |____nifsDefs.pyc
+    |____nifsMerge.py
+    |____nifsMerge.pyc
+    |____nifsReduce.py
+    |____nifsReduce.pyc
+    |____nifsSort.py
+    |____nifsSort.pyc
+    |____Nifty.log
+    |____Nifty.py
+    |____README.rst
+    |____recipes
+    |____runtimeData
+    | |____calibrationDirectoryList.txt
+    | |____default_input.json
+    | |____h_test_one_argon.dat
+    | |____j_test_one_argon.dat
+    | |____k_test_two_argon.dat
+    | |____new_starstemp.txt
+    | |____scienceDirectoryList.txt
+    | |____telluricDirectoryList.txt
+    | |____user_options.json
+    | |____vega_ext.fits
+    |____unitTests
+    | |____generate_response_curve.py
+    | |____hk.txt
+    | |____nftelluric_modified.cl
+
+Before Step 1: Locate the Spectrum
+----------------------------------
+
+.. code-block:: text
+
+    .
+    |____.DS_Store
+    |____.gitignore
+    |____docs
+    | |____directoryModifications.rst
+    | |____example_calibrationDirectoryList.txt
+    | |____example_scienceDirectoryList.txt
+    | |____example_telluricDirectoryList.txt
+    | |____faq.rst
+    | |____hline_removal.rst
+    | |____maintenance.rst
+    | |____nifs_pipeline_june_2015.pdf
+    |____extras
+    | |____gemini_sort.py
+    | |____MANIFEST.in
+    | |____old_merge.py
+    | |____setup.py
+    | |____spec-file-osx-64.txt
+    |____HD141004
+    | |____20100401
+    | | |____Calibrations_K
+    | | | |____arcdarkfile
+    | | | |____arcdarklist
+    | | | |____arclist
+    | | | |____database
+    | | | | |____idrgnN20100410S0375_SCI_10_
+    | | | | |____idrgnN20100410S0375_SCI_11_
+    | | | | |____idrgnN20100410S0375_SCI_12_
+    | | | | |____idrgnN20100410S0375_SCI_13_
+    | | | | |____idrgnN20100410S0375_SCI_14_
+    | | | | |____idrgnN20100410S0375_SCI_15_
+    | | | | |____idrgnN20100410S0375_SCI_16_
+    | | | | |____idrgnN20100410S0375_SCI_17_
+    | | | | |____idrgnN20100410S0375_SCI_18_
+    | | | | |____idrgnN20100410S0375_SCI_19_
+    | | | | |____idrgnN20100410S0375_SCI_1_
+    | | | | |____idrgnN20100410S0375_SCI_20_
+    | | | | |____idrgnN20100410S0375_SCI_21_
+    | | | | |____idrgnN20100410S0375_SCI_22_
+    | | | | |____idrgnN20100410S0375_SCI_23_
+    | | | | |____idrgnN20100410S0375_SCI_24_
+    | | | | |____idrgnN20100410S0375_SCI_25_
+    | | | | |____idrgnN20100410S0375_SCI_26_
+    | | | | |____idrgnN20100410S0375_SCI_27_
+    | | | | |____idrgnN20100410S0375_SCI_28_
+    | | | | |____idrgnN20100410S0375_SCI_29_
+    | | | | |____idrgnN20100410S0375_SCI_2_
+    | | | | |____idrgnN20100410S0375_SCI_3_
+    | | | | |____idrgnN20100410S0375_SCI_4_
+    | | | | |____idrgnN20100410S0375_SCI_5_
+    | | | | |____idrgnN20100410S0375_SCI_6_
+    | | | | |____idrgnN20100410S0375_SCI_7_
+    | | | | |____idrgnN20100410S0375_SCI_8_
+    | | | | |____idrgnN20100410S0375_SCI_9_
+    | | | | |____idwrgnN20100401S0137_SCI_10_
+    | | | | |____idwrgnN20100401S0137_SCI_11_
+    | | | | |____idwrgnN20100401S0137_SCI_12_
+    | | | | |____idwrgnN20100401S0137_SCI_13_
+    | | | | |____idwrgnN20100401S0137_SCI_14_
+    | | | | |____idwrgnN20100401S0137_SCI_15_
+    | | | | |____idwrgnN20100401S0137_SCI_16_
+    | | | | |____idwrgnN20100401S0137_SCI_17_
+    | | | | |____idwrgnN20100401S0137_SCI_18_
+    | | | | |____idwrgnN20100401S0137_SCI_19_
+    | | | | |____idwrgnN20100401S0137_SCI_1_
+    | | | | |____idwrgnN20100401S0137_SCI_20_
+    | | | | |____idwrgnN20100401S0137_SCI_21_
+    | | | | |____idwrgnN20100401S0137_SCI_22_
+    | | | | |____idwrgnN20100401S0137_SCI_23_
+    | | | | |____idwrgnN20100401S0137_SCI_24_
+    | | | | |____idwrgnN20100401S0137_SCI_25_
+    | | | | |____idwrgnN20100401S0137_SCI_26_
+    | | | | |____idwrgnN20100401S0137_SCI_27_
+    | | | | |____idwrgnN20100401S0137_SCI_28_
+    | | | | |____idwrgnN20100401S0137_SCI_29_
+    | | | | |____idwrgnN20100401S0137_SCI_2_
+    | | | | |____idwrgnN20100401S0137_SCI_3_
+    | | | | |____idwrgnN20100401S0137_SCI_4_
+    | | | | |____idwrgnN20100401S0137_SCI_5_
+    | | | | |____idwrgnN20100401S0137_SCI_6_
+    | | | | |____idwrgnN20100401S0137_SCI_7_
+    | | | | |____idwrgnN20100401S0137_SCI_8_
+    | | | | |____idwrgnN20100401S0137_SCI_9_
+    | | | |____flatdarklist
+    | | | |____flatfile
+    | | | |____flatlist
+    | | | |____gnN20100401S0137.fits
+    | | | |____gnN20100410S0362.fits
+    | | | |____gnN20100410S0368.fits
+    | | | |____gnN20100410S0373.fits
+    | | | |____gnN20100410S0375.fits
+    | | | |____N20100401S0137.fits
+    | | | |____N20100401S0181.fits
+    | | | |____N20100410S0362.fits
+    | | | |____N20100410S0363.fits
+    | | | |____N20100410S0364.fits
+    | | | |____N20100410S0365.fits
+    | | | |____N20100410S0366.fits
+    | | | |____N20100410S0367.fits
+    | | | |____N20100410S0368.fits
+    | | | |____N20100410S0369.fits
+    | | | |____N20100410S0370.fits
+    | | | |____N20100410S0371.fits
+    | | | |____N20100410S0372.fits
+    | | | |____N20100410S0373.fits
+    | | | |____N20100410S0374.fits
+    | | | |____N20100410S0375.fits
+    | | | |____N20100410S0376.fits
+    | | | |____nN20100401S0137.fits
+    | | | |____nN20100401S0181.fits
+    | | | |____nN20100410S0362.fits
+    | | | |____nN20100410S0363.fits
+    | | | |____nN20100410S0364.fits
+    | | | |____nN20100410S0365.fits
+    | | | |____nN20100410S0366.fits
+    | | | |____nN20100410S0367.fits
+    | | | |____nN20100410S0368.fits
+    | | | |____nN20100410S0369.fits
+    | | | |____nN20100410S0370.fits
+    | | | |____nN20100410S0371.fits
+    | | | |____nN20100410S0372.fits
+    | | | |____nN20100410S0373.fits
+    | | | |____nN20100410S0374.fits
+    | | | |____nN20100410S0375.fits
+    | | | |____nN20100410S0376.fits
+    | | | |____rgnN20100401S0137.fits
+    | | | |____rgnN20100410S0362.fits
+    | | | |____rgnN20100410S0362_flat.fits
+    | | | |____rgnN20100410S0362_sflat.fits
+    | | | |____rgnN20100410S0362_sflat_bpm.pl
+    | | | |____rgnN20100410S0368.fits
+    | | | |____rgnN20100410S0368_dark.fits
+    | | | |____rgnN20100410S0375.fits
+    | | | |____ronchifile
+    | | | |____ronchilist
+    | | | |____sflat_bpmfile
+    | | | |____sflatfile
+    | | | |____shiftfile
+    | | | |____sN20100410S0362.fits
+    | | | |____wrgnN20100401S0137.fits
+    | | |____K
+    | | | |____obs107
+    | | | | |____N20100401S0182.fits
+    | | | | |____N20100401S0183.fits
+    | | | | |____N20100401S0184.fits
+    | | | | |____N20100401S0185.fits
+    | | | | |____N20100401S0186.fits
+    | | | | |____N20100401S0187.fits
+    | | | | |____N20100401S0188.fits
+    | | | | |____N20100401S0189.fits
+    | | | | |____N20100401S0190.fits
+    | | | | |____scienceFrameList
+    | | | | |____skyframelist
+    | | | |____Tellurics
+    | | | | |____obs109
+    | | | | | |____database
+    | | | | | | |____idrgnN20100410S0375_SCI_10_
+    | | | | | | |____idrgnN20100410S0375_SCI_11_
+    | | | | | | |____idrgnN20100410S0375_SCI_12_
+    | | | | | | |____idrgnN20100410S0375_SCI_13_
+    | | | | | | |____idrgnN20100410S0375_SCI_14_
+    | | | | | | |____idrgnN20100410S0375_SCI_15_
+    | | | | | | |____idrgnN20100410S0375_SCI_16_
+    | | | | | | |____idrgnN20100410S0375_SCI_17_
+    | | | | | | |____idrgnN20100410S0375_SCI_18_
+    | | | | | | |____idrgnN20100410S0375_SCI_19_
+    | | | | | | |____idrgnN20100410S0375_SCI_1_
+    | | | | | | |____idrgnN20100410S0375_SCI_20_
+    | | | | | | |____idrgnN20100410S0375_SCI_21_
+    | | | | | | |____idrgnN20100410S0375_SCI_22_
+    | | | | | | |____idrgnN20100410S0375_SCI_23_
+    | | | | | | |____idrgnN20100410S0375_SCI_24_
+    | | | | | | |____idrgnN20100410S0375_SCI_25_
+    | | | | | | |____idrgnN20100410S0375_SCI_26_
+    | | | | | | |____idrgnN20100410S0375_SCI_27_
+    | | | | | | |____idrgnN20100410S0375_SCI_28_
+    | | | | | | |____idrgnN20100410S0375_SCI_29_
+    | | | | | | |____idrgnN20100410S0375_SCI_2_
+    | | | | | | |____idrgnN20100410S0375_SCI_3_
+    | | | | | | |____idrgnN20100410S0375_SCI_4_
+    | | | | | | |____idrgnN20100410S0375_SCI_5_
+    | | | | | | |____idrgnN20100410S0375_SCI_6_
+    | | | | | | |____idrgnN20100410S0375_SCI_7_
+    | | | | | | |____idrgnN20100410S0375_SCI_8_
+    | | | | | | |____idrgnN20100410S0375_SCI_9_
+    | | | | | | |____idwrgnN20100401S0137_SCI_10_
+    | | | | | | |____idwrgnN20100401S0137_SCI_11_
+    | | | | | | |____idwrgnN20100401S0137_SCI_12_
+    | | | | | | |____idwrgnN20100401S0137_SCI_13_
+    | | | | | | |____idwrgnN20100401S0137_SCI_14_
+    | | | | | | |____idwrgnN20100401S0137_SCI_15_
+    | | | | | | |____idwrgnN20100401S0137_SCI_16_
+    | | | | | | |____idwrgnN20100401S0137_SCI_17_
+    | | | | | | |____idwrgnN20100401S0137_SCI_18_
+    | | | | | | |____idwrgnN20100401S0137_SCI_19_
+    | | | | | | |____idwrgnN20100401S0137_SCI_1_
+    | | | | | | |____idwrgnN20100401S0137_SCI_20_
+    | | | | | | |____idwrgnN20100401S0137_SCI_21_
+    | | | | | | |____idwrgnN20100401S0137_SCI_22_
+    | | | | | | |____idwrgnN20100401S0137_SCI_23_
+    | | | | | | |____idwrgnN20100401S0137_SCI_24_
+    | | | | | | |____idwrgnN20100401S0137_SCI_25_
+    | | | | | | |____idwrgnN20100401S0137_SCI_26_
+    | | | | | | |____idwrgnN20100401S0137_SCI_27_
+    | | | | | | |____idwrgnN20100401S0137_SCI_28_
+    | | | | | | |____idwrgnN20100401S0137_SCI_29_
+    | | | | | | |____idwrgnN20100401S0137_SCI_2_
+    | | | | | | |____idwrgnN20100401S0137_SCI_3_
+    | | | | | | |____idwrgnN20100401S0137_SCI_4_
+    | | | | | | |____idwrgnN20100401S0137_SCI_5_
+    | | | | | | |____idwrgnN20100401S0137_SCI_6_
+    | | | | | | |____idwrgnN20100401S0137_SCI_7_
+    | | | | | | |____idwrgnN20100401S0137_SCI_8_
+    | | | | | | |____idwrgnN20100401S0137_SCI_9_
+    | | | | | |____N20100401S0138.fits
+    | | | | | |____N20100401S0139.fits
+    | | | | | |____N20100401S0140.fits
+    | | | | | |____N20100401S0141.fits
+    | | | | | |____N20100401S0142.fits
+    | | | | | |____N20100401S0143.fits
+    | | | | | |____N20100401S0144.fits
+    | | | | | |____N20100401S0145.fits
+    | | | | | |____N20100401S0146.fits
+    | | | | | |____rgnN20100410S0375.fits
+    | | | | | |____scienceMatchedTellsList
+    | | | | | |____skyframelist
+    | | | | | |____tellist
+    | | | | | |____wrgnN20100401S0137.fits
+    |____LICENSE
+    |____nifsBaselineCalibration.py
+    |____nifsBaselineCalibration.pyc
+    |____nifsDefs.py
+    |____nifsDefs.pyc
+    |____nifsMerge.py
+    |____nifsMerge.pyc
+    |____nifsReduce.py
+    |____nifsReduce.pyc
+    |____nifsSort.py
+    |____nifsSort.pyc
+    |____Nifty.log
+    |____Nifty.py
+    |____README.rst
+    |____recipes
+    |____runtimeData
+    | |____calibrationDirectoryList.txt
+    | |____default_input.json
+    | |____h_test_one_argon.dat
+    | |____j_test_one_argon.dat
+    | |____k_test_two_argon.dat
+    | |____new_starstemp.txt
+    | |____scienceDirectoryList.txt
+    | |____telluricDirectoryList.txt
+    | |____user_options.json
+    | |____vega_ext.fits
+    |____unitTests
+    | |____generate_response_curve.py
+    | |____hk.txt
+    | |____nftelluric_modified.cl
+
+After Step 1: Locate the Spectrum
+---------------------------------
+
+.. code-block:: text
+
+    .
+    |____.DS_Store
+    |____.gitignore
+    |____docs
+    | |____directoryModifications.rst
+    | |____example_calibrationDirectoryList.txt
+    | |____example_scienceDirectoryList.txt
+    | |____example_telluricDirectoryList.txt
+    | |____faq.rst
+    | |____hline_removal.rst
+    | |____maintenance.rst
+    | |____nifs_pipeline_june_2015.pdf
+    |____extras
+    | |____gemini_sort.py
+    | |____MANIFEST.in
+    | |____old_merge.py
+    | |____setup.py
+    | |____spec-file-osx-64.txt
+    |____HD141004
+    | |____20100401
+    | | |____Calibrations_K
+    | | | |____arcdarkfile
+    | | | |____arcdarklist
+    | | | |____arclist
+    | | | |____database
+    | | | | |____idrgnN20100410S0375_SCI_10_
+    | | | | |____idrgnN20100410S0375_SCI_11_
+    | | | | |____idrgnN20100410S0375_SCI_12_
+    | | | | |____idrgnN20100410S0375_SCI_13_
+    | | | | |____idrgnN20100410S0375_SCI_14_
+    | | | | |____idrgnN20100410S0375_SCI_15_
+    | | | | |____idrgnN20100410S0375_SCI_16_
+    | | | | |____idrgnN20100410S0375_SCI_17_
+    | | | | |____idrgnN20100410S0375_SCI_18_
+    | | | | |____idrgnN20100410S0375_SCI_19_
+    | | | | |____idrgnN20100410S0375_SCI_1_
+    | | | | |____idrgnN20100410S0375_SCI_20_
+    | | | | |____idrgnN20100410S0375_SCI_21_
+    | | | | |____idrgnN20100410S0375_SCI_22_
+    | | | | |____idrgnN20100410S0375_SCI_23_
+    | | | | |____idrgnN20100410S0375_SCI_24_
+    | | | | |____idrgnN20100410S0375_SCI_25_
+    | | | | |____idrgnN20100410S0375_SCI_26_
+    | | | | |____idrgnN20100410S0375_SCI_27_
+    | | | | |____idrgnN20100410S0375_SCI_28_
+    | | | | |____idrgnN20100410S0375_SCI_29_
+    | | | | |____idrgnN20100410S0375_SCI_2_
+    | | | | |____idrgnN20100410S0375_SCI_3_
+    | | | | |____idrgnN20100410S0375_SCI_4_
+    | | | | |____idrgnN20100410S0375_SCI_5_
+    | | | | |____idrgnN20100410S0375_SCI_6_
+    | | | | |____idrgnN20100410S0375_SCI_7_
+    | | | | |____idrgnN20100410S0375_SCI_8_
+    | | | | |____idrgnN20100410S0375_SCI_9_
+    | | | | |____idwrgnN20100401S0137_SCI_10_
+    | | | | |____idwrgnN20100401S0137_SCI_11_
+    | | | | |____idwrgnN20100401S0137_SCI_12_
+    | | | | |____idwrgnN20100401S0137_SCI_13_
+    | | | | |____idwrgnN20100401S0137_SCI_14_
+    | | | | |____idwrgnN20100401S0137_SCI_15_
+    | | | | |____idwrgnN20100401S0137_SCI_16_
+    | | | | |____idwrgnN20100401S0137_SCI_17_
+    | | | | |____idwrgnN20100401S0137_SCI_18_
+    | | | | |____idwrgnN20100401S0137_SCI_19_
+    | | | | |____idwrgnN20100401S0137_SCI_1_
+    | | | | |____idwrgnN20100401S0137_SCI_20_
+    | | | | |____idwrgnN20100401S0137_SCI_21_
+    | | | | |____idwrgnN20100401S0137_SCI_22_
+    | | | | |____idwrgnN20100401S0137_SCI_23_
+    | | | | |____idwrgnN20100401S0137_SCI_24_
+    | | | | |____idwrgnN20100401S0137_SCI_25_
+    | | | | |____idwrgnN20100401S0137_SCI_26_
+    | | | | |____idwrgnN20100401S0137_SCI_27_
+    | | | | |____idwrgnN20100401S0137_SCI_28_
+    | | | | |____idwrgnN20100401S0137_SCI_29_
+    | | | | |____idwrgnN20100401S0137_SCI_2_
+    | | | | |____idwrgnN20100401S0137_SCI_3_
+    | | | | |____idwrgnN20100401S0137_SCI_4_
+    | | | | |____idwrgnN20100401S0137_SCI_5_
+    | | | | |____idwrgnN20100401S0137_SCI_6_
+    | | | | |____idwrgnN20100401S0137_SCI_7_
+    | | | | |____idwrgnN20100401S0137_SCI_8_
+    | | | | |____idwrgnN20100401S0137_SCI_9_
+    | | | |____flatdarklist
+    | | | |____flatfile
+    | | | |____flatlist
+    | | | |____gnN20100401S0137.fits
+    | | | |____gnN20100410S0362.fits
+    | | | |____gnN20100410S0368.fits
+    | | | |____gnN20100410S0373.fits
+    | | | |____gnN20100410S0375.fits
+    | | | |____N20100401S0137.fits
+    | | | |____N20100401S0181.fits
+    | | | |____N20100410S0362.fits
+    | | | |____N20100410S0363.fits
+    | | | |____N20100410S0364.fits
+    | | | |____N20100410S0365.fits
+    | | | |____N20100410S0366.fits
+    | | | |____N20100410S0367.fits
+    | | | |____N20100410S0368.fits
+    | | | |____N20100410S0369.fits
+    | | | |____N20100410S0370.fits
+    | | | |____N20100410S0371.fits
+    | | | |____N20100410S0372.fits
+    | | | |____N20100410S0373.fits
+    | | | |____N20100410S0374.fits
+    | | | |____N20100410S0375.fits
+    | | | |____N20100410S0376.fits
+    | | | |____nN20100401S0137.fits
+    | | | |____nN20100401S0181.fits
+    | | | |____nN20100410S0362.fits
+    | | | |____nN20100410S0363.fits
+    | | | |____nN20100410S0364.fits
+    | | | |____nN20100410S0365.fits
+    | | | |____nN20100410S0366.fits
+    | | | |____nN20100410S0367.fits
+    | | | |____nN20100410S0368.fits
+    | | | |____nN20100410S0369.fits
+    | | | |____nN20100410S0370.fits
+    | | | |____nN20100410S0371.fits
+    | | | |____nN20100410S0372.fits
+    | | | |____nN20100410S0373.fits
+    | | | |____nN20100410S0374.fits
+    | | | |____nN20100410S0375.fits
+    | | | |____nN20100410S0376.fits
+    | | | |____rgnN20100401S0137.fits
+    | | | |____rgnN20100410S0362.fits
+    | | | |____rgnN20100410S0362_flat.fits
+    | | | |____rgnN20100410S0362_sflat.fits
+    | | | |____rgnN20100410S0362_sflat_bpm.pl
+    | | | |____rgnN20100410S0368.fits
+    | | | |____rgnN20100410S0368_dark.fits
+    | | | |____rgnN20100410S0375.fits
+    | | | |____ronchifile
+    | | | |____ronchilist
+    | | | |____sflat_bpmfile
+    | | | |____sflatfile
+    | | | |____shiftfile
+    | | | |____sN20100410S0362.fits
+    | | | |____wrgnN20100401S0137.fits
+    | | |____K
+    | | | |____obs107
+    | | | | |____N20100401S0182.fits
+    | | | | |____N20100401S0183.fits
+    | | | | |____N20100401S0184.fits
+    | | | | |____N20100401S0185.fits
+    | | | | |____N20100401S0186.fits
+    | | | | |____N20100401S0187.fits
+    | | | | |____N20100401S0188.fits
+    | | | | |____N20100401S0189.fits
+    | | | | |____N20100401S0190.fits
+    | | | | |____scienceFrameList
+    | | | | |____skyframelist
+    | | | |____Tellurics
+    | | | | |____obs109
+    | | | | | |____database
+    | | | | | | |____idrgnN20100410S0375_SCI_10_
+    | | | | | | |____idrgnN20100410S0375_SCI_11_
+    | | | | | | |____idrgnN20100410S0375_SCI_12_
+    | | | | | | |____idrgnN20100410S0375_SCI_13_
+    | | | | | | |____idrgnN20100410S0375_SCI_14_
+    | | | | | | |____idrgnN20100410S0375_SCI_15_
+    | | | | | | |____idrgnN20100410S0375_SCI_16_
+    | | | | | | |____idrgnN20100410S0375_SCI_17_
+    | | | | | | |____idrgnN20100410S0375_SCI_18_
+    | | | | | | |____idrgnN20100410S0375_SCI_19_
+    | | | | | | |____idrgnN20100410S0375_SCI_1_
+    | | | | | | |____idrgnN20100410S0375_SCI_20_
+    | | | | | | |____idrgnN20100410S0375_SCI_21_
+    | | | | | | |____idrgnN20100410S0375_SCI_22_
+    | | | | | | |____idrgnN20100410S0375_SCI_23_
+    | | | | | | |____idrgnN20100410S0375_SCI_24_
+    | | | | | | |____idrgnN20100410S0375_SCI_25_
+    | | | | | | |____idrgnN20100410S0375_SCI_26_
+    | | | | | | |____idrgnN20100410S0375_SCI_27_
+    | | | | | | |____idrgnN20100410S0375_SCI_28_
+    | | | | | | |____idrgnN20100410S0375_SCI_29_
+    | | | | | | |____idrgnN20100410S0375_SCI_2_
+    | | | | | | |____idrgnN20100410S0375_SCI_3_
+    | | | | | | |____idrgnN20100410S0375_SCI_4_
+    | | | | | | |____idrgnN20100410S0375_SCI_5_
+    | | | | | | |____idrgnN20100410S0375_SCI_6_
+    | | | | | | |____idrgnN20100410S0375_SCI_7_
+    | | | | | | |____idrgnN20100410S0375_SCI_8_
+    | | | | | | |____idrgnN20100410S0375_SCI_9_
+    | | | | | | |____idwrgnN20100401S0137_SCI_10_
+    | | | | | | |____idwrgnN20100401S0137_SCI_11_
+    | | | | | | |____idwrgnN20100401S0137_SCI_12_
+    | | | | | | |____idwrgnN20100401S0137_SCI_13_
+    | | | | | | |____idwrgnN20100401S0137_SCI_14_
+    | | | | | | |____idwrgnN20100401S0137_SCI_15_
+    | | | | | | |____idwrgnN20100401S0137_SCI_16_
+    | | | | | | |____idwrgnN20100401S0137_SCI_17_
+    | | | | | | |____idwrgnN20100401S0137_SCI_18_
+    | | | | | | |____idwrgnN20100401S0137_SCI_19_
+    | | | | | | |____idwrgnN20100401S0137_SCI_1_
+    | | | | | | |____idwrgnN20100401S0137_SCI_20_
+    | | | | | | |____idwrgnN20100401S0137_SCI_21_
+    | | | | | | |____idwrgnN20100401S0137_SCI_22_
+    | | | | | | |____idwrgnN20100401S0137_SCI_23_
+    | | | | | | |____idwrgnN20100401S0137_SCI_24_
+    | | | | | | |____idwrgnN20100401S0137_SCI_25_
+    | | | | | | |____idwrgnN20100401S0137_SCI_26_
+    | | | | | | |____idwrgnN20100401S0137_SCI_27_
+    | | | | | | |____idwrgnN20100401S0137_SCI_28_
+    | | | | | | |____idwrgnN20100401S0137_SCI_29_
+    | | | | | | |____idwrgnN20100401S0137_SCI_2_
+    | | | | | | |____idwrgnN20100401S0137_SCI_3_
+    | | | | | | |____idwrgnN20100401S0137_SCI_4_
+    | | | | | | |____idwrgnN20100401S0137_SCI_5_
+    | | | | | | |____idwrgnN20100401S0137_SCI_6_
+    | | | | | | |____idwrgnN20100401S0137_SCI_7_
+    | | | | | | |____idwrgnN20100401S0137_SCI_8_
+    | | | | | | |____idwrgnN20100401S0137_SCI_9_
+    | | | | | |____N20100401S0138.fits
+    | | | | | |____N20100401S0139.fits
+    | | | | | |____N20100401S0140.fits
+    | | | | | |____N20100401S0141.fits
+    | | | | | |____N20100401S0142.fits
+    | | | | | |____N20100401S0143.fits
+    | | | | | |____N20100401S0144.fits
+    | | | | | |____N20100401S0145.fits
+    | | | | | |____N20100401S0146.fits
+    | | | | | |____nN20100401S0138.fits
+    | | | | | |____nN20100401S0139.fits
+    | | | | | |____nN20100401S0140.fits
+    | | | | | |____nN20100401S0141.fits
+    | | | | | |____nN20100401S0142.fits
+    | | | | | |____nN20100401S0143.fits
+    | | | | | |____nN20100401S0144.fits
+    | | | | | |____nN20100401S0145.fits
+    | | | | | |____nN20100401S0146.fits
+    | | | | | |____rgnN20100410S0375.fits
+    | | | | | |____scienceMatchedTellsList
+    | | | | | |____skyframelist
+    | | | | | |____tellist
+    | | | | | |____wrgnN20100401S0137.fits
+    |____LICENSE
+    |____nifsBaselineCalibration.py
+    |____nifsBaselineCalibration.pyc
+    |____nifsDefs.py
+    |____nifsDefs.pyc
+    |____nifsMerge.py
+    |____nifsMerge.pyc
+    |____nifsReduce.py
+    |____nifsReduce.pyc
+    |____nifsSort.py
+    |____nifsSort.pyc
+    |____Nifty.log
+    |____Nifty.py
+    |____README.rst
+    |____recipes
+    |____runtimeData
+    | |____calibrationDirectoryList.txt
+    | |____default_input.json
+    | |____h_test_one_argon.dat
+    | |____j_test_one_argon.dat
+    | |____k_test_two_argon.dat
+    | |____new_starstemp.txt
+    | |____scienceDirectoryList.txt
+    | |____telluricDirectoryList.txt
+    | |____user_options.json
+    | |____vega_ext.fits
+    |____unitTests
+    | |____generate_response_curve.py
+    | |____hk.txt
+    | |____nftelluric_modified.cl
 
 
 .. _nifsReduceScience:

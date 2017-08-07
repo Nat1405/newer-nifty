@@ -356,8 +356,7 @@ def launch():
 
     if tel:
         if debug:
-            a = raw_input('About to enter reduce to reduce Telluric images, ',\
-                           'create telluric correction spectrum and blackbody spectrum.')
+            a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
         if telred:
             reduceScript.start(
                 telDirList, calDirList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\

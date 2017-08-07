@@ -92,12 +92,6 @@ def start(
     logging.info('#                                               #')
     logging.info('#################################################')
 
-    logging.info('\n#################################################')
-    logging.info('#                                               #')
-    logging.info('# Start the NIFS Science and Telluric Reduction #')
-    logging.info('#                                               #')
-    logging.info('#################################################\n')
-
     # Set up/prepare IRAF.
     iraf.gemini()
     iraf.gemtools()
@@ -245,7 +239,7 @@ def start(
 
             if valindex == 1:
                 if debug:
-                    a = raw_input("About to enter step 1.")
+                    a = raw_input("About to enter step 1: locate the spectrum.")
                 if kind=='Telluric':
                     tellist = prepare(tellist, shift, sflat_bpm, log, over)
                 else:
@@ -253,7 +247,7 @@ def start(
                 skyframelist = prepare(skyframelist, shift, sflat_bpm, log, over)
                 logging.info("\n##############################################################################")
                 logging.info("")
-                logging.info("  STEP 1: Prepare raw data ->n - COMPLETED ")
+                logging.info("  STEP 1: Locate the Spectrum (and prepare raw data) ->n - COMPLETED ")
                 logging.info("")
                 logging.info("##############################################################################\n")
 
@@ -263,7 +257,7 @@ def start(
 
             elif valindex == 2:
                 if debug:
-                    a = raw_input("About to enter step 2.")
+                    a = raw_input("About to enter step 2: sky subtraction.")
                 # Combine telluric sky frames.
                 if kind=='Telluric':
                     if len(skyframelist)>1:
