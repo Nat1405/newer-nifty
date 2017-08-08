@@ -530,7 +530,7 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
         # Append the name corresponding to the minimum time difference to prepared_sky_list.
         prepared_sky_list.append(sorted_by_closest_time[0][1])
         # Print the scienceframe, matching skyframe and time difference side by side for later comparison.
-        logging.info("  ", item, "       ", sorted_by_closest_time[0][1], "        "), abs(sciencetime - sorted_by_closest_time[0][0])
+        logging.info("  "+ str(item)+ "       "+ str(sorted_by_closest_time[0][1])+ "        "+ str(abs(sciencetime - sorted_by_closest_time[0][0])))
     logging.info("\n")
     return prepared_sky_list
 

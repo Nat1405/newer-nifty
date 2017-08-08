@@ -8,7 +8,7 @@ import astropy.io.fits
 from nifsDefs import datefmt, writeList, listit
 
 
-def start(obsDirList, use_pq_offsets, over=""):
+def start(obsDirList, use_pq_offsets, im3dtran, over=""):
     """MERGE
 
     This module contains all the functions needed to merge
@@ -19,9 +19,6 @@ def start(obsDirList, use_pq_offsets, over=""):
     attach the prefix "shif" to each shifted image and save them
     in the observation directory (ie. obs108). This is necessary
     for very faint objects.
-
-    COMMAND LINE OPTIONS
-    If you wish to skip this script enter -m in the command line
 
     INPUT:
         - Reference data cubes
@@ -35,12 +32,6 @@ def start(obsDirList, use_pq_offsets, over=""):
 
     # Store the current working directory so we can find our way back later on.
     path = os.getcwd()
-
-    logging.info('###############################')
-    logging.info('#                             #')
-    logging.info('#         Start Merge         #')
-    logging.info('#                             #')
-    logging.info('###############################')
 
     iraf.gemini()
     iraf.nifs()
@@ -174,18 +165,17 @@ def start(obsDirList, use_pq_offsets, over=""):
             foff.close()
 
         suffix = cubes[0][-8:-5]
-        """if os.path.exists('transcube'+suffix+'.fits'):
-            if not over:
-                logging.info('Output already exists and -over- not set - skipping im3dtran')
-            if over:
-                os.remove('transcube'+suffix+'.fits')
+        if im3dtran:
+            if os.path.exists('transcube'+suffix+'.fits'):
+                if not over:
+                    logging.info('Output already exists and -over- not set - skipping im3dtran')
+                if over:
+                    os.remove('transcube'+suffix+'.fits')
+                    iraf.im3dtran(input = cubes[0]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
+            else:
                 iraf.im3dtran(input = cubes[0]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
         else:
-            iraf.im3dtran(input = cubes[0]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
-            """
-
-        # EXPERIMENT
-        iraf.imcopy(cubes[0]+'[SCI][*,*,*]', 'NONtranscube'+suffix+'.fits')
+            iraf.imcopy(cubes[0]+'[SCI][*,*,*]', 'NONtranscube'+suffix+'.fits')
         shiftlist.append('cube'+suffix+'.fits')
         iraffunctions.chdir(os.getcwd())
 
@@ -206,22 +196,27 @@ def start(obsDirList, use_pq_offsets, over=""):
                 yShift = round((yoff - q0)/pixScale)
                 # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
                 foff = open('offsets.txt', 'a')
-                #foff.write('%d %d %d\n' % (int(xShift), 0, int(yShift)))
-                # EXPERIMENT
-                foff.write('%d\t%d\t%d\n' % (xShift, yShift, 0.))
+                if im3dtran:
+                    # If we swap the y and lambda axis we must also write the offsets in x, lambda, y.
+                    foff.write('%d %d %d\n' % (int(xShift), 0, int(yShift)))
+                else:
+                    # Write offsets in regular x, y, lambda.
+                    foff.write('%d\t%d\t%d\n' % (xShift, yShift, 0.))
                 foff.close()
 
-            """if os.path.exists('transcube'+suffix+'.fits'):
-                if not over:
-                    logging.info('Output already exists and -over- not set - skipping im3dtran')
-                if over:
-                    os.remove('transcube'+suffix+'.fits')
+            if im3dtran:
+                prefix = 'transcube'
+                if os.path.exists('transcube'+suffix+'.fits'):
+                    if not over:
+                        logging.info('Output already exists and -over- not set - skipping im3dtran')
+                    if over:
+                        os.remove('transcube'+suffix+'.fits')
+                        iraf.im3dtran(input = cubes[i]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
+                else:
                     iraf.im3dtran(input = cubes[i]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
             else:
-                iraf.im3dtran(input = cubes[i]+'[SCI][*,*,-*]', new_x=1, new_y=3, new_z=2, output = 'transcube'+suffix)
-            """
-            # EXPERIMENT
-            iraf.imcopy(cubes[i]+'[SCI][*,*,*]', 'NONtranscube'+suffix+'.fits')
+                prefix = 'NONtranscube'
+                iraf.imcopy(cubes[i]+'[SCI][*,*,*]', prefix+suffix+'.fits')
             shiftlist.append('cube'+suffix+'.fits')
 
         if not use_pq_offsets:
@@ -234,22 +229,24 @@ def start(obsDirList, use_pq_offsets, over=""):
         if os.path.exists('cube_merged.fits'):
             if over:
                 os.remove('cube_merged.fits')
-                iraf.imcombine('NONtranscube*', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
+                iraf.imcombine(prefix+'*', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
             else:
                 logging.info('Output already exists and -over- not set - skipping imcombine')
         else:
-            iraf.imcombine('NONtranscube*', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
-        """if os.path.exists('out.fits'):
-            if over:
-                os.remove('out.fits')
-                iraf.im3dtran(input='cube_merged[*,-*,*]', new_x=1, new_y=3, new_z=2, output = 'out.fits')
-                iraf.fxcopy(input=cubes[0]+'[0], out.fits', output = obsidlist[n]+'_merged.fits')
+            iraf.imcombine(prefix+'*', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
+        if im3dtran:
+            # Transpose the cube back to x, y, lambda.
+            if os.path.exists('out.fits'):
+                if over:
+                    os.remove('out.fits')
+                    iraf.im3dtran(input='cube_merged[*,-*,*]', new_x=1, new_y=3, new_z=2, output = 'out.fits')
+                else:
+                    logging.info('Output already exists and -over- not set - skipping final im3dtran')
             else:
-                logging.info('Output already exists and -over- not set - skipping final im3dtran')
-        else:
-            iraf.im3dtran(input='cube_merged[*,-*,*]', new_x=1, new_y=3, new_z=2, output = 'out.fits')
+                iraf.im3dtran(input='cube_merged[*,-*,*]', new_x=1, new_y=3, new_z=2, output = 'out.fits')
             iraf.fxcopy(input=cubes[0]+'[0], out.fits', output = obsidlist[n]+'_merged.fits')
-            """
+        else:
+            iraf.fxcopy(input=cubes[0]+'[0], cube_merged.fits', output = obsidlist[n]+'_merged.fits')
         mergedCubes.append(obsidlist[n]+'_merged.fits')
 
         n+=1

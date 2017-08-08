@@ -68,7 +68,7 @@ def launch():
     logging.info("\n####################################")
     logging.info("#                                  #")
     logging.info("#             NIFTY                #")
-    logging.info("#   NIFS Date Reduction Pipeline   #")
+    logging.info("#   NIFS Data Reduction Pipeline   #")
     logging.info("#         Version "+ __version__+ "           #")
     logging.info("#         July 25th, 2017          #")
     logging.info("#     Marie Lemoine-Busserolle     #")
@@ -223,6 +223,10 @@ def launch():
             "Use pq offsets to merge data cubes? [yes]: ",
             True
             )
+            im3dtran = getParam(
+            "Transpose cubes for faster merging? [no]: ",
+            False
+            )
             over = getParam(
             "Overwrite old files? [no]: ",
             False
@@ -257,6 +261,7 @@ def launch():
             options['telluric_correction_method'] = telluric_correction_method
             options['telinter'] = telinter
             options['use_pq_offsets'] = use_pq_offsets
+            options['im3dtran'] = im3dtran
             with open('runtimeData/user_options.json', 'w') as outfile:
                 json.dump(options, outfile, indent=4)
 
@@ -299,6 +304,7 @@ def launch():
             telluric_correction_method = options['telluric_correction_method']
             telinter = options['telinter']
             use_pq_offsets = options['use_pq_offsets']
+            im3dtran = options['im3dtran']
 
         # Make sure to overwrite runtimeData/user_options.json with the latest parameters!
         # shutil.copy('./recipes/default_input.json', 'runtimeData/user_options.json')
@@ -312,7 +318,7 @@ def launch():
     for i in options:
         logging.info(str(i) + " " + str(options[i]))
     logging.info("")
-    logging.info("These parameters have been written to user_options.json.")
+    logging.info("These parameters have been written to runtimeData/user_options.json.")
 
     # Begin running individual reduction scripts.
 
@@ -355,9 +361,9 @@ def launch():
     ###########################################################################
 
     if tel:
-        if debug:
-            a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
         if telred:
+            if debug:
+                a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
             reduceScript.start(
                 telDirList, calDirList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
@@ -372,16 +378,7 @@ def launch():
             a = raw_input('About to enter reduce to reduce science images.')
         reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, efficiencySpectrumCorrection,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
-                           telluric_correction_method)
-
-    ###########################################################################
-    ##                      STEP 5: Merge data cubes.                        ##
-    ###########################################################################
-
-    if merge:
-        if debug:
-            a = raw_input('About to enter merge to merge cubes.')
-        mergeScript.start(obsDirList, use_pq_offsets, over)
+                           telluric_correction_method, use_pq_offsets, merge, im3dtran)
 
     logging.info('###############################')
     logging.info('#                             #')

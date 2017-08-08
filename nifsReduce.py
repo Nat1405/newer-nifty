@@ -25,11 +25,13 @@ import traceback
 import matplotlib.pyplot as plt
 # Import custom Nifty functions.
 from nifsDefs import datefmt, listit, writeList, checkLists, makeSkyList, MEFarith, convertRAdec
+# Import python data cube merging script.
+import nifsMerge
 
 def start(
     observationDirectoryList, calDirList, start, stop, tel, telinter, efficiencySpectrumCorrection,
     continuuminter, hlineinter, hline_method, spectemp, mag, over,
-    telluric_correction_method):
+    telluric_correction_method, use_pq_offsets, merge, im3dtran):
     """
 
     nifsReduce
@@ -86,11 +88,11 @@ def start(
     # Set up the logging file.
     log = os.getcwd()+'/Nifty.log'
 
-    logging.info('#################################################')
+    logging.info('\n#################################################')
     logging.info('#                                               #')
     logging.info('# Start the NIFS Science and Telluric Reduction #')
     logging.info('#                                               #')
-    logging.info('#################################################')
+    logging.info('#################################################\n')
 
     # Set up/prepare IRAF.
     iraf.gemini()
@@ -282,7 +284,7 @@ def start(
 
             elif valindex == 3:
                 if debug:
-                    a = raw_input("About to enter step 3.")
+                    a = raw_input("About to enter step 3: flat fielding and bad pixels correction.")
                 if kind=='Telluric':
                     applyFlat(tellist, flat, log, over, kind)
                     fixBad(tellist, log, over)
@@ -291,7 +293,7 @@ def start(
                     fixBad(scienceFrameList, log, over)
                 logging.info("\n##############################################################################")
                 logging.info("")
-                logging.info("  STEP 3: Flat field and correct bad pixels ->brsn - COMPLETED ")
+                logging.info("  STEP 3: Flat fielding and Bad Pixels Correction ->brsn - COMPLETED ")
                 logging.info("")
                 logging.info("##############################################################################\n")
 
@@ -302,7 +304,7 @@ def start(
 
             elif valindex == 4:
                 if debug:
-                    a = raw_input("About to enter step 4.")
+                    a = raw_input("About to enter step 4: 2D to 3D transformation and Wavelength Calibration.")
                 if kind=='Telluric':
                     fitCoords(tellist, arc, ronchi, log, over, kind)
                     transform(tellist, log, over)
@@ -311,7 +313,7 @@ def start(
                     transform(scienceFrameList, log, over)
                 logging.info("\n##############################################################################")
                 logging.info("")
-                logging.info("  STEP 4: Derive and apply 2D to 3D transformation ->tfbrsn - COMPLETED ")
+                logging.info("  STEP 4: 2D to 3D transformation and Wavelength Calibration ->tfbrsn - COMPLETED ")
                 logging.info("")
                 logging.info("##############################################################################\n")
 
@@ -336,6 +338,12 @@ def start(
                 # Make a 1D telluric correction spectrum from reduced telluric data.
                 if kind=='Telluric':
                     makeTelluric(tellist, log, over)
+                    logging.info("\n##############################################################################")
+                    logging.info("")
+                    logging.info("  STEP 5: Extract 1D Spectra and Make Combined Telluric")
+                    logging.info("          1D spectrum ->gxtfbrsn - COMPLETED")
+                    logging.info("")
+                    logging.info("##############################################################################\n")
 
                 # For science data, either:
                 # Use Python method.
@@ -353,12 +361,12 @@ def start(
                     # Make cube without telluric correction.
                     makeCube('tfbrsn', scienceFrameList, tel, observationDirectory, log, over)
 
-                logging.info("\n##############################################################################")
-                logging.info("")
-                logging.info("  STEP 5: Derive or apply telluric correction and make")
-                logging.info("          a data cube ->gxtfbrsn, ->catgbrsn, ->cptfbrsn or ->ctfbrsn - COMPLETED")
-                logging.info("")
-                logging.info("##############################################################################\n")
+                    logging.info("\n##############################################################################")
+                    logging.info("")
+                    logging.info("  STEP 5: Possibly apply telluric correction and relative flux calibation and make")
+                    logging.info("          a data cube ->catgbrsn, ->cptfbrsn or ->ctfbrsn - COMPLETED")
+                    logging.info("")
+                    logging.info("##############################################################################\n")
 
             ###########################################################################
             ##  STEP 6 (Tellurics): Create an efficiency spectrum ->cgxtfbrsn        ##
@@ -369,22 +377,28 @@ def start(
             elif valindex == 6:
                 if debug:
                     a = raw_input("About to enter step 6.")
-                if efficiencySpectrumCorrection:
-                    if kind == 'Telluric':
-                        createEfficiencySpectrum(
-                            observationDirectory, path, continuuminter, hlineinter,
-                            hline_method, spectemp, mag, log, over)
-                logging.info("\n##############################################################################")
-                logging.info("")
-                logging.info("  STEP 7c: Perform a flux calibration ->fcatfbrsn or ->fctfbrsn - COMPLETED ")
-                logging.info("")
-                logging.info("##############################################################################\n")
+                if kind == 'Telluric' and efficiencySpectrumCorrection:
+                    createEfficiencySpectrum(
+                        observationDirectory, path, continuuminter, hlineinter,
+                        hline_method, spectemp, mag, log, over)
+                    logging.info("\n##############################################################################")
+                    logging.info("")
+                    logging.info("  STEP 6: Create Efficiency Spectrum ->fcatfbrsn or ->fctfbrsn - COMPLETED ")
+                    logging.info("")
+                    logging.info("##############################################################################\n")
+                if kind == 'Science' and merge:
+                    nifsMerge.start(observationDirectoryList, use_pq_offsets, im3dtran, over)
+                    logging.info("\n##############################################################################")
+                    logging.info("")
+                    logging.info("  STEP 6: Create Combined Final 3D Cube - path/scienceObjectName/Merged/ - COMPLETED ")
+                    logging.info("")
+                    logging.info("##############################################################################\n")
 
             valindex += 1
 
         logging.info("\n##############################################################################")
         logging.info("")
-        logging.info("  COMPLETE - Reductions completed for "), observationDirectory
+        logging.info("  COMPLETE - Reductions completed for " + str(observationDirectory))
         logging.info("")
         logging.info("##############################################################################\n")
 
@@ -982,7 +996,7 @@ def createEfficiencySpectrum(
 
     logging.info("\n##############################################################################")
     logging.info("")
-    logging.info("  STEP 7a - Find standard star information - COMPLETED ")
+    logging.info("  STEP 6a - Find standard star information - COMPLETED ")
     logging.info("")
     logging.info("##############################################################################\n")
 
@@ -1023,7 +1037,7 @@ def createEfficiencySpectrum(
 
     logging.info("\n##############################################################################")
     logging.info("")
-    logging.info("  STEP 7b - Apply or do not apply hline correction to standard star - COMPLETED ")
+    logging.info("  STEP 6b - Apply or do not apply hline correction to standard star - COMPLETED ")
     logging.info("")
     logging.info("##############################################################################\n")
 
@@ -1051,7 +1065,7 @@ def createEfficiencySpectrum(
         star_kelvin = float(lines[0].replace('\n','').split()[3])
         #Extract mag from std_star.txt file and convert to erg/cm2/s/A, for a rough flux scaling
         #find out if a matching band mag exists in std_star.txt
-        logging.info("Band = "), band
+        logging.info("Band = " + str(band))
         if band == 'K':
             star_mag = lines[0].replace('\n','').split()[2]
             star_mag = float(star_mag)
