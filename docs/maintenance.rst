@@ -85,6 +85,8 @@ General Issues
 - The conversion of print statements to logging.info() statements was messy. Some of these
   may still not be properly converted and will throw nasty tracebacks. However these seem to
   have no effect on the functionioning of the code.
+- Logging is still not perfect. One or two iraf tasks are sending their log files to
+  "nifs.log" instead of "Nifty.log".
 
 Future Work
 ===========

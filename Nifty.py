@@ -40,7 +40,7 @@ from nifsDefs import datefmt, writeList, loadSortSave, getParam
 #
 
 # Welcome to Nifty, the nifs data reduction pipeline! My current version is:
-__version__ = "v0.1.1"
+__version__ = "v1.0.0"
 
 # The time when Nifty was started is:
 startTime = str(datetime.now())
@@ -63,7 +63,7 @@ def launch():
     logger.addHandler(ch)
 
     # Enable Debugging break points. Used for testing.
-    debug = True
+    debug = False
 
     logging.info("\n####################################")
     logging.info("#                                  #")
@@ -94,7 +94,7 @@ def launch():
     #parser.add_option('-e', '--stdspectemp', dest = 'spectemp', action = 'store', help = 'specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000')
     #parser.add_option('-f', '--stdmag', dest = 'mag', action = 'store', help = 'specify the IR magnitude of the standard star; if you do not wish to do a flux calibration then enter -f x')
     parser.add_option('-l', '--load', dest = 'repeat', default = False, action = 'store_true', help = 'Load data reduction parameters from runtimeData/user_options.json. Equivalent to -r and --repeat.')
-    parser.add_option('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full Reduction from default_input.json')
+    parser.add_option('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full Reduction from runtimeData/default_input.json')
     #parser.add_option('-y', '--continter', dest = 'continter', default = 'False', action = 'store_true', help = 'do the continuum fitting in the flux calibration interactively')
     #parser.add_option('-a', '--redstart', dest = 'rstart',  type='int', action = 'store', help = 'choose the starting point of the daycal reduction; any integer from 1 to 6')
     #parser.add_option('-z', '--redstop', dest = 'rstop',  type='int', action = 'store', help = 'choose the stopping point of the daycal reduction; any integer from 1 to 6')
@@ -221,7 +221,7 @@ def launch():
             )
             use_pq_offsets = getParam(
             "Use pq offsets to merge data cubes? [yes]: ",
-            True
+            "yes"
             )
             im3dtran = getParam(
             "Transpose cubes for faster merging? [no]: ",
