@@ -5,7 +5,7 @@ from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
 import astropy.io.fits
-import os, shutil, glob, math, logging
+import os, shutil, glob, math, logging, urllib.request
 import numpy as np
 # Import custom Nifty functions.
 from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
@@ -80,6 +80,19 @@ def start(dir, tel, over, copy, program, date):
         logging.info("\n Error in sort. Cannot specify -q AND -c True (local raw files directory AND copy files from Gemini network).\n")
         raise SystemExit
 
+    # TODO(nat): Implement public gemini archive downloads.
+    """# If downloadFromPublicArchive:
+    # Make a url to download from.
+    url = "https://archive.gemini.edu/download/"+program+"/notengineering/NotFail/present/canonical"
+    # Download the file to a local directory.
+    # Download the file from `url` and save it locally under `file_name`:
+    with urllib.request.urlopen(url) as response, open('rawData', 'wb') as out_file:
+        shutil.copyfileobj(response, out_file)
+    # Decompress the .bz2 raw files.
+    # Let path = path/to/downloaded/files.
+    """
+
+
     ############################################################################
     ############################################################################
     #                                                                          #
@@ -124,7 +137,8 @@ def start(dir, tel, over, copy, program, date):
     ############################################################################
     ############################################################################
 
-    elif copy or program or date:
+    # TODO(nat): implement private gemini archive downloads.
+    """elif copy or program or date:
         try:
             import gemini_sort
         except ImportError:
@@ -141,7 +155,7 @@ def start(dir, tel, over, copy, program, date):
             raise SystemExit
         else:
             gemini_sort.start(tel, over, copy, program, date)
-
+    """
 
 
     # Exit if no or incorrectly formatted input is given.

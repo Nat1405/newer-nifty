@@ -88,3 +88,16 @@ General Issues
 
 Future Work
 ===========
+
+- Using a configParser object instead of .json files may be better for configuration files.
+
+
+
+
+
+
+
+
+
+
+.. placeholder comment
