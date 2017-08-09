@@ -31,7 +31,7 @@ import nifsMerge
 def start(
     observationDirectoryList, calDirList, start, stop, tel, telinter, efficiencySpectrumCorrection,
     continuuminter, hlineinter, hline_method, spectemp, mag, over,
-    telluric_correction_method, use_pq_offsets, merge, im3dtran):
+    telluric_correction_method, use_pq_offsets, merge, im3dtran, debug):
     """
 
     nifsReduce
@@ -81,9 +81,6 @@ def start(
 
     # Store current working directory for later use.
     path = os.getcwd()
-
-    # Enable optional debugging pauses.
-    debug = True
 
     # Set up the logging file.
     log = os.getcwd()+'/Nifty.log'

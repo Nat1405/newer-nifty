@@ -9,7 +9,7 @@ import logging, os
 # Import custom Nifty functions.
 from nifsDefs import datefmt, listit, checkLists
 
-def start(obsDirList, calDirList, over, start, stop):
+def start(obsDirList, calDirList, over, start, stop, debug):
     """
          nifsBaselineCalibration
 
@@ -45,60 +45,6 @@ def start(obsDirList, calDirList, over, start, stop):
         start (int):     starting step of daycal reduction. Specified at command line with -a. Default: 1.
         stop (int):      stopping step of daycal reduction. Specified at command line with -z. Default: 6.
 
-    Directory structure after Calibration:
-
-    --->cwd/
-        --->Nifty files (eg Main.py, sort.py, Nifty.log)
-            --->objectname/ (Science target name- found from .fits file headers).
-                --->date/ (YYYYMMDD)
-                    --->Calibrations/
-                        --->N*.fits (calibration raw .fits files)
-                        --->nN*.fits
-                        --->nN*.fits
-                        --->nN*.fits
-                        --->nN*.fits
-                        --->gnN*.fits
-                        --->gnN*.fits
-                        --->gnN*.fits
-                        --->gnN*.fits
-                        --->rgnN*.fits
-                        --->rgnN*.fits
-                        --->rgnN*.fits
-                        --->rgnN*_sflat.fits
-                        --->rgnN*_sflat.bpm.pl
-                        --->rgnN*_flat.fits
-                        --->brgnN*.fits
-                        --->wrgnN*.fits
-                        --->arcdarkfile (text file storing name of the arcdark file)
-                        --->arcdarklist (list of arc dark.fits files)
-                        --->arclist (list of arc .fits files)
-                        --->database/
-                            --->idrgn_SCI_[i]_ (text files storing spatial distorting correction information
-                                                from ronchi flats generated in nfsdist
-                            --->idwrgn_SCI_[i]_ (text files storing wavelength distortion correction information
-                                                 from arc and arc dark frames generated in nswavelength)
-                        --->flatdarklist (list of lamps off flat .fits files)
-                        --->flatlist (list of lamps on flat .fits files)
-                        --->ronchilist (list of ronchi flat .fits files)
-                        --->sN*.fits (shiftfile .fits file. Eg sN20100410S0362.fits)
-                        --->ronchifile (text file storing name of final ronchi file)
-                        --->shiftfile (text file storing name of shiftfile)
-                        --->flatfile (text file storing name of final _flat frame)
-                        --->sflatfile (text file storing name of _sflat frame (flat not rectified with nsslitfunction))
-                        --->sflat_bpmfile (text file storing name of sflat_bpm.pl)
-                    --->grating_or_filter/ (Eg: Z, J, H, K)
-                        --->ot_observation_name/ (Science frames)
-                            --->N*.fits (raw .fits image files)
-                            --->objlist (text file storing names of science frames)
-                            --->skyframelist (text file storing names of science sky frames)
-                        --->Tellurics/
-                            --->ot_observation_name/
-                                -->N*.fits (telluric .fits files)
-                                --->scienceMatchedTellsList (text file matching telluric and science data.
-                                                See comments in telSort for more info.)
-                                --->skyframelist (text file storing names of telluric sky frames)
-                                --->tellist (text file storing names of telluric object frames)
-
     """
     # TODO(nat): stop using first frame from list as name for combined frames. Find better names and implement
     # them in pipeline and docs.
@@ -106,9 +52,6 @@ def start(obsDirList, calDirList, over, start, stop):
 
     # Store current working directory for later use.
     path = os.getcwd()
-
-    # Enable optional debugging pauses.
-    debug = True
 
     logging.info('#################################################')
     logging.info('#                                               #')

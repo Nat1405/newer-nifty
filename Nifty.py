@@ -62,9 +62,6 @@ def launch():
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    # Enable Debugging break points. Used for testing.
-    debug = False
-
     logging.info("\n####################################")
     logging.info("#                                  #")
     logging.info("#             NIFTY                #")
@@ -231,6 +228,10 @@ def launch():
             "Overwrite old files? [no]: ",
             False
             )
+            debug = getParam(
+            "Pause after each data reduction step? [yes]: ",
+            "yes"
+            )
 
             # Serialize and save the options as a .json file.
             options = {}
@@ -262,6 +263,7 @@ def launch():
             options['telinter'] = telinter
             options['use_pq_offsets'] = use_pq_offsets
             options['im3dtran'] = im3dtran
+            options['debug'] = debug
             with open('runtimeData/user_options.json', 'w') as outfile:
                 json.dump(options, outfile, indent=4)
 
@@ -305,6 +307,7 @@ def launch():
             telinter = options['telinter']
             use_pq_offsets = options['use_pq_offsets']
             im3dtran = options['im3dtran']
+            debug = options['debug']
 
         # Make sure to overwrite runtimeData/user_options.json with the latest parameters!
         # shutil.copy('./recipes/default_input.json', 'runtimeData/user_options.json')
@@ -338,7 +341,7 @@ def launch():
 
     if sort:
         # Sort the data and calibrations.
-        scienceDirectoryList, calibrationDirectoryList, telluricDirectoryList = sortScript.start(rawPath, tel, over, copy, program, date)
+        scienceDirectoryList, calibrationDirectoryList, telluricDirectoryList = sortScript.start(rawPath, tel, over, copy, program, date, debug)
 
     else:
         # Don't use sortScript at all; read the paths to data from textfiles.
@@ -353,7 +356,7 @@ def launch():
     if red:
         if debug:
             a = raw_input('About to enter calibrate.py')
-        calibrateScript.start(scienceDirectoryList, calibrationDirectoryList, over, rstart, rstop)
+        calibrateScript.start(scienceDirectoryList, calibrationDirectoryList, over, rstart, rstop, debug)
 
     ###########################################################################
     ##                STEP 3: Reduce telluric observations.                  ##
@@ -366,7 +369,7 @@ def launch():
             reduceScript.start(
                 telluricDirectoryList, calibrationDirectoryList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
-                telluric_correction_method, use_pq_offsets, merge, im3dtran)
+                telluric_correction_method, use_pq_offsets, merge, im3dtran, debug)
 
     ###########################################################################
     ##                 STEP 4: Reduce science observations.                  ##
@@ -377,7 +380,7 @@ def launch():
             a = raw_input('About to enter reduce to reduce science images.')
         reduceScript.start(scienceDirectoryList, calibrationDirectoryList, sciStart, sciStop, tel, telinter, efficiencySpectrumCorrection,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
-                           telluric_correction_method, use_pq_offsets, merge, im3dtran)
+                           telluric_correction_method, use_pq_offsets, merge, im3dtran, debug)
 
     ###########################################################################
     ##                    Data Reduction Complete!                           ##

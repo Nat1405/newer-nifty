@@ -12,7 +12,7 @@ from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stri
 datefmt, checkOverCopy, checkQAPIreq, checkDate, writeList, checkEntry, timeCalc
 
 
-def start(dir, tel, over, copy, program, date):
+def start(dir, tel, over, copy, program, date, debug):
     """
     nifsSort
 
@@ -60,9 +60,6 @@ def start(dir, tel, over, copy, program, date):
 
     # Store current working directory for later use.
     path = os.getcwd()
-
-    # Enable optional debugging pauses.
-    debug = True
 
     # Set up the logging file.
     log = os.getcwd()+'/Nifty.log'
