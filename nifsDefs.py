@@ -25,6 +25,27 @@ def datefmt():
 
 #-----------------------------------------------------------------------------#
 
+def printDirectoryLists(scienceDirectoryList, telluricDirectoryList, calibrationDirectoryList):
+    """Print paths to science, telluric and calibration observations.
+
+    Useful for:
+        - Making sure sorting worked properly.
+        - Making sure pipeline is loading runtimeData/scienceDirectoryList.txt,
+          runtimeData/telluricDirectoryList.txt and runtimeData/calibrationDirectoryList.txt
+          correctly.
+    """
+    logging.info("\nScience Directory List: ")
+    for i in range(len(scienceDirectoryList)):
+        logging.info(scienceDirectoryList[i])
+    logging.info("\nTelluric Directory List: ")
+    for i in range(len(telluricDirectoryList)):
+        logging.info(telluricDirectoryList[i])
+    logging.info("\nCalibration Directory List: ")
+    for i in range(len(calibrationDirectoryList)):
+        logging.info(calibrationDirectoryList[i])
+
+#-----------------------------------------------------------------------------#
+
 def loadSortSave():
     """Opens and reads lists of:
         - Science directories,

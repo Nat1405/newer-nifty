@@ -14,7 +14,7 @@ import nifsReduce as reduceScript
 import nifsMerge as mergeScript
 import nifsDefs
 # Import custom Nifty functions.
-from nifsDefs import datefmt, writeList, loadSortSave, getParam
+from nifsDefs import datefmt, printDirectoryLists, writeList, loadSortSave, getParam
 
 #                                +
 #
@@ -94,7 +94,7 @@ def launch():
     #parser.add_option('-e', '--stdspectemp', dest = 'spectemp', action = 'store', help = 'specify the spectral type or temperature of the standard star; e.g. for a spectral type -e A0V; for a temperature -e 8000')
     #parser.add_option('-f', '--stdmag', dest = 'mag', action = 'store', help = 'specify the IR magnitude of the standard star; if you do not wish to do a flux calibration then enter -f x')
     parser.add_option('-l', '--load', dest = 'repeat', default = False, action = 'store_true', help = 'Load data reduction parameters from runtimeData/user_options.json. Equivalent to -r and --repeat.')
-    parser.add_option('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full Reduction from runtimeData/default_input.json')
+    parser.add_option('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full reduction with data reduction parameters loaded from runtimeData/default_input.json')
     #parser.add_option('-y', '--continter', dest = 'continter', default = 'False', action = 'store_true', help = 'do the continuum fitting in the flux calibration interactively')
     #parser.add_option('-a', '--redstart', dest = 'rstart',  type='int', action = 'store', help = 'choose the starting point of the daycal reduction; any integer from 1 to 6')
     #parser.add_option('-z', '--redstop', dest = 'rstop',  type='int', action = 'store', help = 'choose the stopping point of the daycal reduction; any integer from 1 to 6')
@@ -320,7 +320,17 @@ def launch():
     logging.info("")
     logging.info("These parameters have been written to runtimeData/user_options.json.")
 
-    # Begin running individual reduction scripts.
+    ###########################################################################
+    ##                         SETUP COMPLETE                                ##
+    ##                      BEGIN DATA REDUCTION                             ##
+    ##                                                                       ##
+    ##        Four Main Steps:                                               ##
+    ##          1) Sort the Raw Data - nifsSort.py                           ##
+    ##          2) Reduce baseline calibrations - nifsBaselineCalibration.py ##
+    ##          3) Reduce telluric observations - nifsReduce.py              ##
+    ##          4) Reduce science observations - nifsReduce.py               ##
+    ##                                                                       ##
+    ###########################################################################
 
     ###########################################################################
     ##                      STEP 1: Sort the raw data.                       ##
@@ -328,24 +338,13 @@ def launch():
 
     if sort:
         # Sort the data and calibrations.
-        obsDirList, calDirList, telDirList = sortScript.start(rawPath, tel, over, copy, program, date)
+        scienceDirectoryList, calibrationDirectoryList, telluricDirectoryList = sortScript.start(rawPath, tel, over, copy, program, date)
 
     else:
         # Don't use sortScript at all; read the paths to data from textfiles.
-        obsDirList, telDirList, calDirList = loadSortSave()
+        scienceDirectoryList, telluricDirectoryList, calibrationDirectoryList = loadSortSave()
 
-    logging.info("\nobsDirList : ")
-    for i in range(len(obsDirList)):
-        logging.info(obsDirList[i])
-    logging.info("\ntelDirList : ")
-    for i in range(len(telDirList)):
-        logging.info(telDirList[i])
-    logging.info("\ncalDirList : ")
-    for i in range(len(calDirList)):
-        logging.info(calDirList[i])
-
-    # Here is where the work happens.
-    # Five major reduction steps.
+    printDirectoryLists(scienceDirectoryList, telluricDirectoryList, calibrationDirectoryList)
 
     ###########################################################################
     ##                STEP 2: Reduce baseline calibrations.                  ##
@@ -354,7 +353,7 @@ def launch():
     if red:
         if debug:
             a = raw_input('About to enter calibrate.py')
-        calibrateScript.start(obsDirList, calDirList, over, rstart, rstop)
+        calibrateScript.start(scienceDirectoryList, calibrationDirectoryList, over, rstart, rstop)
 
     ###########################################################################
     ##                STEP 3: Reduce telluric observations.                  ##
@@ -365,9 +364,9 @@ def launch():
             if debug:
                 a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
             reduceScript.start(
-                telDirList, calDirList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\
+                telluricDirectoryList, calibrationDirectoryList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\
                 continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
-                telluric_correction_method)
+                telluric_correction_method, use_pq_offsets, merge, im3dtran)
 
     ###########################################################################
     ##                 STEP 4: Reduce science observations.                  ##
@@ -376,9 +375,13 @@ def launch():
     if sci:
         if debug:
             a = raw_input('About to enter reduce to reduce science images.')
-        reduceScript.start(obsDirList, calDirList, sciStart, sciStop, tel, telinter, efficiencySpectrumCorrection,\
+        reduceScript.start(scienceDirectoryList, calibrationDirectoryList, sciStart, sciStop, tel, telinter, efficiencySpectrumCorrection,\
                            continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
                            telluric_correction_method, use_pq_offsets, merge, im3dtran)
+
+    ###########################################################################
+    ##                    Data Reduction Complete!                           ##
+    ###########################################################################
 
     logging.info('###############################')
     logging.info('#                             #')
