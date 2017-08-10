@@ -362,14 +362,13 @@ def launch():
     ##                STEP 3: Reduce telluric observations.                  ##
     ###########################################################################
 
-    if tel:
-        if telred:
-            if debug:
-                a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
-            reduceScript.start(
-                telluricDirectoryList, calibrationDirectoryList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\
-                continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
-                telluric_correction_method, use_pq_offsets, merge, im3dtran, debug)
+    if telred:
+        if debug:
+            a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
+        reduceScript.start(
+            telluricDirectoryList, calibrationDirectoryList, telStart, telStop, tel, telinter, efficiencySpectrumCorrection,\
+            continuuminter, hlineinter, hline_method, spectemp, mag ,over,\
+            telluric_correction_method, use_pq_offsets, merge, im3dtran, debug)
 
     ###########################################################################
     ##                 STEP 4: Reduce science observations.                  ##

@@ -1454,7 +1454,7 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     h = 6.62618e-34
     k = 1.3807e-23
 
-    logging.info('Input Standard spectrum for flux calibration is ', combined_extracted_1d_spectra)
+    logging.info('Input Standard spectrum for flux calibration is ' +  str(combined_extracted_1d_spectra))
 
     if os.path.exists('c'+combined_extracted_1d_spectra+'.fits'):
         if not over:
