@@ -1,0 +1,521 @@
+2017/08/10 11:23:34  
+####################################
+2017/08/10 11:23:34  #                                  #
+2017/08/10 11:23:34  #             NIFTY                #
+2017/08/10 11:23:34  #   NIFS Data Reduction Pipeline   #
+2017/08/10 11:23:34  #         Version v1.0.0           #
+2017/08/10 11:23:34  #         July 25th, 2017          #
+2017/08/10 11:23:34  #     Marie Lemoine-Busserolle     #
+2017/08/10 11:23:34  # Gemini Observatory, Hilo, Hawaii #
+2017/08/10 11:23:34  #                                  #
+2017/08/10 11:23:34  ####################################
+
+2017/08/10 11:23:34  The log file is Nifty.log.
+2017/08/10 11:23:34  
+Good day! Press enter to accept default reduction options.
+2017/08/10 11:23:34  
+Data reduction parameters for this reduction were copied from ./recipes/default_input.json.
+2017/08/10 11:23:34  
+User parameters for this Reduction:
+
+2017/08/10 11:23:34  im3dtran False
+2017/08/10 11:23:34  tel False
+2017/08/10 11:23:34  mag None
+2017/08/10 11:23:34  over False
+2017/08/10 11:23:34  telred yes
+2017/08/10 11:23:34  sci yes
+2017/08/10 11:23:34  efficiencySpectrumCorrection False
+2017/08/10 11:23:34  telinter False
+2017/08/10 11:23:34  telluric_correction_method python
+2017/08/10 11:23:34  telStop 6
+2017/08/10 11:23:34  continuuminter False
+2017/08/10 11:23:34  sciStart 1
+2017/08/10 11:23:34  program None
+2017/08/10 11:23:34  spectemp None
+2017/08/10 11:23:34  __version__ v1.0.0
+2017/08/10 11:23:34  red yes
+2017/08/10 11:23:34  sort yes
+2017/08/10 11:23:34  sciStop 6
+2017/08/10 11:23:34  rawPath /Users/ncomeau/data/GN-2013A-Q-62
+2017/08/10 11:23:34  rstop 4
+2017/08/10 11:23:34  hlineinter False
+2017/08/10 11:23:34  rstart 1
+2017/08/10 11:23:34  hline_method none
+2017/08/10 11:23:34  date None
+2017/08/10 11:23:34  copy None
+2017/08/10 11:23:34  telStart 1
+2017/08/10 11:23:34  use_pq_offsets yes
+2017/08/10 11:23:34  merge False
+2017/08/10 11:23:34  debug yes
+2017/08/10 11:23:34  
+2017/08/10 11:23:34  These parameters have been written to runtimeData/user_options.json.
+2017/08/10 11:23:34  
+####################################
+2017/08/10 11:23:34  #                                  #
+2017/08/10 11:23:34  #  Start NIFS sorting and copying  #
+2017/08/10 11:23:34  #                                  #
+2017/08/10 11:23:34  ####################################
+
+2017/08/10 11:25:00  Raw file directory is: 
+2017/08/10 11:25:00  
+I am making lists of each type of file.
+2017/08/10 11:25:38  
+Total number of files found by type.
+
+2017/08/10 11:25:38  Length allfilelist (science and telluric frames): 188
+2017/08/10 11:25:38  Length arclist (arc frames): 15
+2017/08/10 11:25:38  Length arcdarklist (arc dark frames): 78
+2017/08/10 11:25:38  Length flatlist (lamps on flat frames): 34
+2017/08/10 11:25:38  Length flatdarklist (lamps off flat frames): 35
+2017/08/10 11:25:38  Length ronchilist (ronchi flat frames): 14
+2017/08/10 11:25:38  Length skyframelist (science sky frames): 15
+2017/08/10 11:25:38  Length telskyframelist (telluric sky frames): 30
+2017/08/10 11:25:38  
+Total number of frames to be copied: 364
+2017/08/10 11:30:06  
+
+Making new directories and copying files. In this step I will process 188 files.
+2017/08/10 11:30:06  
+Making new directories.
+
+2017/08/10 11:30:11  
+Copying Science and Acquisitions.
+Copying science frames.
+Now copying: 
+2017/08/10 11:30:12  N20130527S0263.fits
+2017/08/10 11:30:12  N20130527S0264.fits
+2017/08/10 11:30:12  N20130527S0265.fits
+2017/08/10 11:30:13  N20130527S0266.fits
+2017/08/10 11:30:13  N20130527S0267.fits
+2017/08/10 11:30:13  N20130527S0268.fits
+2017/08/10 11:30:14  N20130527S0269.fits
+2017/08/10 11:30:14  N20130527S0270.fits
+2017/08/10 11:30:15  N20130527S0271.fits
+2017/08/10 11:30:16  N20130527S0272.fits
+2017/08/10 11:30:17  N20130530S0253.fits
+2017/08/10 11:30:17  N20130530S0254.fits
+2017/08/10 11:30:17  N20130530S0255.fits
+2017/08/10 11:30:18  N20130530S0256.fits
+2017/08/10 11:30:18  N20130530S0260.fits
+2017/08/10 11:30:18  N20130530S0261.fits
+2017/08/10 11:30:19  N20130530S0262.fits
+2017/08/10 11:30:19  N20130530S0263.fits
+2017/08/10 11:30:20  N20130531S0161.fits
+2017/08/10 11:30:20  N20130531S0162.fits
+2017/08/10 11:30:21  N20130531S0163.fits
+2017/08/10 11:30:21  N20130531S0164.fits
+2017/08/10 11:30:22  N20130621S0247.fits
+2017/08/10 11:30:22  N20130621S0248.fits
+2017/08/10 11:30:23  N20130621S0249.fits
+2017/08/10 11:30:23  N20130621S0250.fits
+2017/08/10 11:30:23  N20130621S0251.fits
+2017/08/10 11:30:24  N20130621S0252.fits
+2017/08/10 11:30:24  N20130621S0253.fits
+2017/08/10 11:30:25  N20130622S0326.fits
+2017/08/10 11:30:25  N20130622S0327.fits
+2017/08/10 11:30:26  N20130622S0328.fits
+2017/08/10 11:30:26  N20130622S0329.fits
+2017/08/10 11:30:27  N20130622S0330.fits
+2017/08/10 11:30:27  N20130622S0331.fits
+2017/08/10 11:30:27  N20130622S0332.fits
+2017/08/10 11:30:29  N20130624S0077.fits
+2017/08/10 11:30:30  N20130624S0078.fits
+2017/08/10 11:30:32  N20130624S0079.fits
+2017/08/10 11:30:32  N20130624S0080.fits
+2017/08/10 11:30:33  N20130624S0081.fits
+2017/08/10 11:30:34  N20130624S0082.fits
+2017/08/10 11:30:35  N20130624S0083.fits
+2017/08/10 11:30:35  N20130624S0084.fits
+2017/08/10 11:30:36  N20130624S0085.fits
+2017/08/10 11:30:37  N20130624S0086.fits
+2017/08/10 11:30:38  N20130626S0107.fits
+2017/08/10 11:30:39  N20130626S0108.fits
+2017/08/10 11:30:39  N20130626S0109.fits
+2017/08/10 11:30:40  N20130626S0110.fits
+2017/08/10 11:30:40  N20130626S0111.fits
+2017/08/10 11:30:40  N20130626S0112.fits
+2017/08/10 11:30:41  N20130626S0113.fits
+2017/08/10 11:30:41  
+Copying telluric frames.
+Now copying: 
+2017/08/10 11:30:41  N20130527S0240.fits
+2017/08/10 11:30:41  N20130527S0241.fits
+2017/08/10 11:30:42  N20130527S0242.fits
+2017/08/10 11:30:42  N20130527S0243.fits
+2017/08/10 11:30:43  N20130527S0244.fits
+2017/08/10 11:30:43  N20130527S0245.fits
+2017/08/10 11:30:44  N20130527S0246.fits
+2017/08/10 11:30:44  N20130527S0247.fits
+2017/08/10 11:30:44  N20130527S0248.fits
+2017/08/10 11:30:45  N20130527S0249.fits
+2017/08/10 11:30:45  N20130527S0250.fits
+2017/08/10 11:30:46  N20130527S0251.fits
+2017/08/10 11:30:46  N20130527S0254.fits
+2017/08/10 11:30:47  N20130527S0255.fits
+2017/08/10 11:30:47  N20130527S0256.fits
+2017/08/10 11:30:47  N20130527S0257.fits
+2017/08/10 11:30:48  N20130527S0258.fits
+2017/08/10 11:30:48  N20130527S0259.fits
+2017/08/10 11:30:49  N20130527S0277.fits
+2017/08/10 11:30:49  N20130527S0278.fits
+2017/08/10 11:30:50  N20130527S0279.fits
+2017/08/10 11:30:50  N20130527S0280.fits
+2017/08/10 11:30:51  N20130527S0281.fits
+2017/08/10 11:30:51  N20130527S0282.fits
+2017/08/10 11:30:51  N20130530S0244.fits
+2017/08/10 11:30:52  N20130530S0245.fits
+2017/08/10 11:30:52  N20130530S0246.fits
+2017/08/10 11:30:53  N20130530S0247.fits
+2017/08/10 11:30:53  N20130530S0248.fits
+2017/08/10 11:30:54  N20130530S0249.fits
+2017/08/10 11:30:54  N20130530S0268.fits
+2017/08/10 11:30:55  N20130530S0269.fits
+2017/08/10 11:30:55  N20130530S0270.fits
+2017/08/10 11:30:55  N20130530S0271.fits
+2017/08/10 11:30:56  N20130530S0272.fits
+2017/08/10 11:30:56  N20130530S0273.fits
+2017/08/10 11:30:57  N20130531S0152.fits
+2017/08/10 11:30:57  N20130531S0153.fits
+2017/08/10 11:30:57  N20130531S0154.fits
+2017/08/10 11:30:58  N20130531S0155.fits
+2017/08/10 11:30:58  N20130531S0156.fits
+2017/08/10 11:30:59  N20130531S0157.fits
+2017/08/10 11:31:00  N20130531S0170.fits
+2017/08/10 11:31:00  N20130531S0171.fits
+2017/08/10 11:31:01  N20130531S0172.fits
+2017/08/10 11:31:01  N20130531S0173.fits
+2017/08/10 11:31:01  N20130531S0174.fits
+2017/08/10 11:31:02  N20130531S0175.fits
+2017/08/10 11:31:02  N20130621S0258.fits
+2017/08/10 11:31:03  N20130621S0259.fits
+2017/08/10 11:31:03  N20130621S0260.fits
+2017/08/10 11:31:04  N20130621S0261.fits
+2017/08/10 11:31:04  N20130621S0262.fits
+2017/08/10 11:31:04  N20130621S0263.fits
+2017/08/10 11:31:05  N20130622S0316.fits
+2017/08/10 11:31:05  N20130622S0317.fits
+2017/08/10 11:31:06  N20130622S0318.fits
+2017/08/10 11:31:06  N20130622S0319.fits
+2017/08/10 11:31:06  N20130622S0320.fits
+2017/08/10 11:31:07  N20130622S0321.fits
+2017/08/10 11:31:08  N20130622S0337.fits
+2017/08/10 11:31:08  N20130622S0338.fits
+2017/08/10 11:31:09  N20130622S0339.fits
+2017/08/10 11:31:09  N20130622S0340.fits
+2017/08/10 11:31:10  N20130622S0341.fits
+2017/08/10 11:31:10  N20130622S0342.fits
+2017/08/10 11:31:11  N20130624S0068.fits
+2017/08/10 11:31:12  N20130624S0069.fits
+2017/08/10 11:31:12  N20130624S0070.fits
+2017/08/10 11:31:13  N20130624S0071.fits
+2017/08/10 11:31:14  N20130624S0072.fits
+2017/08/10 11:31:14  N20130624S0073.fits
+2017/08/10 11:31:15  N20130624S0091.fits
+2017/08/10 11:31:16  N20130624S0092.fits
+2017/08/10 11:31:16  N20130624S0093.fits
+2017/08/10 11:31:17  N20130624S0094.fits
+2017/08/10 11:31:18  N20130624S0095.fits
+2017/08/10 11:31:18  N20130624S0096.fits
+2017/08/10 11:31:20  N20130626S0097.fits
+2017/08/10 11:31:20  N20130626S0098.fits
+2017/08/10 11:31:20  N20130626S0099.fits
+2017/08/10 11:31:21  N20130626S0100.fits
+2017/08/10 11:31:21  N20130626S0101.fits
+2017/08/10 11:31:21  N20130626S0102.fits
+2017/08/10 11:31:22  N20130626S0117.fits
+2017/08/10 11:31:22  N20130626S0118.fits
+2017/08/10 11:31:23  N20130626S0119.fits
+2017/08/10 11:31:23  N20130626S0120.fits
+2017/08/10 11:31:23  N20130626S0121.fits
+2017/08/10 11:31:24  N20130626S0122.fits
+2017/08/10 11:31:24  
+Checking for non-copied science, tellurics and acquisitions.
+
+2017/08/10 11:31:24  N20130527S0237.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130527S0238.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130527S0239.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130527S0252.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130527S0253.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130527S0261.fits acq was not copied.
+2017/08/10 11:31:24  N20130527S0262.fits acq was not copied.
+2017/08/10 11:31:24  N20130527S0275.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130527S0276.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130530S0242.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130530S0243.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130530S0251.fits acq was not copied.
+2017/08/10 11:31:24  N20130530S0252.fits acq was not copied.
+2017/08/10 11:31:24  N20130530S0259.fits acq was not copied.
+2017/08/10 11:31:24  N20130530S0266.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130530S0267.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130531S0150.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130531S0151.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130531S0159.fits acq was not copied.
+2017/08/10 11:31:24  N20130531S0160.fits acq was not copied.
+2017/08/10 11:31:24  N20130531S0168.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130531S0169.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130621S0245.fits acq was not copied.
+2017/08/10 11:31:24  N20130621S0246.fits acq was not copied.
+2017/08/10 11:31:24  N20130621S0256.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130621S0257.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130622S0314.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130622S0315.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130622S0323.fits acq was not copied.
+2017/08/10 11:31:24  N20130622S0324.fits acq was not copied.
+2017/08/10 11:31:24  N20130622S0325.fits acq was not copied.
+2017/08/10 11:31:24  N20130622S0335.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130622S0336.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130624S0066.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130624S0067.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130624S0075.fits acq was not copied.
+2017/08/10 11:31:24  N20130624S0076.fits acq was not copied.
+2017/08/10 11:31:24  N20130624S0089.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130624S0090.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130626S0095.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130626S0096.fits acqCal was not copied.
+2017/08/10 11:31:24  N20130626S0104.fits acq was not copied.
+2017/08/10 11:31:24  N20130626S0105.fits acq was not copied.
+2017/08/10 11:31:24  N20130626S0106.fits acq was not copied.
+2017/08/10 11:31:24  N20130626S0116.fits acqCal was not copied.
+2017/08/10 11:31:24  
+End non-copied science, tellurics and acquisitions.
+
+2017/08/10 11:31:24  
+Expected number of science and sky frames copied.
+
+2017/08/10 11:31:24  
+Done sorting and copying science and tellurics. Moving on to Calibrations.
+
+2017/08/10 11:39:06  
+I am attempting to sort 176 files.
+
+2017/08/10 11:39:06  
+Sorting flats:
+2017/08/10 11:39:06  N20130527S0310.fits
+2017/08/10 11:39:06  N20130527S0311.fits
+2017/08/10 11:39:07  N20130527S0312.fits
+2017/08/10 11:39:07  N20130527S0313.fits
+2017/08/10 11:39:07  N20130527S0314.fits
+2017/08/10 11:39:08  N20130530S0357.fits
+2017/08/10 11:39:08  N20130530S0358.fits
+2017/08/10 11:39:09  N20130530S0359.fits
+2017/08/10 11:39:09  N20130530S0360.fits
+2017/08/10 11:39:09  N20130530S0361.fits
+2017/08/10 11:39:10  N20130531S0371.fits
+2017/08/10 11:39:10  N20130531S0372.fits
+2017/08/10 11:39:10  N20130531S0373.fits
+2017/08/10 11:39:11  N20130531S0374.fits
+2017/08/10 11:39:11  N20130531S0375.fits
+2017/08/10 11:39:12  N20130621S0539.fits
+2017/08/10 11:39:12  N20130621S0540.fits
+2017/08/10 11:39:12  N20130621S0541.fits
+2017/08/10 11:39:13  N20130621S0542.fits
+2017/08/10 11:39:14  N20130622S0392.fits
+2017/08/10 11:39:14  N20130622S0393.fits
+2017/08/10 11:39:15  N20130622S0394.fits
+2017/08/10 11:39:16  N20130622S0395.fits
+2017/08/10 11:39:17  N20130622S0396.fits
+2017/08/10 11:39:17  N20130624S0235.fits
+2017/08/10 11:39:18  N20130624S0236.fits
+2017/08/10 11:39:19  N20130624S0237.fits
+2017/08/10 11:39:19  N20130624S0238.fits
+2017/08/10 11:39:20  N20130624S0239.fits
+2017/08/10 11:39:20  N20130626S0251.fits
+2017/08/10 11:39:21  N20130626S0252.fits
+2017/08/10 11:39:21  N20130626S0253.fits
+2017/08/10 11:39:21  N20130626S0254.fits
+2017/08/10 11:39:22  N20130626S0255.fits
+2017/08/10 11:39:22  
+Sorting lamps off flats:
+2017/08/10 11:39:22  N20130527S0315.fits
+2017/08/10 11:39:23  N20130527S0316.fits
+2017/08/10 11:39:23  N20130527S0317.fits
+2017/08/10 11:39:23  N20130527S0318.fits
+2017/08/10 11:39:24  N20130527S0319.fits
+2017/08/10 11:39:24  N20130530S0362.fits
+2017/08/10 11:39:24  N20130530S0363.fits
+2017/08/10 11:39:25  N20130530S0364.fits
+2017/08/10 11:39:25  N20130530S0365.fits
+2017/08/10 11:39:26  N20130530S0366.fits
+2017/08/10 11:39:26  N20130531S0376.fits
+2017/08/10 11:39:27  N20130531S0377.fits
+2017/08/10 11:39:27  N20130531S0378.fits
+2017/08/10 11:39:27  N20130531S0379.fits
+2017/08/10 11:39:28  N20130531S0380.fits
+2017/08/10 11:39:29  N20130621S0543.fits
+2017/08/10 11:39:29  N20130621S0544.fits
+2017/08/10 11:39:30  N20130621S0545.fits
+2017/08/10 11:39:30  N20130621S0546.fits
+2017/08/10 11:39:30  N20130621S0547.fits
+2017/08/10 11:39:31  N20130622S0397.fits
+2017/08/10 11:39:31  N20130622S0398.fits
+2017/08/10 11:39:32  N20130622S0399.fits
+2017/08/10 11:39:33  N20130622S0400.fits
+2017/08/10 11:39:33  N20130622S0401.fits
+2017/08/10 11:39:34  N20130624S0240.fits
+2017/08/10 11:39:35  N20130624S0241.fits
+2017/08/10 11:39:35  N20130624S0242.fits
+2017/08/10 11:39:36  N20130624S0243.fits
+2017/08/10 11:39:37  N20130624S0244.fits
+2017/08/10 11:39:37  N20130626S0256.fits
+2017/08/10 11:39:38  N20130626S0257.fits
+2017/08/10 11:39:38  N20130626S0258.fits
+2017/08/10 11:39:38  N20130626S0259.fits
+2017/08/10 11:39:39  N20130626S0260.fits
+2017/08/10 11:39:39  
+Sorting ronchi flats:
+2017/08/10 11:39:39  N20130527S0322.fits
+2017/08/10 11:39:39  N20130527S0323.fits
+2017/08/10 11:39:40  N20130530S0369.fits
+2017/08/10 11:39:40  N20130530S0370.fits
+2017/08/10 11:39:41  N20130531S0383.fits
+2017/08/10 11:39:41  N20130531S0384.fits
+2017/08/10 11:39:41  N20130621S0550.fits
+2017/08/10 11:39:42  N20130621S0551.fits
+2017/08/10 11:39:42  N20130622S0404.fits
+2017/08/10 11:39:43  N20130622S0405.fits
+2017/08/10 11:39:44  N20130624S0247.fits
+2017/08/10 11:39:45  N20130624S0248.fits
+2017/08/10 11:39:45  N20130626S0263.fits
+2017/08/10 11:39:46  N20130626S0264.fits
+2017/08/10 11:39:46  
+Sorting arcs:
+2017/08/10 11:39:46  N20130527S0260.fits
+2017/08/10 11:39:47  N20130527S0274.fits
+2017/08/10 11:39:47  N20130530S0250.fits
+2017/08/10 11:39:47  N20130530S0258.fits
+2017/08/10 11:39:48  N20130530S0265.fits
+2017/08/10 11:39:48  N20130531S0158.fits
+2017/08/10 11:39:49  N20130531S0166.fits
+2017/08/10 11:39:49  N20130621S0244.fits
+2017/08/10 11:39:50  N20130621S0255.fits
+2017/08/10 11:39:50  N20130622S0322.fits
+2017/08/10 11:39:50  N20130622S0334.fits
+2017/08/10 11:39:51  N20130624S0074.fits
+2017/08/10 11:39:52  N20130624S0088.fits
+2017/08/10 11:39:53  N20130626S0103.fits
+2017/08/10 11:39:53  N20130626S0115.fits
+2017/08/10 11:39:53  
+Sorting arc darks:
+2017/08/10 11:39:53  N20130527S0320.fits
+2017/08/10 11:39:54  N20130527S0321.fits
+2017/08/10 11:39:54  N20130530S0367.fits
+2017/08/10 11:39:55  N20130530S0368.fits
+2017/08/10 11:39:55  N20130531S0381.fits
+2017/08/10 11:39:55  N20130531S0382.fits
+2017/08/10 11:39:56  N20130621S0548.fits
+2017/08/10 11:39:56  N20130621S0549.fits
+2017/08/10 11:39:57  N20130622S0402.fits
+2017/08/10 11:39:58  N20130622S0403.fits
+2017/08/10 11:40:00  N20130624S0245.fits
+2017/08/10 11:40:00  N20130624S0246.fits
+2017/08/10 11:40:01  N20130626S0261.fits
+2017/08/10 11:40:01  N20130626S0262.fits
+2017/08/10 11:40:01  
+I did not copy 64 calibration file(s).
+
+2017/08/10 11:40:01  N20130527S0273.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0301.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0302.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0303.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0304.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0305.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0307.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0308.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130527S0309.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0257.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0264.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0349.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0350.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0351.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0352.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0353.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0354.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0355.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130530S0356.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0165.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0363.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0364.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0365.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0366.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0367.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0368.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0369.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130531S0370.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0254.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0530.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0531.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0532.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0533.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0534.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0535.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0536.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130621S0537.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0333.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0422.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0423.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0424.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0425.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0426.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0427.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0428.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130622S0429.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0087.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0227.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0228.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0229.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0230.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0231.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0232.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0233.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130624S0234.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0114.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0243.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0244.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0245.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0246.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0247.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0248.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0249.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  N20130626S0250.fits from arcdarklist was not copied.
+2017/08/10 11:40:01  
+Checking that each science image has required calibration data. 
+2017/08/10 11:40:03  
+Science Directory List: 
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/H/obs28
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/H/obs55
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/H/obs36
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130531/H/obs36
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130621/H/obs36
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130622/H/obs44
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130624/H/obs75
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130626/H/obs83
+2017/08/10 11:40:03  
+Telluric Directory List: 
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/H/Tellurics/obs26
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/H/Tellurics/obs51
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/H/Tellurics/obs30
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/H/Tellurics/obs53
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/H/Tellurics/obs38
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130531/H/Tellurics/obs34
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130531/H/Tellurics/obs64
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130621/H/Tellurics/obs69
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130622/H/Tellurics/obs42
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130622/H/Tellurics/obs46
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130624/H/Tellurics/obs73
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130624/H/Tellurics/obs77
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130626/H/Tellurics/obs81
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130626/H/Tellurics/obs85
+2017/08/10 11:40:03  
+Calibration Directory List: 
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/Calibrations_H
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/Calibrations_H
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130531/Calibrations_H
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130621/Calibrations_H
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130622/Calibrations_H
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130624/Calibrations_H
+2017/08/10 11:40:03  /Users/ncomeau/research/newer-nifty/AEGISz1284/20130626/Calibrations_H
+2017/08/10 11:45:24  #################################################
+2017/08/10 11:45:24  #                                               #
+2017/08/10 11:45:24  # Start the NIFS Baseline Calibration Reduction #
+2017/08/10 11:45:24  #                                               #
+2017/08/10 11:45:24  #################################################

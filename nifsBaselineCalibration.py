@@ -53,6 +53,9 @@ def start(obsDirList, calDirList, over, start, stop, debug):
     # Store current working directory for later use.
     path = os.getcwd()
 
+    # Set up the logging file.
+    log = os.getcwd()+'/Nifty.log'
+
     logging.info('#################################################')
     logging.info('#                                               #')
     logging.info('# Start the NIFS Baseline Calibration Reduction #')
