@@ -5,7 +5,7 @@ from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
 import astropy.io.fits
-import os, shutil, glob, math, logging, urllib.request
+import os, shutil, glob, math, logging
 import numpy as np
 # Import custom Nifty functions.
 from nifsDefs import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
