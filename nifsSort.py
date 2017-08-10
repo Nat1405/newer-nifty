@@ -135,7 +135,7 @@ def start(dir, tel, over, copy, program, date, debug):
     ############################################################################
 
     # TODO(nat): implement private gemini archive downloads.
-    """elif copy or program or date:
+    elif copy or program or date:
         try:
             import gemini_sort
         except ImportError:
@@ -152,8 +152,6 @@ def start(dir, tel, over, copy, program, date, debug):
             raise SystemExit
         else:
             gemini_sort.start(tel, over, copy, program, date)
-    """
-
 
     # Exit if no or incorrectly formatted input is given.
     else:
