@@ -25,6 +25,7 @@
     "copy": null,
     "sciStart": 1,
     "use_pq_offsets": "yes",
-    "merge": "yes",
-    "im3dtran": false
+    "merge": false,
+    "im3dtran": false,
+    "debug": "yes"
 }
