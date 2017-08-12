@@ -1,0 +1,14 @@
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/H/Tellurics/obs26
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/H/Tellurics/obs51
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/H/Tellurics/obs30
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/H/Tellurics/obs53
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/H/Tellurics/obs38
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130531/H/Tellurics/obs34
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130531/H/Tellurics/obs64
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130621/H/Tellurics/obs69
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130622/H/Tellurics/obs42
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130622/H/Tellurics/obs46
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130624/H/Tellurics/obs73
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130624/H/Tellurics/obs77
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130626/H/Tellurics/obs81
+/Users/ncomeau/research/newer-nifty/AEGISz1284/20130626/H/Tellurics/obs85
