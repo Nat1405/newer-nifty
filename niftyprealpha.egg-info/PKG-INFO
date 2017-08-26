@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: niftyprealpha
+Version: 1.0.0
+Summary: Data reduction script for Gemini NIFS
+Home-page: http://www.gemini.edu
+Author: ncomeau
+Author-email: ncomeau@gemini.edu
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

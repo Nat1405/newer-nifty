@@ -188,15 +188,11 @@ def start():
     # 3) Telluric observation directory
     with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
-    temp_sci_dict = {"scienceDirectoryList": tuple(scienceDirectoryList)}
-    temp_cal_dict = {"calibrationDirectoryList": tuple(calibrationDirectoryList)}
-    temp_tel_dict = {"telluricDirectoryList": tuple(telluricDirectoryList)}
-    options.update(temp_sci_dict)
-    options.update(temp_cal_dict)
-    options.update(temp_tel_dict)
-
-    with open(RUNTIME_DATA_PATH+'config.cfg', 'w') as outfile:
-        options.write(outfile)
+    options['scienceDirectoryList'] = scienceDirectoryList
+    options['telluricDirectoryList'] = telluricDirectoryList
+    options['calibrationDirectoryList'] = calibrationDirectoryList
+    with open(RUNTIME_DATA_PATH+'config.cfg', 'w') as config_file:
+        options.write(config_file)
 
 ##################################################################################################################
 #                                                                                                                #

@@ -8,7 +8,7 @@ import sys
 from setuptools import setup, find_packages, Extension, Command
 from glob import glob
 
-NAME = 'nifty'
+NAME = 'niftyprealpha'
 SCRIPTS = glob('scripts/*')
 PACKAGE_DATA = {
     '': ['*.dat', '*.cfg', '*.fits']
