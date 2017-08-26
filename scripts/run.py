@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-import nifty.linearPipeline as linearPipeline
+import nifty
 
 if __name__ == '__main__':
 
@@ -9,5 +9,5 @@ if __name__ == '__main__':
         sys.stdout.write("%s\n" % stpipe.__version__)
         sys.exit(0)
 
-    if '-f' in sys.argv:
-        linearPipeline.start(sys.argv[1:])
+    if '-f' or '-r' or '-l' in sys.argv:
+        nifty.linearPipeline.start(sys.argv[1:])

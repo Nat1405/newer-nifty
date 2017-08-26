@@ -7,7 +7,7 @@
 # STDLIB
 
 from optparse import OptionParser
-import logging, os, sys, shutil
+import logging, os, sys, shutil, pkg_resources
 from datetime import datetime
 
 # LOCAL
@@ -74,6 +74,10 @@ def start(args):
     # Save path for later use and change one directory up.
     path = os.getcwd()
 
+    # Get paths to Nifty data.
+    RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
+    RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
+
     # Format logging options.
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
@@ -106,39 +110,46 @@ def start(args):
     # I am testing the use of pip and another entry point.
     parser = OptionParser()
     parser.add_option('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeData/config.cfg.')
-    parser.add_option('-l', '--load', dest = 'load', default='default_input.cfg', action = 'store', help = 'Load data reduction parameters from runtimeData/config.cfg. Equivalent to -r and --repeat.')
+    parser.add_option('-l', '--load', dest = 'fileToLoad', action = 'store', help = 'Load data reduction parameters from the provided configuration file. Default is default_input.cfg.')
     parser.add_option('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full reduction with data reduction parameters loaded from runtimeData/default_input.cfg')
 
     (options, args) = parser.parse_args(args)
 
     repeat = options.repeat
     fullReduction = options.fullReduction
+    fileToLoad = options.fileToLoad
 
     # Check if the user specified at command line to repeat the last Reduction, do a full default data reduction from a
     # recipe file or do a full data reduction from a handmade file.
-    if not repeat and not fullReduction:
+    if not repeat and not fullReduction and not fileToLoad:
         # If not get user input and check if user specified a full data reduction.
         fullReduction = getUserInput()
 
     # TODO(nat): Add proper documentation on supplying an input file name (the args option here).
     if fullReduction:
         # TODO(nat): move this code to a function.
-        # TODO(nat): finish implementing the recipe loading feature.
         # Read and use parameters of the last Reduction from runtimeData/config.cfg.
-        shutil.copy('recipes/default_input.cfg', 'runtimeData/config.cfg')
-        logging.info("\nData reduction parameters for this reduction were copied from ./recipes/default_input.cfg to runtimeData/config.cfg.")
+        shutil.copy(RECIPES_PATH+'default_input.cfg', RUNTIME_DATA_PATH+'config.cfg')
+        logging.info("\nData reduction parameters for this reduction were copied from recipes/default_input.cfg to runtimeData/config.cfg.")
 
-    # logging.info(user parameters for future reference.
-    logging.info("\nPipeline configuration for this data reduction has been written to runtimeData/config.cfg.")
+    if fileToLoad:
+        # Load input from a .cfg file user specified at command line.
+        shutil.copy('./'+fileToLoad, RUNTIME_DATA_PATH+'config.cfg')
+        logging.info("\nPipeline configuration for this data reduction was read read from " + str(fileToLoadl))
+    else:
+        shutil.copy(RUNTIME_DATA_PATH+'config.cfg', './config.cfg')
+        logging.info("\nPipeline configuration for this data reduction has been written to ./config.cfg")
+
+    # Print data reduction parameters for a user's peace-of-mind.
     logging.info("\nParameters for this data reduction as read from that file:\n")
-    with open('runtimeData/config.cfg') as config_file:
+    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         for i in options:
             logging.info(str(i) + " " + str(options[i]))
     logging.info("")
 
     # Define parameters used by this script:
-    with open('runtimeData/config.cfg') as config_file:
+    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         sort = options['sort']
         calibrationReduction = options['calibrationReduction']

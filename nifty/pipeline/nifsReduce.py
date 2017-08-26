@@ -2,7 +2,7 @@
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
-import sys, glob, shutil, getopt, os, time, logging, glob, sgmllib, urllib, re, traceback
+import sys, glob, shutil, getopt, os, time, logging, glob, sgmllib, urllib, re, traceback, pkg_resources
 import pexpect as p
 from pyraf import iraf, iraffunctions
 import astropy.io.fits
@@ -18,6 +18,11 @@ from configobj.configobj import ConfigObj
 from nifsUtils import datefmt, listit, writeList, checkLists, makeSkyList, MEFarith, convertRAdec
 # Import Nifty python data cube merging script.
 import nifsMerge
+
+# Define constants
+# Paths to Nifty data.
+RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
+RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
 def start(kind):
     """
@@ -109,7 +114,7 @@ def start(kind):
     iraf.reset(clobber='yes')
 
     # Load reduction parameters from runtimeData/config.cfg.
-    with open('runtimeData/config.cfg') as config_file:
+    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         if kind == 'Telluric':
             # Load telluricDirectoryList as observationDirectoryList
@@ -1209,7 +1214,7 @@ def mag2mass(name, path, spectemp, mag, band):
     """
 
     starfile = 'std_star.txt'
-    kelvinfile = path+'/runtimeData/new_starstemp.txt'
+    kelvinfile = RUNTIME_DATA_PATH+'new_starstemp.txt'
 
     sf = open(starfile,'w')
     klf = open (kelvinfile)
@@ -1423,11 +1428,11 @@ def vega(spectrum, band, path, hlineinter, airmass, telluric_shift_scale_record,
     if os.path.exists("tell_nolines"+band+".fits"):
             if over:
                 os.remove("tell_nolines"+band+".fits")
-                tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/runtimeData/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
+                tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=RUNTIME_DATA_PATH+'vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
             else:
                 logging.info("Output file exists and -over not set - skipping H line correction")
     else:
-        tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=path+'/runtimeData/vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=1., dscale=0.05, offset=0, smooth=1, cursor='', mode='al', Stdout=1)
+        tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=RUNTIME_DATA_PATH+'vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=1., dscale=0.05, offset=0, smooth=1, cursor='', mode='al', Stdout=1)
 
     # record shift and scale info for future reference
     telluric_shift_scale_record.write(str(tell_info)+'\n')

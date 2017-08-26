@@ -10,7 +10,7 @@ from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
 import astropy.io.fits
-import os, sys, shutil, glob, math, logging
+import os, sys, shutil, glob, math, logging, pkg_resources
 import numpy as np
 # Import config parsing.
 from configobj.configobj import ConfigObj
@@ -20,6 +20,11 @@ from configobj.configobj import ConfigObj
 # Import custom Nifty functions.
 from nifsUtils import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
 datefmt, checkOverCopy, checkQAPIreq, checkDate, writeList, checkEntry, timeCalc, checkSameLengthFlatLists
+
+# Define constants
+# Paths to Nifty data.
+RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
+RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
 
 def start():
@@ -77,7 +82,7 @@ def start():
     logging.info('####################################\n')
 
     # Load reduction parameters from runtimeData/config.cfg.
-    with open('runtimeData/config.cfg') as config_file:
+    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         rawPath = options['rawPath']
         telluricReduction = options['telluricReduction']
@@ -181,7 +186,7 @@ def start():
     # 1) Science observation directory
     # 2) Calibration observation directory
     # 3) Telluric observation directory
-    with open('runtimeData/config.cfg') as config_file:
+    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
     temp_sci_dict = {"scienceDirectoryList": tuple(scienceDirectoryList)}
     temp_cal_dict = {"calibrationDirectoryList": tuple(calibrationDirectoryList)}
@@ -190,7 +195,7 @@ def start():
     options.update(temp_cal_dict)
     options.update(temp_tel_dict)
 
-    with open('runtimeData/config.cfg', 'w') as outfile:
+    with open(RUNTIME_DATA_PATH+'config.cfg', 'w') as outfile:
         options.write(outfile)
 
 ##################################################################################################################

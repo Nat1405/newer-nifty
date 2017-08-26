@@ -4,7 +4,7 @@
 
 # STDLIB
 
-import time, sys, calendar, astropy.io.fits, urllib, shutil, glob, os, fileinput, logging, smtplib
+import time, sys, calendar, astropy.io.fits, urllib, shutil, glob, os, fileinput, logging, smtplib, pkg_resources
 import numpy as np
 from xml.dom.minidom import parseString
 from pyraf import iraf
@@ -13,6 +13,11 @@ from pyraf import iraf
 
 # Import config parsing.
 from configobj.configobj import ConfigObj
+
+# Define constants
+# Paths to Nifty data.
+RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
+RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
 #--------------------------------------------------------------------#
 #                                                                    #
@@ -190,7 +195,7 @@ def getUserInput():
         options['use_pq_offsets'] = use_pq_offsets
         options['im3dtran'] = im3dtran
         options['debug'] = debug
-        with open('runtimeData/config.cfg', 'w') as outfile:
+        with open(RUNTIME_DATA_PATH+'/config.cfg', 'w') as outfile:
             options.write(outfile)
 
     return fullReduction
@@ -212,7 +217,6 @@ def printDirectoryLists():
           runtimeData/telluricDirectoryList.txt and runtimeData/calibrationDirectoryList.txt
           correctly.
     """
-    print os.getcwd()
     # Print the current directory of data being reduced.
     logging.info("\n#################################################################################")
     logging.info("                                   ")
@@ -222,9 +226,8 @@ def printDirectoryLists():
     logging.info("")
     logging.info("#################################################################################\n")
 
-    with open('runtimeData/config.cfg') as config_file:
+    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
-    print options
     logging.info("\nScience Directory List: ")
     for i in range(len(options['scienceDirectoryList'])):
         logging.info(options['scienceDirectoryList'][i])

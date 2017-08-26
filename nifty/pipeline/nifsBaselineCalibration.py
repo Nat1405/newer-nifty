@@ -2,15 +2,20 @@
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
-from pyraf import iraf, iraffunctions
+import logging, os, pkg_resources
 import astropy.io.fits
-import logging, os
+from pyraf import iraf, iraffunctions
 
 # Import config parsing.
 from configobj.configobj import ConfigObj
 
 # Import custom Nifty functions.
 from nifsUtils import datefmt, listit, checkLists
+
+# Define constants.
+# Paths to Nifty data.
+RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
+RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
 def start():
     """
@@ -92,7 +97,7 @@ def start():
     iraf.reset(clobber='yes')
 
     # Load reduction parameters from runtimeData/config.cfg.
-    with open('runtimeData/config.cfg') as config_file:
+    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         calDirList = options['calibrationDirectoryList']
         over = options['over']
@@ -646,15 +651,15 @@ def wavecal(arc, log, over, path):
     interactive = 'no'
 
     if band == "K":
-        clist=path+"/runtimeData/wavecal_k_band_argon.dat"
+        clist=RUNTIME_DATA_PATH+"wavecal_k_band_argon.dat"
         my_thresh = 50.0
         interactive = 'no'
     elif band == "J":
-        clist=path+"/runtimeData/wavecal_j_band_argon.dat"
+        clist=RUNTIME_DATA_PATH+"wavecal_j_band_argon.dat"
         my_thresh=100.0
         interactive = 'no'
     elif band == "H":
-        clist=path+"/runtimeData/wavecal_h_band_argon.dat"
+        clist=RUNTIME_DATA_PATH+"wavecal_h_band_argon.dat"
         my_thresh=100.0
         interactive = 'no'
     elif band == "Z":
