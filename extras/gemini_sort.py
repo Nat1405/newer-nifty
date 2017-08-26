@@ -41,9 +41,9 @@ def start(tel, sort, over, copy, program, date):
     if copy and sort:
         # Copy data from archives and sort ONLY IF a program is given with -p.
         if program:
-            allfilelist, filelist, skyframelist, telskyframelist = getProgram(program, date, over)
+            allfilelist, filelist, skyFrameList, telskyFrameList = getProgram(program, date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
-            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skyframelist, telskyframelist)
+            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skyFrameList, telskyFrameList)
             calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList)
             # If a telluric correction will be performed sort the science and telluric images based on time between observations.
             # This will ONLY NOT be executed if -t False is specified at command line.
@@ -51,9 +51,9 @@ def start(tel, sort, over, copy, program, date):
                 telSort(telDirList, obsDirList)
         # Copy data from archives and sort ONLY IF a date is given with -d.
         elif date:
-            allfilelist, filelist, skyframelist, telskyframelist = getScience(date, over)
+            allfilelist, filelist, skyFrameList, telskyFrameList = getScience(date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList = getCals(filelist, over)
-            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skyframelist, telskyframelist)
+            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skyFrameList, telskyFrameList)
             calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList)
             # If telluric correction will be performed sort the science and telluric images based on time between observations.
             # This will ONLY NOT be executed if -t False is specified at command line.
@@ -68,15 +68,15 @@ def start(tel, sort, over, copy, program, date):
     elif copy and not sort:
         # When a program is given (looks for program using /net/mko-nfs/sci/dataflow)
         if program:
-            allfilelist, filelist, skyframelist, telskyframelist = getProgram(program, date, over)
+            allfilelist, filelist, skyFrameList, telskyFrameList = getProgram(program, date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyframelist, telskyframelist, obsidDateList = makeSortFiles(dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyFrameList, telskyFrameList, obsidDateList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateGratingList, dir)
         # When a date is given (looks for data using /net/mko-nfs/sci/dataflow)
         elif date:
-            allfilelist, filelist, skyframelist, telskyframelist = getScience(date, over)
+            allfilelist, filelist, skyFrameList, telskyFrameList = getScience(date, over)
             arclist, arcdarklist, flatlist, flatdarklist, ronchilist, obsidDateList  = getCals(filelist, over)
-            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyframelist, telskyframelist, obsidDateList = makeSortFiles(dir)
+            allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyFrameList, telskyFrameList, obsidDateList = makeSortFiles(dir)
             obsDirList, calDirList, telDirList = getPaths(allfilelist, objDateGratingList, dir)
         # Exit if a program or date was not provided with -p or -d at command line.
         else:
@@ -85,10 +85,10 @@ def start(tel, sort, over, copy, program, date):
 
     # Sort data ALREADY copied from Gemini Network. Specified if -s and -c are NOT specified at command line.
     elif not copy and sort:
-        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyframelist, telskyframelist, obsidDateList = makeSortFiles(dir)
+        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objDateGratingList, skyFrameList, telskyFrameList, obsidDateList = makeSortFiles(dir)
         # Sort and get data from Gemini Internal Network
         if program or date:
-            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skyframelist, telskyframelist)
+            objDateGratingList, objDirList, obsDirList, telDirList = sortObsGem(allfilelist, skyFrameList, telskyFrameList)
             calDirList = sortCalsGem(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objDateGratingList, objDirList, obsidDateList)
         # if a telluric correction will be performed sort the science and telluric images based on time between observations
         if tel:
@@ -112,7 +112,7 @@ def start(tel, sort, over, copy, program, date):
 ##################################################################################################################
 
 
-def sortObsGem(allfilelist, skyframelist, telskyframelist):
+def sortObsGem(allfilelist, skyFrameList, telskyFrameList):
 
     """Sorts the science images, tellurics and acquisitions into the appropriate directories based
     on date, grating, obsid, obsclass; called when sorting in the Gemini network.
@@ -185,11 +185,11 @@ def sortObsGem(allfilelist, skyframelist, telskyframelist):
             objDir = path+'/'+header[2]
             shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+DATE+'/'+header[5][0]+'/obs'+obsid+'/')
             # make an objlist in the relevant directory
-            if allfilelist[i] not in skyframelist:
+            if allfilelist[i] not in skyFrameList:
                 writeList(allfilelist[i], 'objlist', objDir+'/'+DATE+'/'+header[5][0]+'/obs'+obsid+'/')
-            # make a skyframelist in the relevant directory
-            if allfilelist[i] in skyframelist:
-               writeList(allfilelist[i], 'skyframelist', objDir+'/'+DATE+'/'+header[5][0]+'/obs'+obsid+'/')
+            # make a skyFrameList in the relevant directory
+            if allfilelist[i] in skyFrameList:
+               writeList(allfilelist[i], 'skyFrameList', objDir+'/'+DATE+'/'+header[5][0]+'/obs'+obsid+'/')
 
         if header[3]=='partnerCal':
             # create a Tellurics directory in objDir/YYYYMMDD/grating
@@ -203,11 +203,11 @@ def sortObsGem(allfilelist, skyframelist, telskyframelist):
                     telDirList.append(objDir+'/'+DATE+'/'+header[5][0]+'/Tellurics/obs'+obsid)
                 shutil.copy(Raw+'/'+allfilelist[i], objDir+'/'+DATE+'/'+header[5][0]+'/Tellurics/obs'+obsid+'/')
                 # make a tellist in the relevant directory
-                if allfilelist[i] not in telskyframelist:
+                if allfilelist[i] not in telskyFrameList:
                     writeList(allfilelist[i], 'tellist', objDir+'/'+DATE+'/'+header[5][0]+'/Tellurics/obs'+obsid+'/')
-                # make a skyframelist in the relevant telluric directory
-                if allfilelist[i] in telskyframelist:
-                    writeList(allfilelist[i], 'skyframelist', objDir+'/'+DATE+'/'+header[5][0]+'/Tellurics/obs'+obsid+'/')
+                # make a skyFrameList in the relevant telluric directory
+                if allfilelist[i] in telskyFrameList:
+                    writeList(allfilelist[i], 'skyFrameList', objDir+'/'+DATE+'/'+header[5][0]+'/Tellurics/obs'+obsid+'/')
 
         if i!=(len(allfilelist)-1):
             header2= getFitsHeader(allfilelist[i+1], fitsKeyWords)
@@ -323,8 +323,8 @@ def getProgram(program, date, over):
     rawfiles = []
     missingRaw = []
     filelist = []
-    skyframelist = []
-    telskyframelist = []
+    skyFrameList = []
+    telskyFrameList = []
 
     if date:
         url = '/net/mko-nfs/sci/dataflow/'+program+'/'+date+'/OBJECT'
@@ -372,13 +372,13 @@ def getProgram(program, date, over):
         if header[1] == 'science':
             rad = math.sqrt(header[2]**2 + header[3]**2)
             if rad > 3.0:
-                skyframelist.append(entry)
+                skyFrameList.append(entry)
         if header[1] == 'partnerCal':
             rad = math.sqrt(header[2]**2 + header[3]**2)
             if rad > 2.5:
-                telskyframelist.append(entry)
+                telskyFrameList.append(entry)
 
-    return allfilelist, filelist, skyframelist, telskyframelist
+    return allfilelist, filelist, skyFrameList, telskyFrameList
 
 #----------------------------------------------------------------------------------------#
 
@@ -390,8 +390,8 @@ def getScience(date, over):
     filelist = []
     templist = []
     datelist = []
-    skyframelist = []
-    telskyframelist = []
+    skyFrameList = []
+    telskyFrameList = []
 
     # internal site where observations can be found
     url = 'http://fits/xmlfilelist/summary/'+date+'/NIFS/OBJECT'
@@ -423,11 +423,11 @@ def getScience(date, over):
         if header[1] == 'science':
             rad = math.sqrt(header[2]**2 + header[3]**2)
             if rad > 3.0:
-                skyframelist.append(entry)
+                skyFrameList.append(entry)
         if header[1] == 'partnerCal':
             rad = math.sqrt(header[2]**2 + header[3]**2)
             if rad > 2.5:
-                telskyframelist.append(entry)
+                telskyFrameList.append(entry)
         if header[1]!='acq':
             filelist.append(entry)
 
@@ -446,7 +446,7 @@ def getScience(date, over):
     # copy all science images from a given night into ./Raw/
     checkOverCopy(allfilelist, Raw, over)
 
-    return allfilelist, filelist, skyframelist, telskyframelist
+    return allfilelist, filelist, skyFrameList, telskyFrameList
 
 #----------------------------------------------------------------------------------------#
 

@@ -1,0 +1,788 @@
+
+# Old nifsSort.py functions.
+
+#-----------------------------------------------------------------------------#
+
+def getPaths(allfilelist, objectDateGratingList, sciImageList, dir):
+
+    """Creates lists of Calibrations, science observations
+    and Tellurics/ directories.
+
+    """
+
+    obsDirList = []
+    calDirList = []
+    telDirList = []
+
+    # Modify allfilelist to remove sorted/not sorted flag data used in previous steps.
+    '''tempList = []
+    for i in range(len(allfilelist)):
+         tempList.append(allfilelist[i][0])
+    allfilelist = tempList'''
+
+    path = os.getcwd()
+    if dir:
+        Raw = dir
+    else:
+        Raw = path+'/Raw'
+
+    logging.info("\nGetting list of paths to science observations.")
+    for i in range(len(allfilelist)):
+        # Make a 2D list of paths to science observations and the time of each one.
+        header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
+
+        obstype = header[0].header['OBSTYPE'].strip()
+        obsid = header[0].header['OBSID']
+        grat = header[0].header['GRATING'][0:1]
+        date = header[0].header[ 'DATE'].replace('-','')
+        obsclass = header[0].header['OBSCLASS']
+        obj = header[0].header['OBJECT'].replace(' ','')
+        time = timeCalc(Raw+'/'+allfilelist[i][0])
+
+        if obsclass=='science':
+            objDir = path+'/'+obj
+            path1 = (objDir+'/'+date+'/'+grat+'/obs'+obsid[-3:].replace('-',''))
+            if not obsDirList or not obsDirList[-1][1]==path1:
+                obsDirList.append([[time], path1])
+            elif obsDirList[-1][1] == path1:
+                obsDirList[-1][0].append(time)
+            allfilelist[i][1] = 0
+
+    # Get list of paths to Tellurics/ot_observation_id directories.
+    logging.info("\nGetting list of paths to telluric observations.")
+    for i in range(len(allfilelist)):
+        header = astropy.io.fits.open(Raw+'/'+allfilelist[i][0])
+
+        obstype = header[0].header['OBSTYPE'].strip()
+        obsid = header[0].header['OBSID'][-3:].replace('-','')
+        grat = header[0].header['GRATING'][0:1]
+        date = header[0].header[ 'DATE'].replace('-','')
+        obsclass = header[0].header['OBSCLASS']
+        obj = header[0].header['OBJECT'].replace(' ', '')
+        telluric_time = timeCalc(Raw+'/'+allfilelist[i][0])
+
+        # Match tellurics to science data by date, grating and time.
+        if obsclass=='partnerCal':
+            logging.info(allfilelist[i][0])
+            timeList = []
+            for k in range(len(obsDirList)):
+                # Make sure date and gratings match.
+                tempDir = obsDirList[k][1].split(os.sep)
+                if date in tempDir and grat in tempDir:
+                    # Open the times of all science images in obsDirList[k][0].
+                    times = obsDirList[k][0]
+                    # Find difference in each time from the telluric frame we're trying to sort.
+                    diffList = []
+                    for b in range(len(times)):
+                        difference = abs(telluric_time-obsDirList[k][0][b])
+                        templist = []
+                        templist.append(difference)
+                        templist.append(obsDirList[k][1])
+                        diffList.append(templist)
+                    # Find the science image with the smallest difference.
+                    minDiff = min(diffList)
+                    # Pass that time and path out of the for loop.
+                    timeList.append(minDiff)
+            # Out of the for loop, compare min times from different directories.
+            if timeList:
+                closest_time = min(timeList)
+                # Copy the telluric frame to the path of that science image.
+                path_to_science_dir = closest_time[1]
+                path_to_tellurics = os.path.split(path_to_science_dir)[0]
+                if not telDirList or telDirList[-1] != path_to_tellurics+'/Tellurics/obs'+obsid:
+                    telDirList.append(path_to_tellurics+'/Tellurics/obs'+obsid)
+
+    # Append Calibrations directories to the calDirList (ie. YYYYMMDD/Calibrations).
+    for item in objectDateGratingList:
+            Calibrations = (path+'/'+item[0]+'/'+item[1]+'/Calibrations_'+item[2])
+            calDirList.append(Calibrations)
+
+
+    # ---------------------------- Tests ------------------------------------- #
+
+
+    # Check that each science observation has valid telluric data.
+    logging.info("\nChecking that each science observation has valid telluric data.")
+    # For each science observation:
+    for i in range(len(obsDirList)):
+        os.chdir(obsDirList[i][1])
+        # Store science observation name in science_observation_name
+        science_observation_name = obsDirList[i][1].split(os.sep)[-1]
+        # Optional: store time of a science frame in science_time.
+        try:
+            scienceFrameList = open('scienceFrameList', "r").readlines()
+        except IOError:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: science "+str(science_observation_name))
+            logging.info("                      does not contain science images.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+
+            scienceFrameList = open('skyFrameList', "r").readlines()
+        scienceFrameList = [image.strip() for image in scienceFrameList]
+
+        # Open image and get science image grating from header.
+        science_image = scienceFrameList[0]
+        science_header = astropy.io.fits.open('./'+ science_image + '.fits')
+        science_time = timeCalc(science_image+'.fits')
+        science_date = science_header[0].header[ 'DATE'].replace('-','')
+
+        # Check that directory obsname matches header obsname.
+        temp_obs_name = 'obs' + science_header[0].header['OBSID'][-3:].replace('-','')
+        if science_observation_name != temp_obs_name:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: science "+ str(science_observation_name)+ " :")
+            logging.info("                      observation name data in headers and directory")
+            logging.info("                      do not match.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+        # Check that a tellurics directory exists.
+        if os.path.exists('../Tellurics/'):
+            os.chdir('../Tellurics/')
+        else:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: telluric directory for science "+str(science_observation_name))
+            logging.info("                      does not exist.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+        found_telluric_flag = False
+
+        # Iterate through tellurics observation directories.
+        for directory in list(glob.glob('obs*')):
+            os.chdir('./'+directory)
+            # Check that a file, scienceMatchedTellsList exists.
+            try:
+                scienceMatchedTellsList = open('scienceMatchedTellsList', "r").readlines()
+                # Check that the science observation name is in the file.
+                # Check that immediately after is at least one telluric image name.
+                # Do this by checking for the science date in the telluric name.
+                for i in range(len(scienceMatchedTellsList)):
+                    telluric_observation_name = scienceMatchedTellsList[i].strip()
+                    if telluric_observation_name == science_observation_name:
+                        if science_date in scienceMatchedTellsList[i+1].strip():
+                            found_telluric_flag = True
+                            break
+            except IOError:
+                pass
+
+            if found_telluric_flag:
+                os.chdir('../')
+                break
+            else:
+                os.chdir('../')
+
+        if not found_telluric_flag:
+            os.chdir('../')
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no tellurics data found for science "+str(science_observation_name))
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+
+        else:
+            logging.info("\nFound telluric data for all science observations.")
+        # TO DO:
+        # Optional: open that telluric image and store time in telluric_time
+        # Check that abs(telluric_time - science_time) < 1.5 hours
+
+    os.chdir(path)
+
+    # Check that each science directory exists and has associated calibration data.
+    # Pseudocode (repeated below with actual code):
+    # For each science directory, make sure that:
+    # a calibrations directory is present.
+    # flatlist exists and has more than one file.
+    # flatdarklist exists and has more than one file.
+    # arclist exists and has more than one file.
+    # arcdarklist exists and has more than one file.
+    # ronchilist exists and has more than one file.
+
+    logging.info("\nChecking that each science image has required calibration data. ")
+    # For each science image, read its header data and try to change to the appropriate directory.
+    # Check that:
+    for i in range(len(sciImageList)):
+        header = astropy.io.fits.open(dir+sciImageList[i])
+
+        obstype = header[0].header['OBSTYPE'].strip()
+        obsid = header[0].header['OBSID'][-3:].replace('-','')
+        grat = header[0].header['GRATING'][0:1]
+        date = header[0].header[ 'DATE'].replace('-','')
+        obsclass = header[0].header['OBSCLASS']
+        obj = header[0].header['OBJECT'].replace(' ','')
+
+        # a science and Calibrations directory are present.
+        try:
+            os.chdir(path+'/'+obj+'/'+date+'/'+grat+'/obs'+obsid+'/')
+            os.chdir('../../Calibrations_'+grat+'/')
+        except OSError:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no Calibrations directory found for ")
+            logging.info("                      science frame "+str(sciImageList[i]))
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+            continue
+
+        # flatlist exists and has more than one file.
+        try:
+            flatlist = open('flatlist', "r").readlines()
+            if len(flatlist) <= 1:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 lamps on flat frame found for science")
+                logging.info("                      frame "+str(sciImageList[i]))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+        except OSError:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no flatlist found for science frame")
+            logging.info("                      "+str(sciImageList[i]))
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+        # flatdarklist exists and has more than one file.
+        try:
+            flatdarklist = open('flatdarklist', "r").readlines()
+            if len(flatdarklist) <= 1:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 lamps off flat frame found for science")
+                logging.info("                      frame "+str(sciImageList[i]))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+        except OSError:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no flatdarklist found for science frame")
+            logging.info("                      "+str(sciImageList[i]))
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+        # arclist exists and has more than one file.
+        try:
+            arclist = open('arclist', "r").readlines()
+            if len(arclist) <= 1:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 arc frame found for science frame")
+                logging.info("                      "+str(sciImageList[i]))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+        except OSError:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no arclist found for science frame")
+            logging.info("                      "+str(sciImageList[i]))
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+        # arcdarklist exists and has more than one file.
+        try:
+            arcdarklist = open('arcdarklist', "r").readlines()
+            if len(arcdarklist) <= 1:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 dark arc frame found for science frame")
+                logging.info("                      "+str(sciImageList[i]))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+        except OSError:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no arcdarklist found for science frame")
+            logging.info("                      "+ str(sciImageList[i]))
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+        # ronchilist exists and has more than one file.
+        try:
+            ronchilist = open('ronchilist', "r").readlines()
+            if len(ronchilist) <= 1:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 ronchi flat frame found for science frame")
+                logging.info("                      " + str(sciImageList[i]))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+        except OSError:
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: no ronchilist found for science frame")
+            logging.info("                      " + str(sciImageList[i]))
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+
+        os.chdir(path)
+
+    logging.info("Done checking that each science image has required calibration data.\n")
+
+    # Check to see what files were copied.
+    logging.info("\nChecking for non-copied science, tellurics and acquisitions.\n")
+    for i in range(len(allfilelist)):
+        # Check the copied flag. If not 0, logging.info("the entry.")
+        if allfilelist[i][1] != 0:
+            logging.info(str(allfilelist[i][0]) + " " + str(allfilelist[i][2]) +  " was not copied.")
+    logging.info("\nEnd non-copied science, tellurics and acquisitions.\n")
+
+    # Check that all science frames were copied.
+    count_from_raw_files = len(sciImageList)
+
+    count = 0
+    for i in range(len(obsDirList)):
+        for file in os.listdir(obsDirList[i][1]):
+            if file.endswith('.fits'):
+                count += 1
+
+    if count_from_raw_files != count:
+        logging.info("\nWARNING: "+ str(count_from_raw_files - count) + " science images (or sky frames) \
+        were not copied.\n")
+    else:
+        logging.info("\nExpected number of science and sky frames copied.\n")
+
+    # ---------------------------- End Tests --------------------------------- #
+
+    # Modify obsDirList to remove extra time information.
+    tempList = []
+    for i in range(len(obsDirList)):
+        tempList.append(obsDirList[i][1])
+    obsDirList = tempList
+
+    os.chdir(path)
+
+
+    return obsDirList, calDirList, telDirList
+
+
+# ---------------------------------------------------------------------------- #
+
+# Old nifsMerge.py code.
+
+
+def mergeOld(obsDirList, over=""):
+    path = os.getcwd()
+    cubelist = []
+    mergedCubes = []
+    obsidlist = []
+    pixScaleX = 0.05
+    pixScaleY = 0.043
+    # Set up the logging file
+    FORMAT = '%(asctime)s %(message)s'
+    DATEFMT = datefmt()
+    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
+    log = os.getcwd()+'/Nifty.log'
+    logging.info('###############################')
+    logging.info('#                             #')
+    logging.info('#         Start Merge         #')
+    logging.info('#                             #')
+    logging.info('###############################')
+    print '###############################'
+    print '#                             #'
+    print '#         Start Merge         #'
+    print '#                             #'
+    print '###############################'
+    # Unlearn the used tasks
+    iraf.unlearn(iraf.gemini,iraf.gemtools,iraf.gnirs,iraf.nifs)
+    # Prepare the package for NIFS
+    iraf.nsheaders("nifs",logfile=log)
+    iraf.set(stdimage='imt2048')
+    user_clobber=iraf.envget("clobber")
+    iraf.reset(clobber='yes')
+    # change to the directory in iraf
+    iraffunctions.chdir(path)
+    for obsDir in obsDirList:
+        temp1 = os.path.split(obsDir)
+        temp2 = os.path.split(temp1[0])
+        temp3 = os.path.split(temp2[0])
+        temp4 = os.path.split(temp3[0])
+        objname = temp4[1]
+        date = temp3[1]
+        obsid = temp1[1]
+        obsPath = temp3[0]
+        os.chdir(obsDir)
+        obsidlist.append(date+'_'+obsid)
+        # create a directory called Merged and copy all the data cubes to this directory
+        if not os.path.exists(obsPath+'/Merged/'):
+            os.mkdir(obsPath+'/Merged/')
+        Merged = obsPath+'/Merged'
+        if not os.path.exists(Merged+'/'+date+'_'+obsid):
+            os.mkdir(Merged+'/'+date+'_'+obsid)
+        # if a list called shiftedcubes already exists then just merge those shifted cubes and continue
+        if glob.glob("./shif*.fits"):
+            if over:
+                if os.path.exists('./'+obsid+'_merged.fits'):
+                    os.remove('./'+obsid+'_merged.fits')
+                    iraf.gemcube(input="shif*.fits[SCI]", output=obsid+'_merged', logfile = log)
+            elif not os.path.exists('./'+obsid+'_merged.fits'):
+                iraf.gemcube(input="shif*.fits[SCI]", output=obsid+'_merged', logfile = log)
+            else:
+                print "Output exists and -over- not set - shifted cubes are not being merged"
+            shutil.copy('./'+obsid+'_merged.fits', Merged)
+            if obsDir==obsDirList[-1]:
+                return
+            else:
+                continue
+        # create a list called cubes, which stores all the cubes from a particular night
+        # store all the cubes lists in a list of lists called cubelist
+        cubes = glob.glob('bbatfbrgnN*.fits')
+        if cubes:
+            cubelist.append(cubes)
+            pre = 'atfbrgn'
+        else:
+            cubes = glob.glob('tfbrgn*.fits')
+            cubelist.append(cubes)
+            pre = 'tfbrgn'
+        # copy cubes to their date directory within Merged
+        for cube in cubes:
+            if cubes.index(cube)==0:
+                shutil.copy('c'+pre+cube[-19:], Merged+'/'+date+'_'+obsid)
+            shutil.copy(cube, Merged+'/'+date+'_'+obsid)
+    os.chdir(Merged)
+    n=0
+    for cubes in cubelist:
+        if cubes:
+            os.chdir(Merged+'/'+obsidlist[n])
+            # set the zero point p and q offsets to the p and q offsets of the first cube in each sequence (assumed to have a p and q of 0)
+            print cubes
+            print cubelist
+            header = astropy.io.fits.open(cubes[0])
+            p0 = header[0].header['POFFSET']
+            q0 = header[0].header['QOFFSET']
+            refCube = "cube"+cubes[0][-8:-5]
+            iraffunctions.chdir(os.getcwd())
+            if over:
+                if os.path.exists('./'+refCube+'.fits'):
+                    os.remove('./'+refCube+'.fits')
+                iraf.imcopy('c'+pre+cubes[0][-19:-5]+"[sci,1][*,0:62,*]", output=refCube)
+            elif not os.path.exists('./'+refCube+'.fits'):
+                iraf.imcopy('c'+pre+cubes[0][-19:-5]+"[sci,1][*,0:62,*]", output=refCube)
+            else:
+                "Output file exists and -over not set - skipping imcopy reference cube"
+            fx = open('offsetsX.txt', 'w')
+            fx.write('%d\t%d\t%d\n' % (0, 0, 0))
+            foff = open('offsets.txt', 'w')
+            foff.write('%d\t%d\t%d\n' % (0, 0, 0))
+        for i in range(len(cubes)-1):
+            i+=1
+            header2 = astropy.io.fits.open(cubes[i])
+            # find the p and q offsets of the other cubes in the sequence
+            poff = header2[0].header['POFFSET']
+            qoff = header2[0].header['QOFFSET']
+            # find the reference pixel values of the other cubes in the sequence
+            refX = header2[0].header['CRPIX1']
+            refY = header2[0].header['CRPIX2']
+            # calculate the difference between the zero point offsets and the offsets of the other cubes and convert that to pixels
+            pShift = round((poff - p0)/pixScaleX)
+            qShift = round((qoff - q0)/pixScaleY)
+            # write the y offsets to a text file (used in gemcombine step)
+            fy = open('offsetsY.txt', 'w')
+            fy.write('%d\t%d\t%d\t\n%d\t%d\t%d\n' % (0.,0.,0.,0., qShift, 0.))
+            fy.close()
+            # write the x offsets to a text file (used in imcombine step)
+            fx = open('offsetsX.txt', 'a')
+            fx.write('%d\t%d\t%d\n' % (pShift, 0., 0.))
+            fx.close()
+            # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
+            foff = open('offsets.txt', 'a')
+            foff.write('%d\t%d\t%d\n' % (pShift, qShift, 0.))
+            foff.close()
+            suffix = cubes[i][-8:-5]
+            f = open('atlist', 'w')
+            f.write(cubes[0].lstrip('c')+'\n'+cubes[i].lstrip('c'))
+            f.close()
+            atlist = open('atlist', 'r').readlines()
+            # gemcombine the 2D spectra of the zero point offset and a cube that needs to be shifted
+            # executes the shift in the y direction
+            if over:
+                if os.path.exists('./at'+suffix+'.fits'):
+                    os.remove('./at'+suffix+'.fits')
+                iraf.gemcombine(listit(atlist, ""), output = "at"+suffix, combine = 'average', offsets = 'offsetsY.txt', logfile = log)
+            elif not os.path.exists('./at'+suffix+'.fits'):
+                iraf.gemcombine(listit(atlist, ""), output = "at"+suffix, combine = 'average', offsets = 'offsetsY.txt', logfile = log)
+            else:
+                print "Output file exists and -over not set - skipping gemcombine (y-shift)"
+            # nifcube sometimes runs into an unpredictable error
+            # the pexpect sequence below anticipates this error to avoid a crash
+            if over:
+                if os.path.exists('./cat'+suffix+'.fits'):
+                    os.remove('./cat'+suffix+'.fits')
+                child = p.spawn('pyraf')
+                child.expect("")
+                child.sendline('gemini')
+                child.expect("")
+                child.sendline('nifs')
+                child.expect("")
+                child.sendline("nifcube at"+suffix+" logfile="+log)
+                index = child.expect(["Using input files:", "Name of science extension:"])
+                if index==0:
+                    pass
+                elif index==1:
+                    child.sendline('SCI')
+                child.expect("NIFCUBE  Exit status good", timeout=100)
+                child.sendline('.exit')
+                print child.before
+                child.interact()
+            elif not os.path.exists('./cat'+suffix+'.fits'):
+                child = p.spawn('pyraf')
+                child.expect("")
+                child.sendline('gemini')
+                child.expect("")
+                child.sendline('nifs')
+                child.expect("")
+                child.sendline("nifcube at"+suffix+" logfile="+log)
+                index = child.expect(["Using input files:","Name of science extension:"])
+                if index==0:
+                    pass
+                elif index==1:
+                    child.sendline('SCI')
+                child.expect("NIFCUBE  Exit status good", timeout=100)
+                child.sendline('.exit')
+                print child.before
+                child.interact()
+            else:
+                print "Output file exists and -over not set - skipping nifcube"
+            # need to trim the image to use in imarith
+            # trim to the same dimensions and position as the zero point offset image
+            # this is the part of this script that does not work for faint objects
+            if over:
+                if os.path.exists('./ccat'+suffix+'.fits'):
+                    os.remove('./ccat'+suffix+'.fits')
+                if qShift < 0.:
+                    iraf.imcopy("cat"+suffix+".fits[sci,1][*,"+str(int((qShift*(-1))-1))+":"+(str(int(62+(qShift*(-1))-1)))+",*]",  output = "ccat"+suffix)
+                else:
+                    iraf.imcopy("cat"+suffix+".fits[sci,1][*,0:62,*]", output = "ccat"+suffix)
+            elif not os.path.exists('./ccat'+suffix+'.fits'):
+                if qShift < 0.:
+                    iraf.imcopy("cat"+suffix+".fits[sci,1][*,"+str(int((qShift*(-1))-1))+":"+(str(int(62+(qShift*(-1))-1)))+",*]",  output = "ccat"+suffix)
+                else:
+                    iraf.imcopy("cat"+suffix+".fits[sci,1][*,0:62,*]", output = "ccat"+suffix)
+            else:
+                print "Output file exists and -over not set - skipping imcopy y-shifted cube"
+            # remove the zero point offset image from the average combined data cube
+            if over:
+                if os.path.exists('./temp'+suffix+'.fits'):
+                    os.remove('./temp'+suffix+'.fits')
+                iraf.imarith(operand1 = "ccat"+suffix, operand2 = 2, op = "*", result = "temp"+suffix)
+            elif not os.path.exists('./temp'+suffix+'.fits'):
+                iraf.imarith(operand1 = "ccat"+suffix, operand2 = 2, op = "*", result = "temp"+suffix)
+            else:
+                 print "Output file exists and -over not set - skipping imarith multiplication"
+            if over:
+                if os.path.exists('./cube'+suffix+'.fits'):
+                    os.remove('./cube'+suffix+'.fits')
+                iraf.imarith(operand1 = "temp"+suffix, operand2 = refCube, op = "-", result = "cube"+suffix)
+            elif not os.path.exists('./cube'+suffix+'.fits'):
+                iraf.imarith(operand1 = "temp"+suffix, operand2 = refCube, op = "-", result = "cube"+suffix)
+            else:
+                print "Output file exists and -over not set - skipping imarith subtraction"
+        # sum all the y shifted data cubes and zero point offset cube
+        # x shift is done in this step
+        if over:
+            if os.path.exists('./'+obsidlist[n]+'_merged.fits'):
+                os.remove('./'+obsidlist[n]+'_merged.fits')
+            iraf.imcombine("cube*.fits", output = obsidlist[n]+'_merged',  combine = 'sum', offsets = 'offsetsX.txt', logfile = log)
+        elif not os.path.exists('./'+obsidlist[n]+'_merged.fits'):
+            iraf.imcombine("cube*.fits", output = obsidlist[n]+'_merged',  combine = 'sum', offsets = 'offsetsX.txt', logfile = log)
+        else:
+            print "Output file exists and -over not set - skipping imcombine (x-shift)"
+        mergedCubes.append(obsidlist[n]+'_merged')
+        n+=1
+    os.chdir(Merged)
+    # copy the merged observation sequence data cubes to the Merged directory
+    for i in range(len(mergedCubes)):
+        shutil.copy(Merged+'/'+obsidlist[i]+'/'+mergedCubes[i]+'.fits', './')
+    # merge all the individual merged observation sequence data cubes
+    if len(mergedCubes)>1:
+        iraf.imcombine("*_obs*_merged.fits", output = objname+'_merged.fits', combine = 'sum')
+
+
+# ------------------------- nifsUtils ----------------------------------------- #
+
+
+def OLD_makeSkyList(skyFrameList, objlist, obsDir):
+    """ check to see if the number of sky images matches the number of science
+        images and if not duplicates sky images and rewrites the sky file and skyFrameList
+    """
+
+    objtime = []
+    skytime = []
+    b = ['bbbbbbbbbbbb']
+    for item in objlist:
+        item = str(item).strip()
+        otime = timeCalc(item+'.fits')
+        objtime.append(otime)
+    for sky in skyFrameList:
+        sky = str(sky).strip()
+        stime = timeCalc(sky+'.fits')
+        skytime.append(stime)
+    logging.info(skytime)
+    logging.info(objtime)
+
+    templist = []
+    for time in objtime:
+        difflist = []
+        for stime in skytime:
+            difflist.append(abs(time-stime))
+        ind = difflist.index(min(difflist))
+        if templist and skyFrameList[ind] in templist[-1]:
+            n+=1
+            templist.append(skyFrameList[ind])
+        else:
+            n=0
+            templist.append(skyFrameList[ind])
+        writeList(skyFrameList[ind]+b[0][:n], 'skyFrameList', obsDir)
+        if n>0:
+            shutil.copyfile(skyFrameList[ind]+'.fits', skyFrameList[ind]+b[0][:n]+'.fits')
+    '''
+    for i in range(len(skyFrameList)-1):
+        n=0
+        for j in range(len(objtime)):
+            if abs(skytime[i]-objtime[j])<abs(skytime[i+1]-objtime[j]):
+                logging.info(skyFrameList[i]+b[0][:n])
+                writeList(skyFrameList[i]+b[0][:n], 'skyFrameList', obsDir)
+                if n>0:
+                    shutil.copyfile(skyFrameList[i]+'.fits', skyFrameList[i]+b[0][:n]+'.fits')
+                n+=1
+    '''
+    skyFrameList = open("skyFrameList", "r").readlines()
+    skyFrameList = [image.strip() for image in skyFrameList]
+    return skyFrameList
+
+# ---------------------------------------------------------------------------- #
+
+def OLD_writeCenters(objlist):
+    """Write centers to a text file, load that textfile into list centers and
+        return that list. """
+
+    centers = []
+    for image in objlist:
+        header = astropy.io.fits.open(image+'.fits')
+        poff = header[0].header['XOFFSET']
+        qoff = header[0].header['YOFFSET']
+        if objlist.index(image)==0:
+            P0 = poff
+            Q0 = qoff
+            f=open('offsets', 'w')
+            f.write(str(0)+'\t'+str(0)+'\n')
+        else:
+            f=open('offsets', 'a')
+            f.write(str(P0-poff)+'\t'+str(Q0-qoff)+'\n')
+    f.close()
+
+    offlist = open('offsets', 'r').readlines()
+    for line in offlist:
+        centers.append([((float(line.split()[0])/5.0)/.1)+14.5, ((float(line.split()[1])/1.0)/.04)+34.5])
+
+    return centers
+# ---------------------------------------------------------------------------- #
+
+def OBSOLETE_loadSortSave():
+    """Opens and reads lists of:
+        - Science directories,
+        - Telluric directories, and
+        - Calibration directories
+        from runtimeData/scienceDirectoryList.txt, runtimeData/telluricDirectoryList.txt and runtimeData/calibrationDirectoryList.txt in
+        the main Nifty directory.
+    """
+    # Don't use sortScript at all; read the paths to data from textfiles.
+    # Load telluric observation directories.
+    try:
+        telDirList = open("runtimeData/telluricDirectoryList.txt", "r").readlines()
+        telDirList = [entry.strip() for entry in telDirList]
+    except IOError:
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in Nifty: no telluric data found. Setting telDirList to ")
+        logging.info("                       an empty list.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
+        telDirList = []
+    # Load science observation directories.
+    try:
+        obsDirList = open("runtimeData/scienceDirectoryList.txt", "r").readlines()
+        obsDirList = [entry.strip() for entry in obsDirList]
+    except IOError:
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in Nifty: no science data found. Setting obsDirList to ")
+        logging.info("                       an empty list.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
+        obsDirList = []
+    # Load calibration directories.
+    try:
+        calDirList = open("runtimeData/calibrationDirectoryList.txt", "r").readlines()
+        calDirList = [entry.strip() for entry in calDirList]
+    except IOError:
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in Nifty: no science data found. Setting calDirList to ")
+        logging.info("                       an empty list.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
+        calDirList = []
+
+    return obsDirList, telDirList, calDirList
+
+# ---------------------------------------------------------------------------- #
+
+def MEFarithOLD(MEF, image, out, op, result):
+
+    if os.path.exists(out+'.fits'):
+        os.remove(out+'.fits')
+    for i in range(1,88):
+        header = astropy.io.fits.open(MEF+'.fits')
+        extname = header[i].header['EXTNAME']
+        if extname == 'DQ' or extname == 'VAR':
+            iraf.imarith(operand1=MEF+'['+str(i)+']', op='*', operand2 = '1', result = out)
+        if extname == 'SCI':
+            iraf.imarith(operand1=MEF+'['+str(i)+']', op=op, operand2 = image, result = out, divzero = 0.0)
+
+    iraf.fxcopy(input=MEF+'[0],'+out, output = result)
+    iraf.hedit(result+'[1]', field = 'EXTNAME', value = 'SCI', add = 'yes', verify = 'no')
+    iraf.hedit(result+'[1]', field='EXTVER', value='1', add='yes', verify='no')
+    
+# ---------------------------------------------------------------------------- #

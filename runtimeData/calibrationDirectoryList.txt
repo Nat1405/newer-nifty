@@ -1,7 +1,0 @@
-/Users/ncomeau/research/newer-nifty/AEGISz1284/20130527/Calibrations_H
-/Users/ncomeau/research/newer-nifty/AEGISz1284/20130530/Calibrations_H
-/Users/ncomeau/research/newer-nifty/AEGISz1284/20130531/Calibrations_H
-/Users/ncomeau/research/newer-nifty/AEGISz1284/20130621/Calibrations_H
-/Users/ncomeau/research/newer-nifty/AEGISz1284/20130622/Calibrations_H
-/Users/ncomeau/research/newer-nifty/AEGISz1284/20130624/Calibrations_H
-/Users/ncomeau/research/newer-nifty/AEGISz1284/20130626/Calibrations_H

@@ -1,29 +1,27 @@
+#!/usr/bin/env python
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
-import logging
-from pyraf import iraf
-from pyraf import iraffunctions
+from pyraf import iraf, iraffunctions
 import astropy.io.fits
 import logging, os
-# Import custom Nifty functions.
-from nifsDefs import datefmt, listit, checkLists
 
-def start(obsDirList, calDirList, over, start, stop, debug):
+# Import config parsing.
+from configobj.configobj import ConfigObj
+
+# Import custom Nifty functions.
+from nifsUtils import datefmt, listit, checkLists
+
+def start():
     """
          nifsBaselineCalibration
 
          This module contains all the functions needed to reduce
          NIFS GENERAL BASELINE CALIBRATIONS
 
-         COMMAND LINE OPTIONS
-         If you wish to skip this step enter -r in the command line
-         Specify a start value with -a (default is 1) in command line
-         Specify a stop value with -z (default is 6) in command line
-
          INPUT FILES FOR EACH BASELINE CALIBRATION:
 
-         + Raw files
+         Raw files:
            - Flat frames (lamps on)
            - Flat frames (lamps off)
            - Arc frames
@@ -39,13 +37,15 @@ def start(obsDirList, calDirList, over, start, stop, debug):
          - Reduced dark frame. Eg: rgnARCDARK.fits
 
     Args:
-        obsDirList:      list of paths to science observations. ['path/obj/date/grat/obsid']
+        # Loaded from runtimeData/config.cfg
         calDirList:      list of paths to calibrations. ['path/obj/date/Calibrations_grating']
         over (boolean):  overwrite old files. Default: False.
         start (int):     starting step of daycal reduction. Specified at command line with -a. Default: 1.
         stop (int):      stopping step of daycal reduction. Specified at command line with -z. Default: 6.
+        debug (boolean): enable optional debugging pauses. Default: False.
 
     """
+
     # TODO(nat): stop using first frame from list as name for combined frames. Find better names and implement
     # them in pipeline and docs.
     # TODO(nat): Finish converting the print statements to logging.info() statements.
@@ -90,6 +90,15 @@ def start(obsDirList, calDirList, over, start, stop, debug):
     # YOU WILL LIKELY HAVE TO REMOVE FILES IF YOU RE_RUN THE SCRIPT.
     user_clobber=iraf.envget("clobber")
     iraf.reset(clobber='yes')
+
+    # Load reduction parameters from runtimeData/config.cfg.
+    with open('runtimeData/config.cfg') as config_file:
+        options = ConfigObj(config_file, unrepr=True)
+        calDirList = options['calibrationDirectoryList']
+        over = options['over']
+        start = options['rstart']
+        stop = options['rstop']
+        debug = options['debug']
 
     ################################################################################
     # Define Variables, Reduction Lists AND identify/run number of reduction steps #
@@ -532,24 +541,36 @@ def reduceArc(arclist, arc, arcdarklist, arcdark, log, over):
     arcdarklist = checkLists(arcdarklist, '.', 'n', '.fits')
 
     # Combine arc frames, "n"+image+".fits". Output combined file will have the name of the first arc file.
-    if over:
-        iraf.delete("gn"+arc+".fits")
+    if os.path.exists("gn"+arc+".fits"):
+        if over:
+            iraf.delete("gn"+arc+".fits")
+            if len(arclist) > 1:
+                iraf.gemcombine(listit(arclist,"n"),output="gn"+arc, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+            else:
+                iraf.copy('n'+arc+'.fits', 'gn'+arc+'.fits')
+        else:
+            print "\nOutput file exists and -over not set - skipping gemcombine of arcs."
     else:
-        print "\nOutput file exists and -over not set - skipping gemcombine of arcs."
-    if len(arclist) > 1:
-        iraf.gemcombine(listit(arclist,"n"),output="gn"+arc, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
-    else:
-        iraf.copy('n'+arc+'.fits', 'gn'+arc+'.fits')
+        if len(arclist) > 1:
+            iraf.gemcombine(listit(arclist,"n"),output="gn"+arc, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+        else:
+            iraf.copy('n'+arc+'.fits', 'gn'+arc+'.fits')
 
     # Combine arc dark frames, "n"+image+".fits". Output combined file will have the name of the first arc dark file.
-    if over:
-        iraf.delete("gn"+arcdark+".fits")
+    if os.path.exists("gn"+arcdark+".fits"):
+        if over:
+            iraf.delete("gn"+arcdark+".fits")
+            if len(arcdarklist) > 1:
+                iraf.gemcombine(listit(arcdarklist,"n"),output="gn"+arcdark, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+            else:
+                iraf.copy('n'+arcdark+'.fits', 'gn'+arcdark+'.fits')
+        else:
+            print "\nOutput file exists and -over not set - skipping gemcombine of arcdarks."
     else:
-        print "\nOutput file exists and -over not set - skipping gemcombine of arcdarks."
-    if len(arcdarklist) > 1:
-        iraf.gemcombine(listit(arcdarklist,"n"),output="gn"+arcdark, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
-    else:
-        iraf.copy('n'+arcdark+'.fits', 'gn'+arcdark+'.fits')
+        if len(arcdarklist) > 1:
+            iraf.gemcombine(listit(arcdarklist,"n"),output="gn"+arcdark, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+        else:
+            iraf.copy('n'+arcdark+'.fits', 'gn'+arcdark+'.fits')
 
     # Put the name of the combined and prepared arc dark frame "gn"+arcdark into a text
     # file called arcdarkfile to be used by the pipeline later.
@@ -625,15 +646,15 @@ def wavecal(arc, log, over, path):
     interactive = 'no'
 
     if band == "K":
-        clist=path+"/runtimeData/k_test_two_argon.dat"
+        clist=path+"/runtimeData/wavecal_k_band_argon.dat"
         my_thresh = 50.0
         interactive = 'no'
     elif band == "J":
-        clist=path+"/runtimeData/j_test_one_argon.dat"
+        clist=path+"/runtimeData/wavecal_j_band_argon.dat"
         my_thresh=100.0
         interactive = 'no'
     elif band == "H":
-        clist=path+"/runtimeData/h_test_one_argon.dat"
+        clist=path+"/runtimeData/wavecal_h_band_argon.dat"
         my_thresh=100.0
         interactive = 'no'
     elif band == "Z":
@@ -729,4 +750,4 @@ def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    print "nifs_baseline_calibration"
+    start()

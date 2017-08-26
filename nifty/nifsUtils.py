@@ -1,10 +1,18 @@
-import time
-import sys, calendar, astropy.io.fits, urllib, shutil, glob, os, fileinput
+################################################################################
+#                Import some useful Python utilities/modules                   #
+################################################################################
+
+# STDLIB
+
+import time, sys, calendar, astropy.io.fits, urllib, shutil, glob, os, fileinput, logging, smtplib
 import numpy as np
 from xml.dom.minidom import parseString
-import logging
-import smtplib
 from pyraf import iraf
+
+# LOCAL
+
+# Import config parsing.
+from configobj.configobj import ConfigObj
 
 #--------------------------------------------------------------------#
 #                                                                    #
@@ -19,13 +27,183 @@ from pyraf import iraf
 #                                                                    #
 #--------------------------------------------------------------------#
 
+
+#-----------------------------------------------------------------------------#
+
+def getUserInput():
+    """
+    Interactive input session based on Sphinx's interactive setup.
+
+    """
+
+    logging.info("\nGood day! Press enter to accept default reduction options.")
+
+    fullReduction = getParam(
+                "Do a full data reduction with default parameters loaded from recipes/default_input.cfg? [no]: ",
+                False,
+                "Type yes to start Nifty with data reduction input parameters loaded from recipes/default_input.cfg file."
+    )
+    if fullReduction == False:
+        # "Select in". User has to turn individual steps on.
+        # TODO(nat): Implement these steps.
+        date = ""
+        program = ""
+        copy = ""
+
+        sort = getParam(
+        "Sort data? [no]: ",
+        False
+        )
+        rawPath = getParam(
+        "Path to raw files directory? [~/data]: ",
+        "~/data"
+        )
+        tel = getParam(
+        "Apply a telluric correction? [no]: ",
+        False
+        )
+        # See if we want to reduce the baseline calibrations. And if so, which substeps
+        # to perform.
+        calibrationReduction = getParam(
+        "Reduce baseline calibrations? [no]: ",
+        False
+        )
+        # By default do all of them.
+        rstart = getParam(
+        "Starting point of baseline calibration reductions? [1]: ",
+        1
+        )
+        rstop = getParam(
+        "Stopping point of baseline calibration reductions? [4]: ",
+        4
+        )
+
+        # Check for tellurics as well; by default do all reduction steps.
+        telluricReduction = getParam(
+        "Reduce telluric data? [no]: ",
+        False
+        )
+        telStart = getParam(
+        "Starting point of science and telluric reductions? [1]: ",
+        1
+        )
+        telStop = getParam(
+        "Stopping point of science and telluric reductions? [6]: ",
+        6
+        )
+        # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
+        # Set the h-line removal method with the vega() function in nifsReduce as default.
+        hline_method = getParam(
+        "H-line removal method? [vega]: ",
+        "vega"
+        )
+        # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
+        hlineinter = getParam(
+        "Interative H-line removal? [no]: ",
+        False
+        )
+        continuuminter = getParam(
+        "Interative telluric continuum fitting? [no]: ",
+        False
+        )
+        telluric_correction_method = getParam(
+        "Telluric correction method? [python]: ",
+        "python"
+        )
+        telinter = getParam(
+        "Interactive telluric correction? [no]: ",
+        False
+        )
+        # Check for science as well.
+        scienceReduction = getParam(
+        "Reduce science data? [no]: ",
+        False
+        )
+        sciStart = getParam(
+        "Starting point of science and telluric reductions? [1]: ",
+        1
+        )
+        sciStop = getParam(
+        "Stopping point of science and telluric reductions? [6]: ",
+        6
+        )
+        efficiencySpectrumCorrection = getParam(
+        "Do a flux calibration? [no]: ",
+        False
+        )
+        spectemp = getParam(
+        "Effective temperature in kelvin of telluric standard star? [""]: ",
+        ""
+        )
+        mag = getParam(
+        "Magnitude of standard star? [""]: ",
+        ""
+        )
+        merge = getParam(
+        "Produce one final 3D cube? [no]: ",
+        False
+        )
+        use_pq_offsets = getParam(
+        "Use pq offsets to merge data cubes? [yes]: ",
+        "yes"
+        )
+        im3dtran = getParam(
+        "Transpose cubes for faster merging? [no]: ",
+        False
+        )
+        over = getParam(
+        "Overwrite old files? [no]: ",
+        False
+        )
+        debug = getParam(
+        "Pause after each data reduction step? [yes]: ",
+        "yes"
+        )
+
+        # Serialize and save the options as a .cfg file.
+        options = ConfigObj(unrepr=True)
+        options['date'] = date
+        options['program'] = program
+        options['rawPath'] = rawPath
+        options['over'] = over
+        options['copy'] = copy
+        options['sort'] = sort
+        options['calibrationReduction'] = calibrationReduction
+        options['scienceReduction'] = scienceReduction
+        options['merge'] = merge
+        options['tel'] = tel
+        options['telluricReduction'] = telluricReduction
+        options['spectemp'] = spectemp
+        options['mag'] = mag
+        options['efficiencySpectrumCorrection'] = efficiencySpectrumCorrection
+        options['rstart']= rstart
+        options['rstop'] = rstop
+        options['telStart'] = telStart
+        options['telStop'] = telStop
+        options['sciStart'] = sciStart
+        options['sciStop'] = sciStop
+        options['hline_method'] = hline_method
+        options['hlineinter'] = hlineinter
+        options['continuuminter'] = continuuminter
+        options['telluric_correction_method'] = telluric_correction_method
+        options['telinter'] = telinter
+        options['use_pq_offsets'] = use_pq_offsets
+        options['im3dtran'] = im3dtran
+        options['debug'] = debug
+        with open('runtimeData/config.cfg', 'w') as outfile:
+            options.write(outfile)
+
+    return fullReduction
+
+#-----------------------------------------------------------------------------#
+
 def datefmt():
     datefmt = '%Y/%m/%d %H:%M:%S '
     return datefmt
 
 #-----------------------------------------------------------------------------#
 
-def printDirectoryLists(scienceDirectoryList, telluricDirectoryList, calibrationDirectoryList):
+def printDirectoryLists():
     """Print paths to science, telluric and calibration observations.
 
     Useful for:
@@ -34,71 +212,28 @@ def printDirectoryLists(scienceDirectoryList, telluricDirectoryList, calibration
           runtimeData/telluricDirectoryList.txt and runtimeData/calibrationDirectoryList.txt
           correctly.
     """
+    print os.getcwd()
+    # Print the current directory of data being reduced.
+    logging.info("\n#################################################################################")
+    logging.info("                                   ")
+    logging.info("  COMPLETE - sorting. I've updated scienceDirectoryList,")
+    logging.info("             telluricDirectoryList and calibrationDirectoryList in")
+    logging.info("             runtimeData/config.cfg with the following values:")
+    logging.info("")
+    logging.info("#################################################################################\n")
+
+    with open('runtimeData/config.cfg') as config_file:
+        options = ConfigObj(config_file, unrepr=True)
+    print options
     logging.info("\nScience Directory List: ")
-    for i in range(len(scienceDirectoryList)):
-        logging.info(scienceDirectoryList[i])
+    for i in range(len(options['scienceDirectoryList'])):
+        logging.info(options['scienceDirectoryList'][i])
     logging.info("\nTelluric Directory List: ")
-    for i in range(len(telluricDirectoryList)):
-        logging.info(telluricDirectoryList[i])
+    for i in range(len(options['telluricDirectoryList'])):
+        logging.info(options['telluricDirectoryList'][i])
     logging.info("\nCalibration Directory List: ")
-    for i in range(len(calibrationDirectoryList)):
-        logging.info(calibrationDirectoryList[i])
-
-#-----------------------------------------------------------------------------#
-
-def loadSortSave():
-    """Opens and reads lists of:
-        - Science directories,
-        - Telluric directories, and
-        - Calibration directories
-        from runtimeData/scienceDirectoryList.txt, runtimeData/telluricDirectoryList.txt and runtimeData/calibrationDirectoryList.txt in
-        the main Nifty directory.
-    """
-    # Don't use sortScript at all; read the paths to data from textfiles.
-    # Load telluric observation directories.
-    try:
-        telDirList = open("runtimeData/telluricDirectoryList.txt", "r").readlines()
-        telDirList = [entry.strip() for entry in telDirList]
-    except IOError:
-        logging.info("\n#####################################################################")
-        logging.info("#####################################################################")
-        logging.info("")
-        logging.info("     WARNING in Nifty: no telluric data found. Setting telDirList to ")
-        logging.info("                       an empty list.")
-        logging.info("")
-        logging.info("#####################################################################")
-        logging.info("#####################################################################\n")
-        telDirList = []
-    # Load science observation directories.
-    try:
-        obsDirList = open("runtimeData/scienceDirectoryList.txt", "r").readlines()
-        obsDirList = [entry.strip() for entry in obsDirList]
-    except IOError:
-        logging.info("\n#####################################################################")
-        logging.info("#####################################################################")
-        logging.info("")
-        logging.info("     WARNING in Nifty: no science data found. Setting obsDirList to ")
-        logging.info("                       an empty list.")
-        logging.info("")
-        logging.info("#####################################################################")
-        logging.info("#####################################################################\n")
-        obsDirList = []
-    # Load calibration directories.
-    try:
-        calDirList = open("runtimeData/calibrationDirectoryList.txt", "r").readlines()
-        calDirList = [entry.strip() for entry in calDirList]
-    except IOError:
-        logging.info("\n#####################################################################")
-        logging.info("#####################################################################")
-        logging.info("")
-        logging.info("     WARNING in Nifty: no science data found. Setting calDirList to ")
-        logging.info("                       an empty list.")
-        logging.info("")
-        logging.info("#####################################################################")
-        logging.info("#####################################################################\n")
-        calDirList = []
-
-    return obsDirList, telDirList, calDirList
+    for i in range(len(options['calibrationDirectoryList'])):
+        logging.info(options['calibrationDirectoryList'][i])
 
 #-----------------------------------------------------------------------------#
 
@@ -368,11 +503,11 @@ def checkLists(original_list, path, prefix, suffix):
         if os.path.exists(path+'/'+prefix+image+suffix):
             new_list.append(image)
         else:
-            logging.info('\n', image, '.fits not being processed due to error in image.\n')
+            logging.info('\n' +  str(image)+ '.fits not being processed due to error in image.\n')
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
-            logging.info("     WARNING: ", image, " .fits was removed from a list after a checkLists call.")
+            logging.info("     WARNING: " + str(image) + " .fits was removed from a list after a checkLists call.")
             logging.info("               An iraf task may have failed. ")
             logging.info("")
             logging.info("#####################################################################")
@@ -385,91 +520,66 @@ def checkLists(original_list, path, prefix, suffix):
 
 #-----------------------------------------------------------------------------#
 
-def writeCenters(objlist):
-    """Write centers to a text file, load that textfile into list centers and
-        return that list. """
-
-    centers = []
-    for image in objlist:
-        header = astropy.io.fits.open(image+'.fits')
-        poff = header[0].header['XOFFSET']
-        qoff = header[0].header['YOFFSET']
-        if objlist.index(image)==0:
-            P0 = poff
-            Q0 = qoff
-            f=open('offsets', 'w')
-            f.write(str(0)+'\t'+str(0)+'\n')
-        else:
-            f=open('offsets', 'a')
-            f.write(str(P0-poff)+'\t'+str(Q0-qoff)+'\n')
-    f.close()
-
-    offlist = open('offsets', 'r').readlines()
-    for line in offlist:
-        centers.append([((float(line.split()[0])/5.0)/.1)+14.5, ((float(line.split()[1])/1.0)/.04)+34.5])
-
-    return centers
-
-#-----------------------------------------------------------------------------#
-
-def OLD_makeSkyList(skyframelist, objlist, obsDir):
-    """ check to see if the number of sky images matches the number of science
-        images and if not duplicates sky images and rewrites the sky file and skyframelist
+def checkSameLengthFlatLists():
+    """Reads two textfile lists of filenames. If not the same length,
+    removes last entry from longer list until they are. Prints loud warnings to
+    tell people it is doing this.
+    This is done because it was found nsflat() complains when the gain of Combined
+    lamps-on flats does not match the gain of combined lamps-off flats.
+    This is caused when different numbers of flats combined into one combined frame.
+    It seemed simplest to exclude one of the darks. Feel free to attempt a more complicated
+    fix!
     """
-
-    objtime = []
-    skytime = []
-    b = ['bbbbbbbbbbbb']
-    for item in objlist:
-        item = str(item).strip()
-        otime = timeCalc(item+'.fits')
-        objtime.append(otime)
-    for sky in skyframelist:
-        sky = str(sky).strip()
-        stime = timeCalc(sky+'.fits')
-        skytime.append(stime)
-    logging.info(skytime)
-    logging.info(objtime)
-
-    templist = []
-    for time in objtime:
-        difflist = []
-        for stime in skytime:
-            difflist.append(abs(time-stime))
-        ind = difflist.index(min(difflist))
-        if templist and skyframelist[ind] in templist[-1]:
-            n+=1
-            templist.append(skyframelist[ind])
-        else:
-            n=0
-            templist.append(skyframelist[ind])
-        writeList(skyframelist[ind]+b[0][:n], 'skyframelist', obsDir)
-        if n>0:
-            shutil.copyfile(skyframelist[ind]+'.fits', skyframelist[ind]+b[0][:n]+'.fits')
-    '''
-    for i in range(len(skyframelist)-1):
-        n=0
-        for j in range(len(objtime)):
-            if abs(skytime[i]-objtime[j])<abs(skytime[i+1]-objtime[j]):
-                logging.info(skyframelist[i]+b[0][:n])
-                writeList(skyframelist[i]+b[0][:n], 'skyframelist', obsDir)
-                if n>0:
-                    shutil.copyfile(skyframelist[i]+'.fits', skyframelist[i]+b[0][:n]+'.fits')
-                n+=1
-    '''
-    skyframelist = open("skyframelist", "r").readlines()
-    skyframelist = [image.strip() for image in skyframelist]
-    return skyframelist
+    # Read the flatlist into a python list.
+    with open('./flatlist', 'r') as f:
+        flatlist = f.readlines()
+    # Read the flatdarklist into a python list.
+    with open('./flatdarklist', 'r') as f:
+        flatdarklist = f.readlines()
+    # Check that both lists are the same length.
+    if len(flatlist) != len(flatdarklist):
+        # Print a nice loud warning.
+        logging.info("\n#####################################################################")
+        logging.info("#####################################################################")
+        logging.info("")
+        logging.info("     WARNING in sort: flatlist and flatdarklist are not the same ")
+        logging.info("                      length. Removing extra entries from the")
+        logging.info("                      longer list. Original lists can be found in")
+        logging.info("                      original_flatlist and original_flatdarklist.")
+        logging.info("")
+        logging.info("#####################################################################")
+        logging.info("#####################################################################\n")
+        # Copy the original flatlist and flatdarklist to backup files.
+        shutil.copy2('./flatlist', './original_flatlist')
+        shutil.copy2('./flatdarklist', './original_flatdarklist')
+        # while they are not the same length:
+        while len(flatlist) != len(flatdarklist):
+            # remove the last entry from the longer list.
+            if len(flatlist) > len(flatdarklist):
+                del flatlist[-1]
+            else:
+                del flatdarklist[-1]
+        # Write the new flatlist to the flatlist textfile, overwriting anything already there.
+        with open('./flatlist', 'w') as f:
+            for item in flatlist:
+                f.write(item)
+        # Write the new flatdarklist to the flatdarklist textfile, overwriting anything already there.
+        with open('./flatdarklist', 'w') as f:
+            for item in flatdarklist:
+                f.write(item)
 
 #-----------------------------------------------------------------------------#
 
-
-def makeSkyList(skyframelist, sciencelist, obsDir):
-    """ Makes a skyframelist equal in length to object list with sky and object
+def makeSkyList(skyFrameList, sciencelist, obsDir):
+    """ Makes a skyFrameList equal in length to object list with sky and object
     frames closest in time at equal indices.
 
+    Writes the original skyFrameList to original_skyFrameList.
+
+    Writes results to skyFrameList textfile.
+
     Returns:
-        skyframelist (list): list of sky frames organized so each science frame has subtracted
+        skyFrameList (list): list of sky frames organized so each science frame has subtracted
                         the sky frame closest in time.
 
     Eg:
@@ -486,7 +596,7 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
             sky3
             obs6
 
-        sciencelist was:    skyframelist was:   Output skyframelist will be:
+        sciencelist was:    skyFrameList was:   Output skyFrameList will be:
             obs1                    sky1            sky1
             obs2                    sky2            sky1
             obs3                    sky3            sky2
@@ -502,7 +612,7 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
             obs3
             sky3
 
-        sciencelist was:    skyframelist was:   Output skyframelist will be:
+        sciencelist was:    skyFrameList was:   Output skyFrameList will be:
             obs1                    sky1            sky1
             obs2                    sky2            sky1
             obs3                    sky3            sky2
@@ -518,7 +628,7 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
     # AB AB AB- one sky frame per one two science frames.
     #
     # If it is neither warn user to verify that sky frames were matched with science frames correctly.
-    if len(skyframelist) != len(sciencelist)/2 and len(skyframelist) != len(sciencelist):
+    if len(skyFrameList) != len(sciencelist)/2 and len(skyFrameList) != len(sciencelist):
         logging.info("\n#####################################################################")
         logging.info("#####################################################################")
         logging.info("")
@@ -532,7 +642,7 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
     # Calculate time of each sky frame. Store the calculated time and the frame name in skytimes, a
     # 2D list of [skyframe_time, skyframe_name] pairs.
     # Eg: [[39049.3, 'N20130527S0241'], [39144.3, 'N20130527S0244'], [39328.8, 'N20130527S0247'], [39590.3, 'N20130527S0250']]
-    for item in skyframelist:
+    for item in skyFrameList:
         # Strip off the trailing newline.
         item = str(item).strip()
         # Calculate the time of the sky frame.
@@ -540,7 +650,7 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
         # Store the sky frame time and corresponding sky frame name in skytimes.
         templist = [skytime, item]
         skytimes.append(templist)
-    logging.info("scienceframelist:      skyframelist:      time delta (between observation UT start times from .fits headers):")
+    logging.info("scienceframelist:      skyFrameList:      time delta (between observation UT start times from .fits headers):")
     for item in sciencelist:
         # Calculate time of the science frame in seconds.
         item = str(item).strip()
@@ -553,6 +663,14 @@ def makeSkyList(skyframelist, sciencelist, obsDir):
         # Print the scienceframe, matching skyframe and time difference side by side for later comparison.
         logging.info("  "+ str(item)+ "       "+ str(sorted_by_closest_time[0][1])+ "        "+ str(abs(sciencetime - sorted_by_closest_time[0][0])))
     logging.info("\n")
+
+    os.rename('skyFrameList', 'original_skyFrameList')
+
+    f = open('skyFrameList', 'w')
+    for image in prepared_sky_list:
+        f.write(image+'\n')
+    f.close()
+
     return prepared_sky_list
 
 #-----------------------------------------------------------------------------#
@@ -613,19 +731,3 @@ def MEFarith(MEF, image, op, result):
             iraf.imarith(operand1=result+'['+str(i)+']', op=op, operand2 = image, result = result+'['+str(i)+', overwrite]', divzero = 0.0)
 
 #-----------------------------------------------------------------------------#
-
-def MEFarithOLD(MEF, image, out, op, result):
-
-    if os.path.exists(out+'.fits'):
-        os.remove(out+'.fits')
-    for i in range(1,88):
-        header = astropy.io.fits.open(MEF+'.fits')
-        extname = header[i].header['EXTNAME']
-        if extname == 'DQ' or extname == 'VAR':
-            iraf.imarith(operand1=MEF+'['+str(i)+']', op='*', operand2 = '1', result = out)
-        if extname == 'SCI':
-            iraf.imarith(operand1=MEF+'['+str(i)+']', op=op, operand2 = image, result = out, divzero = 0.0)
-
-    iraf.fxcopy(input=MEF+'[0],'+out, output = result)
-    iraf.hedit(result+'[1]', field = 'EXTNAME', value = 'SCI', add = 'yes', verify = 'no')
-    iraf.hedit(result+'[1]', field='EXTVER', value='1', add='yes', verify='no')

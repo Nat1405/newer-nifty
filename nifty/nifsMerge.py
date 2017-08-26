@@ -5,7 +5,7 @@ import time
 from pyraf import iraf
 from pyraf import iraffunctions
 import astropy.io.fits
-from nifsDefs import datefmt, writeList, listit
+from nifsUtils import datefmt, writeList, listit
 
 
 def start(obsDirList, use_pq_offsets, im3dtran, over=""):
@@ -258,6 +258,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
 
     # Merge all the individual merged observation sequence data cubes.
     # TODO: test. Still untested.
+    """
     if len(mergedCubes)>1:
         os.chdir(Merged)
         iraffunctions.chdir(Merged)
@@ -294,7 +295,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
             else:
                 iraf.imcombine(inputstring, output = 'temp_merged'+gratlist[n][0]+'.fits', combine = 'median', offsets = 'waveoffsets'+grat[0]+'.txt')
                 iraf.fxcopy(input=newcubelist[0]+'[0], temp_merged'+gratlist[n][0]+'.fits', output = 'TOTAL_merged'+gratlist[n][0]+'.fits')
-
+        """
 
 #####################################################################################
 #                                        FUNCTIONS                                  #

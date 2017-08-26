@@ -19,7 +19,7 @@ setup(name='nifty-gemini',
             'Nifty/nifsBaselineCalibration.py',
             'Nifty/nifsReduce.py',
             'Nifty/nifsMerge.py',
-            'Nifty/nifsDefs.py'
+            'Nifty/nifsUtils.py'
       ],
       install_requires=[],
       include_package_data=True,

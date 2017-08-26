@@ -4,24 +4,27 @@ Maintaining Nifty
 Documentation
 =============
 
-Right now there exists four forms of documentation.
+Right now there exists five forms of documentation.
 
 Paper
 -----
 .. Insert a paper!
 
+README.rst
+----------
+
 Manual
 ------
 
-Nifty's manual gives a broad overview of how the code functions. It is written
-with Microsoft Word as one large document and offered as a pdf.
+Nifty's manual gives a broad overview of how the code functions. It is included as
+a pdf.
 
-.rst Files in Source Code
--------------------------
+.rst Files in the docs/ directory
+---------------------------------
 
 This file, others like it in the docs/ directory and the README are written in
 reStructuredText. This markup language integrates well with Python's automatic
-documentation builder (Eg: Sphinx) and Github as well as being human readable. You can
+documentation builder (read Sphinx) and Github as well as being human readable. You can
 read more about reStructuredText `here.<http://www.sphinx-doc.org/en/stable/rest.html>`_
 
 Comments and DocStrings in Source Code
@@ -34,6 +37,23 @@ Other Python comments use the following convention:
 
 - A # is followed by a space and a capital letter.
 - All comments end in a period where possible.
+
+Updates
+=======
+
+Version Numbers
+---------------
+
+Nifty uses semantic versioning(see http://semver.org/). This means version numbers come in
+
+.. code-block:: text
+
+  MAJOR.MINOR.PATCH
+
+In brief, when releasing a version of Nifty that is not backward-compatible with old test recipes,
+or changes break the public API, it is time to increment the MAJOR version number.
+
+..TODO(nat): maybe make this a little clearer.
 
 Code Conventions
 ================
@@ -80,7 +100,7 @@ nifsDefs.py
 
 General Issues
 --------------
-- A longstanding bug in `astropy<https://github.com/astropy/astropy/pull/960>`_ has made it
+- A longstanding bug (see `astropy<https://github.com/astropy/astropy/pull/960>`_ ) in astropy has made it
   difficult to build Nifty as a binary executable.
 - The conversion of print statements to logging.info() statements was messy. Some of these
   may still not be properly converted and will throw nasty tracebacks. However these seem to
@@ -91,7 +111,7 @@ General Issues
 Future Work
 ===========
 
-- Using a configParser object instead of .json files may be better for configuration files.
+- Update config to use .cfg and a config parser instead of .json files, a la space-telescope
 
 
 
