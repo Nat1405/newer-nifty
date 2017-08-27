@@ -68,46 +68,6 @@ Variables and functions were named using conventions in the
 `Python Style Guide.<https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_
 Specifically a mix of camelCase and lower_case_with_underscores was used.
 
-Known Issues
-============
-
-Nifty.py
---------
-
-nifsSort.py
------------
-
-nifsBaselineCalibration.py
---------------------------
-
-nifsReduce.py
--------------
-- z-band data is not capable of a flux calibration (yet!).
-- Seems to be missing the first peak of the ronchi slit when iraf.nfsdist() is run interactively.
-  This does not seem to be a problem.
-- We noticed that iraf.nfsdist() produced different results when run interactively and
-  non-interactively. To test check the log for iraf.nfsdist() output and make sure it is
-  identifying 8/8 or 9/9 peaks every time.
-- iraf.nftelluric() was not built to be run automatically. A lightly tested modified
-  version that allows an automatic telluric correction is included in the extras directory
-  but more testing is needed. For now applyTelluricPython() is recommended.
-
-nifsMerge.py
-------------
-
-nifsDefs.py
------------
-
-General Issues
---------------
-- A longstanding bug (see `astropy<https://github.com/astropy/astropy/pull/960>`_ ) in astropy has made it
-  difficult to build Nifty as a binary executable.
-- The conversion of print statements to logging.info() statements was messy. Some of these
-  may still not be properly converted and will throw nasty tracebacks. However these seem to
-  have no effect on the functionioning of the code.
-- Logging is still not perfect. One or two iraf tasks are sending their log files to
-  "nifs.log" instead of "Nifty.log".
-
 Future Work
 ===========
 

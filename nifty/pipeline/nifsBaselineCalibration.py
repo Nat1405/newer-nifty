@@ -651,15 +651,15 @@ def wavecal(arc, log, over, path):
     interactive = 'no'
 
     if band == "K":
-        clist=RUNTIME_DATA_PATH+"wavecal_k_band_argon.dat"
+        clist=RUNTIME_DATA_PATH+"k_ar.dat"
         my_thresh = 50.0
         interactive = 'no'
     elif band == "J":
-        clist=RUNTIME_DATA_PATH+"wavecal_j_band_argon.dat"
+        clist=RUNTIME_DATA_PATH+"j_ar.dat"
         my_thresh=100.0
         interactive = 'no'
     elif band == "H":
-        clist=RUNTIME_DATA_PATH+"wavecal_h_band_argon.dat"
+        clist=RUNTIME_DATA_PATH+"h_ar.dat"  
         my_thresh=100.0
         interactive = 'no'
     elif band == "Z":

@@ -1,6 +1,10 @@
 Preparing the .json Input File
 ==============================
 
+**NOTE: This document is out of date. We are now using .cfg files. See
+http://www.voidspace.org.uk/python/configobj.html for instructions on preparing the
+new config format.**
+
 For now we're using .json files to provide input to *Nifty*. This may not be an
 optimal solution, my main worries being lack of comments in .json files and that
 .json files can be difficult to edit by hand.

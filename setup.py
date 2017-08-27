@@ -16,7 +16,7 @@ PACKAGE_DATA = {
 
 setup(
     name=NAME,
-    version="1.0.0",
+    version="1.0.0.dev1",
     author='ncomeau',
     author_email='ncomeau@gemini.edu',
     description='Data reduction script for Gemini NIFS',

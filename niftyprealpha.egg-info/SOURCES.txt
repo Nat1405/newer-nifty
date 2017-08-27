@@ -15,10 +15,10 @@ nifty/recipes/__init__.py
 nifty/recipes/default_input.cfg
 nifty/runtimeData/__init__.py
 nifty/runtimeData/config.cfg
+nifty/runtimeData/h_ar.dat
+nifty/runtimeData/j_ar.dat
+nifty/runtimeData/k_ar.dat
 nifty/runtimeData/vega_ext.fits
-nifty/runtimeData/wavecal_h_band_argon.dat
-nifty/runtimeData/wavecal_j_band_argon.dat
-nifty/runtimeData/wavecal_k_band_argon.dat
 niftyprealpha.egg-info/PKG-INFO
 niftyprealpha.egg-info/SOURCES.txt
 niftyprealpha.egg-info/dependency_links.txt

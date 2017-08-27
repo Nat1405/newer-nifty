@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: niftyprealpha
-Version: 1.0.0
+Version: 1.0.0.dev1
 Summary: Data reduction script for Gemini NIFS
 Home-page: http://www.gemini.edu
 Author: ncomeau
