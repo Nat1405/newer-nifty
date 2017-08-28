@@ -14,7 +14,7 @@ README_TEXT = readme.read()
 readme.close()
 
 
-NAME = 'niftynifs'
+NAME = 'Nifty4NIFS'
 SCRIPTS = glob('scripts/*')
 PACKAGE_DATA = {
     '': ['*.dat', '*.cfg', '*.fits']
