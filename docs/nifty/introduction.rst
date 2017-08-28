@@ -1,5 +1,20 @@
-Overview
-========
+Introduction
+============
+
+Documentation contents:
+
+.. toctree::
+   :maxdepth: 1
+
+   preparingInput
+   runningNifty
+   availableRecipes
+   directoryModifications
+   hlineRemoval
+   merging
+   knownissues
+   maintenance
+   api
 
 Nifty Structure
 ---------------
