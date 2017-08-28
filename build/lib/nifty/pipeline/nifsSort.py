@@ -814,6 +814,7 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
     logging.info("\nSorting arcs:")
     for i in range(len(arclist)):
         header = astropy.io.fits.open(arclist[i][0])
+        obsid = header[0].header['OBSID']
         date = header[0].header['DATE'].replace('-','')
         grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
@@ -939,7 +940,7 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
-        except IOError:
+        except OSError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
@@ -963,7 +964,7 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
-        except IOError:
+        except OSError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
@@ -976,11 +977,19 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
         # Make sure flatlist and flatdarklist are the same length. nsflat() complains otherwise.
         checkSameLengthFlatLists()
 
-        # arclist exists.
+        # arclist exists and has more than one file.
         try:
             arclist = open('arclist', "r").readlines()
             if len(arclist) <= 1:
-        except IOError:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 arc frame found for science frame")
+                logging.info("                      "+str(sciImageList[i]))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+        except OSError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
@@ -990,10 +999,19 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
 
-        # arcdarklist exists.
+        # arcdarklist exists and has more than one file.
         try:
             arcdarklist = open('arcdarklist', "r").readlines()
-        except IOError:
+            if len(arcdarklist) <= 1:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in sort: only 1 dark arc frame found for science frame")
+                logging.info("                      "+str(sciImageList[i]))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+        except OSError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
@@ -1015,7 +1033,7 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
-        except IOError:
+        except OSError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
