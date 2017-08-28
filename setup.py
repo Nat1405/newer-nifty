@@ -8,7 +8,13 @@ import sys
 from setuptools import setup, find_packages, Extension, Command
 from glob import glob
 
-NAME = 'niftyprealpha'
+# Open the README as the package long description
+readme = open('README.rst', 'r')
+README_TEXT = readme.read()
+readme.close()
+
+
+NAME = 'niftynifs'
 SCRIPTS = glob('scripts/*')
 PACKAGE_DATA = {
     '': ['*.dat', '*.cfg', '*.fits']
@@ -19,16 +25,24 @@ setup(
     version="1.0.0.dev1",
     author='ncomeau',
     author_email='ncomeau@gemini.edu',
-    description='Data reduction script for Gemini NIFS',
+    description='The Gemini NIFS data reduction pipeline.',
+    long_description = README_TEXT,
     url='http://www.gemini.edu',
     license='MIT',
     classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Environment :: MacOS X',
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Education',
         'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Operating System :: MacOS',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Scientific/Engineering :: Astronomy',
+        'Topic :: Scientific/Engineering :: Physics',
     ],
-    scripts=SCRIPTS,
+    keywords='Gemini NIFS nifs pipeline reduction data IRAF iraf PYRAF pyraf astronomy integral field spectroscopy ifs ifu',
+    python_requires='~=2.7',
+    scripts=SCRIPTS, # TODO(nat): Update this to use entry_points instead of scripts for better cross-platform performance
     packages=find_packages(),
     package_data=PACKAGE_DATA
 )
