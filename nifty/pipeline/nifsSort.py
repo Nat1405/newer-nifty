@@ -82,7 +82,7 @@ def start():
     logging.info('####################################\n')
 
     # Load reduction parameters from runtimeData/config.cfg.
-    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
+    with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         rawPath = options['rawPath']
         telluricReduction = options['telluricReduction']
@@ -186,12 +186,12 @@ def start():
     # 1) Science observation directory
     # 2) Calibration observation directory
     # 3) Telluric observation directory
-    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
+    with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
     options['scienceDirectoryList'] = scienceDirectoryList
     options['telluricDirectoryList'] = telluricDirectoryList
     options['calibrationDirectoryList'] = calibrationDirectoryList
-    with open(RUNTIME_DATA_PATH+'config.cfg', 'w') as config_file:
+    with open('./config.cfg', 'w') as config_file:
         options.write(config_file)
 
 ##################################################################################################################

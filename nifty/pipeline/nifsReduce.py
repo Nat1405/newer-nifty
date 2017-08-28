@@ -114,7 +114,7 @@ def start(kind):
     iraf.reset(clobber='yes')
 
     # Load reduction parameters from runtimeData/config.cfg.
-    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
+    with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         if kind == 'Telluric':
             # Load telluricDirectoryList as observationDirectoryList
@@ -202,13 +202,13 @@ def start(kind):
         # Open and store the bad pixel mask name from sflat_bpmfile in sflat_bpm.
         sflat_bpm = calDir+str(open(calDir+"sflat_bpmfile", "r").readlines()[0]).strip()
         # Open and store the name of the reduced spatial correction ronchi flat frame name from ronchifile in ronchi.
-        ronchi = open(calDir+"ronchifile," "r").readlines()[0].strip()
+        ronchi = open(calDir+"ronchifile", "r").readlines()[0].strip()
         # Copy the spatial calibration ronchi flat frame from Calibrations_grating to the observation directory.
-        iraf.copy(calDir+ronchi+".fits",output="./")
+        iraf.copy(calDir+ronchi+".fits", output="./")
         # Open and store the name of the reduced wavelength calibration arc frame from arclist in arc.
         arc = "wrgn"+str(open(calDir+"arclist", "r").readlines()[0]).strip()
         # Copy the wavelength calibration arc frame from Calibrations_grating to the observation directory.
-        iraf.copy(calDir+arc+".fits",output="./")
+        iraf.copy(calDir+arc+".fits", output="./")
         # Make sure the database files are in place. Current understanding is that
         # these should be local to the reduction directory, so need to be copied from
         # the calDir.

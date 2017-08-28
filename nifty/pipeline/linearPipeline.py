@@ -6,7 +6,7 @@
 
 # STDLIB
 
-from optparse import OptionParser
+import argparse
 import logging, os, sys, shutil, pkg_resources
 from datetime import datetime
 
@@ -105,23 +105,29 @@ def start(args):
     logging.info("####################################\n")
 
     # Make sure to change this if you change the default logfile.
-    logging.info('The log file is Nifty.log.')
+    logging.info('The log file is Nifty.log.\n')
 
-    # I am testing the use of pip and another entry point.
-    parser = OptionParser()
-    parser.add_option('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeData/config.cfg.')
-    parser.add_option('-l', '--load', dest = 'fileToLoad', action = 'store', help = 'Load data reduction parameters from the provided configuration file. Default is default_input.cfg.')
-    parser.add_option('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full reduction with data reduction parameters loaded from runtimeData/default_input.cfg')
+    # Parse command line options.
+    parser = argparse.ArgumentParser(description='Do a Gemini NIFS data reduction.')
+    # Ability to repeat the last data reduction
+    parser.add_argument('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeData/config.cfg.')
+    # Ability to load a built-in configuration file (recipe)
+    parser.add_argument('-l', '--recipe', dest = 'recipe', action = 'store', help = 'Load data reduction parameters from the a provided recipe. Default is default_input.cfg.')
+    # Ability to load your own configuration file
+    parser.add_argument(dest = 'inputfile', action = 'store', help = 'Load data reduction parameters from <inputfile>.cfg.')
+    # Ability to do a quick and dirty fully automatic data reduction with no user input
+    # TODO(nat): make it so Nifty does this when you type "niftyRun" with no options
+    parser.add_argument('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full reduction with data reduction parameters loaded from runtimeData/default_input.cfg')
 
-    (options, args) = parser.parse_args(args)
+    args = parser.parse_args(args)
 
-    repeat = options.repeat
-    fullReduction = options.fullReduction
-    fileToLoad = options.fileToLoad
+    repeat = args.repeat
+    fullReduction = args.fullReduction
+    inputfile = args.inputfile
 
     # Check if the user specified at command line to repeat the last Reduction, do a full default data reduction from a
     # recipe file or do a full data reduction from a handmade file.
-    if not repeat and not fullReduction and not fileToLoad:
+    if not repeat and not fullReduction and not inputfile:
         # If not get user input and check if user specified a full data reduction.
         fullReduction = getUserInput()
 
@@ -132,24 +138,25 @@ def start(args):
         shutil.copy(RECIPES_PATH+'default_input.cfg', RUNTIME_DATA_PATH+'config.cfg')
         logging.info("\nData reduction parameters for this reduction were copied from recipes/default_input.cfg to runtimeData/config.cfg.")
 
-    if fileToLoad:
+    if inputfile:
         # Load input from a .cfg file user specified at command line.
-        shutil.copy('./'+fileToLoad, RUNTIME_DATA_PATH+'config.cfg')
-        logging.info("\nPipeline configuration for this data reduction was read read from " + str(fileToLoad))
+        shutil.copy('./'+inputfile, RUNTIME_DATA_PATH+'config.cfg')
+        logging.info("\nPipeline configuration for this data reduction was read from " + str(inputfile) + \
+        " and copied to ./config.cfg.")
     else:
         shutil.copy(RUNTIME_DATA_PATH+'config.cfg', './config.cfg')
         logging.info("\nPipeline configuration for this data reduction has been written to ./config.cfg")
 
     # Print data reduction parameters for a user's peace-of-mind.
     logging.info("\nParameters for this data reduction as read from that file:\n")
-    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
+    with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         for i in options:
             logging.info(str(i) + " " + str(options[i]))
     logging.info("")
 
     # Define parameters used by this script:
-    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
+    with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         sort = options['sort']
         calibrationReduction = options['calibrationReduction']

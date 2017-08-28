@@ -96,8 +96,8 @@ def start():
     user_clobber=iraf.envget("clobber")
     iraf.reset(clobber='yes')
 
-    # Load reduction parameters from runtimeData/config.cfg.
-    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
+    # Load reduction parameters from ./config.cfg.
+    with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         calDirList = options['calibrationDirectoryList']
         over = options['over']
@@ -659,7 +659,7 @@ def wavecal(arc, log, over, path):
         my_thresh=100.0
         interactive = 'no'
     elif band == "H":
-        clist=RUNTIME_DATA_PATH+"h_ar.dat"  
+        clist=RUNTIME_DATA_PATH+"h_ar.dat"
         my_thresh=100.0
         interactive = 'no'
     elif band == "Z":

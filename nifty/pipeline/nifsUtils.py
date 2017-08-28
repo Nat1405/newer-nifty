@@ -226,7 +226,7 @@ def printDirectoryLists():
     logging.info("")
     logging.info("#################################################################################\n")
 
-    with open(RUNTIME_DATA_PATH+'config.cfg') as config_file:
+    with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
     logging.info("\nScience Directory List: ")
     for i in range(len(options['scienceDirectoryList'])):

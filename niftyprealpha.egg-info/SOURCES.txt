@@ -23,4 +23,4 @@ niftyprealpha.egg-info/PKG-INFO
 niftyprealpha.egg-info/SOURCES.txt
 niftyprealpha.egg-info/dependency_links.txt
 niftyprealpha.egg-info/top_level.txt
-scripts/run.py
+scripts/niftyrun
