@@ -1,3 +1,5 @@
+https://zenodo.org/badge/93109208.svg
+
 Nifty
 =====
 A Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
