@@ -3,10 +3,20 @@
 import sys
 import nifty
 
+# TODO(nat): have a syntax of runNifty <script name> <inputfile>.
+
 if __name__ == '__main__':
 
     if '--version' in sys.argv:
         sys.stdout.write("%s\n" % stpipe.__version__)
         sys.exit(0)
 
-    nifty.linearPipeline.start(sys.argv[1:])
+    # TODO(nat): find a better way to do this.
+    if 'linearPipeline' in sys.argv:
+        nifty.linearPipeline.start(sys.argv[1:])
+    """elif 'nifsSort' in sys.argv:
+        nifty.nifsSort.start()                            # TODO(nat): make these able parse input on their own.
+    elif 'nifsBaselineCalibration' in sys.argv:           # Right now they assume config is in ./config.cfg...
+        nifty.nifsBaselineCalibration.start()
+    elif 'nifsReduce' in sys.argv:
+        nifty.nifsReduce.start()"""

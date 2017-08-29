@@ -68,10 +68,6 @@ Variables and functions were named using conventions in the
 `Python Style Guide.<https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_
 Specifically a mix of camelCase and lower_case_with_underscores was used.
 
-Future Work
-===========
-
-- Update config to use .cfg and a config parser instead of .json files, a la space-telescope
 
 
 

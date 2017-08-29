@@ -6,8 +6,7 @@
 
 # STDLIB
 
-import argparse
-import logging, os, sys, shutil, pkg_resources
+import logging, os, sys, shutil, pkg_resources, argparse
 from datetime import datetime
 
 # LOCAL
