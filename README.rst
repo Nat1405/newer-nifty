@@ -1,7 +1,5 @@
 .. image:: https://zenodo.org/badge/93109208.svg
-   :align: right
 .. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-   :align: right
 
 Nifty
 =====
