@@ -1,5 +1,7 @@
-|doi|
-|astropy|
+.. image:: https://zenodo.org/badge/93109208.svg
+   :align: right
+.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+   :align: right
 
 Nifty
 =====
@@ -262,8 +264,3 @@ runtimeData/user_options.json files that are loaded with the -l flag.
 .. code-block:: text
 
     python Nifty.py -q users/name/reduction/Raw -s -r -k -b 8
-
-.. |doi| image:: https://zenodo.org/badge/93109208.svg
-         :align: right
-.. |astropy| image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-             :align: right
