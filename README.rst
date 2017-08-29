@@ -1,4 +1,4 @@
-https://zenodo.org/badge/93109208.svg
+|doi|
 
 Nifty
 =====
@@ -261,3 +261,5 @@ runtimeData/user_options.json files that are loaded with the -l flag.
 .. code-block:: text
 
     python Nifty.py -q users/name/reduction/Raw -s -r -k -b 8
+
+.. |doi| image:: https://zenodo.org/badge/93109208.svg
