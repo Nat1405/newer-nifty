@@ -979,7 +979,6 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
         # arclist exists.
         try:
             arclist = open('arclist', "r").readlines()
-            if len(arclist) <= 1:
         except IOError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
