@@ -1,8 +1,10 @@
-.. image:: https://zenodo.org/badge/93109208.svg
-.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-
 Nifty
 =====
+
+.. image:: https://zenodo.org/badge/93109208.svg
+.. image:: https://readthedocs.org/projects/newer-nifty/badge/?version=latest
+.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+
 A Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
 Field Spectrometer (NIFS).
 
