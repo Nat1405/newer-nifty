@@ -988,6 +988,9 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
+            # Give user a chance now to try and provide an arc file.
+            a = raw_input("\n Please provide a textfile called arclist in " + str(os.getcwd()) + \
+            " or be sure not to attempt a wavelength calibration for this directory.")
 
         # arcdarklist exists.
         try:

@@ -14,6 +14,7 @@ Documentation contents:
    merging
    knownissues
    maintenance
+   futurework
    api
 
 Nifty Structure
