@@ -390,18 +390,18 @@ def start(kind):
                 # For science data, either:
                 # Apply the telluric correction and absolute flux calibration by dividing by efficiency spectrum with Python.
                 elif kind=='Science' and telluric_correction_method == "python":
-                    makeCube('tfbrsn', scienceFrameList, observationDirectory, log, over)
+                    makeCube('tfbrsn', scienceFrameList, log, over)
                     applyTelluricPython(over)
 
                 # Apply the telluric correction and absolute flux calibration with iraf.nftelluric().
                 elif kind=='Science' and telluric_correction_method == "iraf":
                     applyTelluricIraf(scienceFrameList, obsid, telinter, log, over)
-                    makeCube('atfbrsn', scienceFrameList, observationDirectory, log, over)
+                    makeCube('atfbrsn', scienceFrameList, log, over)
 
                 # DON'T apply the telluric correction and absolute flux calibration; just make a cube.
                 elif kind=='Science' and telluric_correction_method == "none":
                     # Make cube without telluric correction.
-                    makeCube('tfbrsn', scienceFrameList, observationDirectory, log, over)
+                    makeCube('tfbrsn', scienceFrameList, log, over)
 
                     logging.info("\n##############################################################################")
                     logging.info("")
@@ -649,7 +649,7 @@ def transform(objlist, log, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def makeCube(pre, scienceFrameList, observationDirectory, log, over):
+def makeCube(pre, scienceFrameList, log, over):
     """ Reformat the data into a 3-D datacube using iraf.nifcube. Output: If
     telluric correction to be applied, -->catfbrsgn. Else, -->ctfbrsgn.
 
@@ -661,7 +661,6 @@ def makeCube(pre, scienceFrameList, observationDirectory, log, over):
 
     """
 
-    os.chdir(observationDirectory)
     for frame in scienceFrameList:
         if os.path.exists("c"+pre+frame+".fits"):
             if over:
