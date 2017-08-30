@@ -121,13 +121,13 @@ def start(kind):
             observationDirectoryList = options['telluricDirectoryList']
             start = options['telStart']
             stop = options['telStop']
-            telluricSkySubtration = options['telluricSkySubtration']
         elif kind == 'Science':
             # Load scienceDirectoryList as observationDirectoryList
             observationDirectoryList = options['scienceDirectoryList']
             start = options['sciStart']
             stop = options['sciStop']
-            scienceSkySubtraction = options['scienceSkySubtraction']
+        telluricSkySubtration = options['telluricSkySubtraction']
+        scienceSkySubtraction = options['scienceSkySubtraction']
         calDirList = options['calibrationDirectoryList']
         telinter = options['telinter']
         efficiencySpectrumCorrection = options['efficiencySpectrumCorrection']
@@ -249,8 +249,9 @@ def start(kind):
             scienceFrameList = [frame.strip() for frame in scienceFrameList]
             # For science frames, check to see if the number of sky frames matches the number of science frames.
             # IF NOT duplicate the sky frames and rewrite the sky file and skyFrameList.
-            if not len(skyFrameList)==len(scienceFrameList):
-                skyFrameList = makeSkyList(skyFrameList, scienceFrameList, observationDirectory)
+            if scienceSkySubtraction:
+                if not len(skyFrameList)==len(scienceFrameList):
+                    skyFrameList = makeSkyList(skyFrameList, scienceFrameList, observationDirectory)
 
         ###########################################################################
         ##                                                                       ##
