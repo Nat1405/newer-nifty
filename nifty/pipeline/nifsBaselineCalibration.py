@@ -597,23 +597,24 @@ def makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path):
     # Determine the wavelength setting.
     hdulist = astropy.io.fits.open("rgn"+arc+".fits")
     band = hdulist[0].header['GRATING'][0:1]
+    central_wavelength = float(hdulist[0].header['GRATWAVE'])
 
     # Set interactive mode. Default False for standard configurations (and True for non-standard wavelength configurations ).
     interactive = 'no'
 
-    if band == "K":
+    if band == "K" and central_wavelength == 2.20:
         clist=RUNTIME_DATA_PATH+"k_ar.dat"
         my_thresh = 50.0
         interactive = 'no'
-    elif band == "J":
-        clist=RUNTIME_DATA_PATH+"j_ar.dat"
-        my_thresh=100.0
-        interactive = 'no'
-    elif band == "H":
+    elif band == "H" and central_wavelength == 1.65:
         clist=RUNTIME_DATA_PATH+"h_ar.dat"
         my_thresh=100.0
         interactive = 'no'
-    elif band == "Z":
+    elif band == "J" and central_wavelength == 1.25:
+        clist=RUNTIME_DATA_PATH+"j_ar.dat"
+        my_thresh=100.0
+        interactive = 'no'
+    elif band == "Z" and central_wavelength == 1.05:
         clist="nifs$data/ArXe_Z.dat"
         my_thresh=100.0
         interactive = 'yes'
