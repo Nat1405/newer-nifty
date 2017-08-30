@@ -222,21 +222,22 @@ def start(kind):
             os.mkdir('./database/')
         iraf.copy(input=calDir+"database/*", output="./database/")
 
-        # Read the list of sky frames in the observation directory.
-        try:
-            skyFrameList = open("skyFrameList", "r").readlines()
-            skyFrameList = [frame.strip() for frame in skyFrameList]
-        except:
-            logging.info("\n#####################################################################")
-            logging.info("#####################################################################")
-            logging.info("")
-            logging.info("     WARNING in reduce: No sky frames were found in a directory.")
-            logging.info("              Please make a skyFrameList in: " + str(os.getcwd()))
-            logging.info("")
-            logging.info("#####################################################################")
-            logging.info("#####################################################################\n")
-            raise SystemExit
-        sky = skyFrameList[0]
+        if telluricSkySubtration or scienceSkySubtraction:
+            # Read the list of sky frames in the observation directory.
+            try:
+                skyFrameList = open("skyFrameList", "r").readlines()
+                skyFrameList = [frame.strip() for frame in skyFrameList]
+            except:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in reduce: No sky frames were found in a directory.")
+                logging.info("              Please make a skyFrameList in: " + str(os.getcwd()))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+                raise SystemExit
+            sky = skyFrameList[0]
 
         # If we are doing a telluric reduction, open the list of telluric frames in the observation directory.
         # If we are doing a science reduction, open the list of science frames in the observation directory.

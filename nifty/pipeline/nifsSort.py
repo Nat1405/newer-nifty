@@ -91,6 +91,8 @@ def start():
         program = options['program']
         date = options['date']
         debug = options['debug']
+        telluricSkySubtration = options['telluricSkySubtration']
+        scienceSkySubtraction = options['scienceSkySubtraction']
 
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
     # Exit if -q <path to raw frame files> and -c True are specified at command line (cannot copy from
