@@ -1,6 +1,6 @@
 Metadata-Version: 1.2
 Name: Nifty4NIFS
-Version: 1.0.0.dev3
+Version: 1.0.0.dev4
 Summary: The Gemini NIFS data reduction pipeline.
 Home-page: http://www.gemini.edu
 Author: ncomeau
@@ -10,14 +10,20 @@ Description: Nifty
         =====
         
         .. image:: https://zenodo.org/badge/93109208.svg
+           :alt: DOI of the latest release. See releases.
+           :target: https://zenodo.org/record/852696#.WaWmr5PyhMA
         .. image:: https://readthedocs.org/projects/newer-nifty/badge/?version=latest
+           :alt: Nifty's documentation, hosted on ReadtheDocs.
+           :target: http://newer-nifty.readthedocs.io/en/latest/
         .. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+           :alt: Nifty uses Astropy! Here is a link to the project webpage:
+           :target: http://www.astropy.org/
         
         A Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
         Field Spectrometer (NIFS).
         
         This is a new data reduction python pipeline that uses Astroconda and the Gemini
-        Iraf Package to reduce NIFS data. It offers a complete data reduction process from
+        IRAF Package to reduce NIFS data. It offers a complete data reduction process from
         sorting the data to producing a final flux calibrated and wavelength calibrated
         combined cube with the full S/N for a science target.
         
@@ -42,92 +48,83 @@ Description: Nifty
         Installation
         ============
         
-        .. 1. Install Astroconda. Instructions can be found on Gemini's website `here. <http://www.gemini.edu/node/12665>`
-        .. This will work but doesn't guarantee an identical pipeline every time.
-        1. Make sure you have Anaconda installed. We tested Nifty with Anaconda 4.4.0.
-           You can grab the latest version `here<https://www.continuum.io/downloads>`
-           **Important: do not activate an environment yet. We will create a new one in step 5.**
-        2. Make sure your terminal is using a bash shell. This should print something similar to /bin/bash.
+        Pre-Requisites
+        --------------
+        Make sure you have the latest version of Gemini Astroconda installed and have activated an Astroconda environment.
+        You can find instructions for installing Astroconda `here.<https://astroconda.readthedocs.io/en/latest/>`
+        
+        Installing
+        ----------
+        The following command installs Nifty from PyPi.org.
         
         .. code-block:: text
         
-            echo $SHELL
+            pip install Nifty4NIFS
         
-        2. Download the latest release of Nifty from `github.<https://github.com/Nat1405/newer-nifty/releases>`
-        3. Unpack the .zip or .tar file.
-        4. Within a terminal change into the unpacked Nifty directory. When you type "ls" you should see
-           several files like "Nifty.py, nifsSort.py and environment-file.txt.".
-        5. From the spec-file-osx-64.txt create a new conda environment. This helps ensure you are
-           using identical python modules to those used during testing. For more info on creating
-           identical environments see `here.<https://conda.io/docs/using/envs.html#build-identical-conda-environments>`
-        .. code-block:: text
+        You're ready to begin.
         
-            conda create --name niftyconda --file spec-file-osx-64.txt
-        
-        6. Activate the new "niftyconda" environment.
+        .. TODO(nat): implement these instructions.
+        *Coming Soon: Instructions for installing in Developer mode.*
         
         .. code-block:: text
         
-            source activate niftyconda
-        
-        .. Insert photo of the new prompt.
-        
-        You should see (niftyconda) appear before your shell prompt.
-        
-        You're ready to begin!
-        
-        You should see the following directory structure:
-        
-        .. code-block:: text
-        
-            |_ Nifty.py
-            |_ nifsSort.py
-            |_ nifsBaselineCalibration.py
-            |_ nifsReduce.py
-            |_ nifsMerge.py
-            |_ nifsDefs.py
-            |____ runtimeData/
-            |  |____ h_wave.data
-            |  |____ j_wave.data
-            |  |____ k_wave.data
-            |  |____ default_input.json
-            |  |____ new_starstemp.txt
-            |  |____ vega_ext.fits
-            |____ docs/
-            |  |____ nifs_pipeline_june_2015.pdf
-            |____ extras/
-            |  |____ geminiSort.py
-            |____ tests/
-            |  |____ generate_response_curve.py
-            |  |____ hk.txt
-            |  |____ nftelluric_modified.cl
-            |_ .gitignore
-            |_ LICENSE
-            |_ README.rst
-            |_ spec-file-osx-64.txt
-        
-        *Nifty.py* is the main control script of the pipeline.
+            Not implemented yet.
         
         Quick Start
         ===========
         
-        To launch Nifty with interactive input, type:
+        To run Nifty, getting data reduction parameters from an interactive input session:
         
         .. code-block:: text
         
-           python Nifty.py
+           runNifty -i
         
-        Nifty will let you select parameters for the data reduction. Press enter to accept
-        the default options.
-        
-        To do a full data reduction from the defaults listed in default_input.json:
+        To run Nifty in full-automatic mode with default input parameters, provide the -f flag
+        and a local path to the raw data or a Gemini Program ID string (Eg: GN-2013A-Q-62).
         
         .. code-block:: text
         
-           python Nifty.py -f
+           runNifty -f <data_location>
         
-        or type "yes" at the first interactive prompt that asks if you would like to do a
-        full default reduction.
+        
+        Running Nifty
+        =============
+        
+        The runNifty command should now be active. You can now run Nifty from any directory to do either a
+        full or partial data reduction. Nifty is launched by typing the runNifty command with the name of a
+        configuration file and optional command line options. Typing runNifty without any arguments lists the
+        syntax and available options.
+        
+        To get available options:
+        
+        .. code-block:: text
+        
+           runNifty
+        
+        To show help:
+        
+        .. code-block:: text
+        
+           runNifty -h
+        
+        To run Nifty, populating a configuration file with an interactive input session:
+        
+        .. code-block:: text
+        
+           runNifty -i <data_location>
+        
+        To run Nifty, getting data reduction parameters from the file <inputfile.cfg>:
+        
+        .. code-block:: text
+        
+           runNifty <inputfile.cfg>
+        
+        To do a full automatic data reduction with default options:
+        
+        .. code-block:: text
+        
+           runNifty -f <data_location>
+        
         
         Input
         =====

@@ -69,7 +69,6 @@ def start(args):
                 3) nifsReduce.py
 
     """
-
     # Save path for later use and change one directory up.
     path = os.getcwd()
 

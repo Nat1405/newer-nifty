@@ -1,4 +1,3 @@
-MANIFEST.in
 README.rst
 setup.py
 Nifty4NIFS.egg-info/PKG-INFO
