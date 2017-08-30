@@ -219,8 +219,7 @@ def start():
             elif valindex == 3:
                 if debug:
                     a = raw_input("About to enter step 3: wavelength solution.")
-                reduceArc(arclist, arc, arcdarklist, arcdark, log, over)
-                wavecal(arc, log, over, path)
+                makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path)
                 print "\n###################################################################"
                 print ""
                 print "         STEP 3: Wavelength Solution (NFPREPARE and Combine arc darks.  "
@@ -237,7 +236,7 @@ def start():
             elif valindex == 4:
                 if debug:
                     a = raw_input("About to enter step 4: spatial distortion.")
-                ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
+                makeRonchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
                 print "\n###################################################################"
                 print ""
                 print "     Step 4: Spatial Distortion (Trace the spatial curvature and spectral distortion "
@@ -442,44 +441,6 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
     open("sflatfile", "w").write("rgn"+calflat+"_sflat")            # Flat field before renormalization (before nsslitfunction)
     open("sflat_bpmfile", "w").write("rgn"+calflat+"_sflat_bpm.pl") # Bad Pixel Mask
 
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
-def makeArcDark(arcdarklist, arcdark, calflat, over, log):
-    """"Prepare with iraf.nfprepare and combine the daytime arc darks.
-
-    Processing with NFPREPARE will rename the data extension and add
-    variance and data quality extensions. By default (see NSHEADERS)
-    the extension names are SCI for science data, VAR for variance, and
-    DQ for data quality (0 = good). Generation of the data quality
-    plane (DQ) is important in order to fix hot and dark pixels on the
-    NIFS detector in subsequent steps in the data reduction process.
-    Various header keywords (used later) are also added in NFPREPARE.
-    NFPREPARE will also add an MDF file (extension MDF) describing the
-    NIFS image slicer pattern and how the IFU maps to the sky field.
-
-    """
-
-    # Update arc dark frames with mdf offset value and generate variance and data quality extensions.
-    for image in arcdarklist:
-        image = str(image).strip()
-        if over:
-            iraf.delete("n"+image+".fits")
-        iraf.nfprepare(image, rawpath='.', shiftimage="s"+calflat, \
-                       bpm=sflat_bpm,fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
-    arcdarklist = checkLists(arcdarklist, '.', 'n', '.fits')
-
-    # Combine arc dark frames, "n"+image+".fits". Output combined file will have the name of the first arc dark file.
-    if over:
-        iraf.delete("gn"+arcdark+".fits")
-    if len(arcdarklist) > 1:
-        iraf.gemcombine(listit(arcdarklist,"n"),output="gn"+arcdark, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
-    else:
-        iraf.copy('n'+arcdark+'.fits', 'gn'+arcdark+'.fits')
-
-    # Put the name of the combined and prepared arc dark frame "gn"+arcdark into a text
-    # file called arcdarkfile to be used by the pipeline later.
-    open("arcdarkfile", "w").write("gn"+arcdark)
-
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def reduceArc(arclist, arc, arcdarklist, arcdark, log, over):
@@ -606,7 +567,7 @@ def reduceArc(arclist, arc, arcdarklist, arcdark, log, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def wavecal(arc, log, over, path):
+def makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path):
     """Determine the wavelength solution of each slice of the observation and
     set the arc coordinate file.
 
@@ -634,6 +595,106 @@ def wavecal(arc, log, over, path):
     automatic mode (i.e., fl_inter-).  Use fl_inter+ for manual mode.
 
     """
+
+    # Store the name of the shift image in "shiftima".
+    shiftima = open("shiftfile", "r").readlines()[0].strip()
+    # Store the name of the bad pixel mask in "sflat_bpm".
+    sflat_bpm = open("sflat_bpmfile", "r").readlines()[0].strip()
+    # Store the name of the final flat field frame in "flat".
+    flat = open("flatfile", "r").readlines()[0].strip()
+
+    # Update arc images with offset value and generate variance and data
+    # quality extensions. Results in "n"+image+".fits"
+    for image in arclist:
+        image = str(image).strip()
+        if os.path.exists("n"+image+".fits"):
+            if over:
+                iraf.delete("n"+image+".fits")
+            else:
+                print "\nOutput file exists and -over not set - skipping nfprepare of arcs."
+                continue
+        iraf.nfprepare(image, rawpath=".", shiftimage=shiftima,bpm=sflat_bpm,\
+                       fl_vardq="yes",fl_corr='no',fl_nonl='no',logfile=log)
+
+    # Check that output files for all arc images exists from nfprepare; if output does not
+    # exist remove corresponding arc images from arclist.
+    arclist = checkLists(arclist, '.', 'n', '.fits')
+
+    # Update arc dark frames with mdf offset value and generate variance and data
+    # quality extensions. Results in "n"+image+".fits"
+    for image in arcdarklist:
+        image = str(image).strip()
+        if os.path.exists("n"+image+".fits"):
+            if over:
+                iraf.delete("n"+image+".fits")
+            else:
+                print "\nOutput file exists and -over not set - skipping nfprepare of arcdarks."
+                continue
+        iraf.nfprepare(image, rawpath=".", shiftimage=shiftima, bpm=sflat_bpm, \
+                       fl_vardq='yes',fl_corr='no',fl_nonl='no',logfile=log)
+
+    # Check that output files for all arc images exists from nfprepare; if output does not
+    # exist remove corresponding arc images from arclist.
+    arcdarklist = checkLists(arcdarklist, '.', 'n', '.fits')
+
+    # Combine arc frames, "n"+image+".fits". Output combined file will have the name of the first arc file.
+    if os.path.exists("gn"+arc+".fits"):
+        if over:
+            iraf.delete("gn"+arc+".fits")
+            if len(arclist) > 1:
+                iraf.gemcombine(listit(arclist,"n"),output="gn"+arc, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+            else:
+                iraf.copy('n'+arc+'.fits', 'gn'+arc+'.fits')
+        else:
+            print "\nOutput file exists and -over not set - skipping gemcombine of arcs."
+    else:
+        if len(arclist) > 1:
+            iraf.gemcombine(listit(arclist,"n"),output="gn"+arc, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+        else:
+            iraf.copy('n'+arc+'.fits', 'gn'+arc+'.fits')
+
+    # Combine arc dark frames, "n"+image+".fits". Output combined file will have the name of the first arc dark file.
+    if os.path.exists("gn"+arcdark+".fits"):
+        if over:
+            iraf.delete("gn"+arcdark+".fits")
+            if len(arcdarklist) > 1:
+                iraf.gemcombine(listit(arcdarklist,"n"),output="gn"+arcdark, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+            else:
+                iraf.copy('n'+arcdark+'.fits', 'gn'+arcdark+'.fits')
+        else:
+            print "\nOutput file exists and -over not set - skipping gemcombine of arcdarks."
+    else:
+        if len(arcdarklist) > 1:
+            iraf.gemcombine(listit(arcdarklist,"n"),output="gn"+arcdark, fl_dqpr='yes',fl_vardq='yes',masktype="none",logfile=log)
+        else:
+            iraf.copy('n'+arcdark+'.fits', 'gn'+arcdark+'.fits')
+
+    # Put the name of the combined and prepared arc dark frame "gn"+arcdark into a text
+    # file called arcdarkfile to be used by the pipeline later.
+    open("arcdarkfile", "w").write("gn"+arcdark)
+
+    # NSREDUCE on arc images "gn"+arc+".fits" to extract the slices and apply an approximate
+    # wavelength calibration. Results in "rgn"+image+".fits"
+    if os.path.exists("rgn"+arc+".fits"):
+        if over:
+            iraf.delete("rgn"+arc+".fits")
+        else:
+            print "Output file exists and -over not set - skipping apply_flat_arc."
+            return
+    fl_dark = "no"
+    if arcdark != "":
+        fl_dark = "yes"
+    hdulist = astropy.io.fits.open(arc+'.fits')
+    if 'K_Long' in hdulist[0].header['GRATING']:
+        iraf.nsreduce("gn"+arc, darki=arcdark, fl_cut="yes", fl_nsappw="yes", crval = 23000., fl_dark="yes", fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="no",logfile=log)
+    else:
+        iraf.nsreduce("gn"+arc, darki="gn"+arcdark, flatimage=flat, \
+                      fl_vardq="no", fl_cut="yes", fl_nsappw="yes", fl_sky="no", fl_dark="yes", fl_flat="yes", \
+                      logfile=log)
+
+    # Put the name of the combined and prepared arc dark frame "gn"+arcdark into a text
+    # file called arcdarkfile to be used by the pipeline later.
+    open("arcdarkfile", "w").write("gn"+arcdark)
 
     if os.path.exists("wrgn"+arc+".fits"):
         if over:
@@ -691,7 +752,7 @@ def wavecal(arc, log, over, path):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def ronchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
+def makeRonchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
     """Establish Spatial-distortion calibration with nfsdist.
 
     NFSDIST uses the information in the "Ronchi" Calibration images

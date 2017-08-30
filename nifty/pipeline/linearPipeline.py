@@ -139,7 +139,6 @@ def start(args):
 
     if inputfile:
         # Load input from a .cfg file user specified at command line.
-        shutil.copy('./'+inputfile, RUNTIME_DATA_PATH+'config.cfg')
         logging.info("\nPipeline configuration for this data reduction was read from " + str(inputfile) + \
         " and copied to ./config.cfg.")
     else:

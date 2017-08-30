@@ -121,11 +121,13 @@ def start(kind):
             observationDirectoryList = options['telluricDirectoryList']
             start = options['telStart']
             stop = options['telStop']
+            telluricSkySubtration = options['telluricSkySubtration']
         elif kind == 'Science':
             # Load scienceDirectoryList as observationDirectoryList
             observationDirectoryList = options['scienceDirectoryList']
             start = options['sciStart']
             stop = options['sciStop']
+            scienceSkySubtraction = options['scienceSkySubtraction']
         calDirList = options['calibrationDirectoryList']
         telinter = options['telinter']
         efficiencySpectrumCorrection = options['efficiencySpectrumCorrection']
@@ -301,19 +303,23 @@ def start(kind):
                     a = raw_input("About to enter step 2: sky subtraction.")
                 # Combine telluric sky frames.
                 if kind=='Telluric':
-                    if len(skyFrameList)>1:
-                        combineImages(skyFrameList, "gn"+sky, log, over)
+                    if telluricSkySubtration:
+                        if len(skyFrameList)>1:
+                            combineImages(skyFrameList, "gn"+sky, log, over)
+                        else:
+                            copyImage(skyFrameList, 'gn'+sky+'.fits', over)
+                        skySubtractTel(tellist, "gn"+sky, log, over)
                     else:
-                        copyImage(skyFrameList, 'gn'+sky+'.fits', over)
-                if kind=='Telluric':
-                    skySubtractTel(tellist, "gn"+sky, log, over)
-                elif kind=='Science':
-                    # Temporary code to let us skip the sky subtraction.
-                    if False:
+                        for image in tellist:
+                            iraf.copy('n'+image+'.fits', 'sn'+image+'.fits')
+
+                if kind=='Science':
+                    if scienceSkySubtraction:
                         skySubtractObj(scienceFrameList, skyFrameList, log, over)
                     else:
                         for image in scienceFrameList:
                             iraf.copy('n'+image+'.fits', 'sn'+image+'.fits')
+
                 logging.info("\n##############################################################################")
                 logging.info("")
                 logging.info("  STEP 2: Sky Subtraction ->sn - COMPLETED ")

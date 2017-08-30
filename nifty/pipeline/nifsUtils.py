@@ -96,6 +96,10 @@ def getUserInput():
         "Stopping point of science and telluric reductions? [6]: ",
         6
         )
+        telluricSkySubtration = getParam(
+        "Subtract sky frames from telluric frames? [yes]: ",
+        'yes'
+        )
         # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
         # Set the h-line removal method with the vega() function in nifsReduce as default.
         hline_method = getParam(
@@ -131,6 +135,10 @@ def getUserInput():
         sciStop = getParam(
         "Stopping point of science and telluric reductions? [6]: ",
         6
+        )
+        scienceSkySubtraction = getParam(
+        "Subtract sky frames from science frames? [yes]: ",
+        'yes'
         )
         efficiencySpectrumCorrection = getParam(
         "Do a flux calibration? [no]: ",
@@ -175,6 +183,7 @@ def getUserInput():
         options['sort'] = sort
         options['calibrationReduction'] = calibrationReduction
         options['scienceReduction'] = scienceReduction
+        options['scienceSkySubtraction'] = scienceSkySubtraction
         options['merge'] = merge
         options['tel'] = tel
         options['telluricReduction'] = telluricReduction
@@ -192,6 +201,7 @@ def getUserInput():
         options['continuuminter'] = continuuminter
         options['telluric_correction_method'] = telluric_correction_method
         options['telinter'] = telinter
+        options['telluricSkySubtration'] = telluricSkySubtration
         options['use_pq_offsets'] = use_pq_offsets
         options['im3dtran'] = im3dtran
         options['debug'] = debug
