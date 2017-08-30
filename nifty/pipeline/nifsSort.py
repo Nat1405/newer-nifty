@@ -91,7 +91,7 @@ def start():
         program = options['program']
         date = options['date']
         debug = options['debug']
-        telluricSkySubtration = options['telluricSkySubtration']
+        telluricSkySubtration = options['telluricSkySubtraction']
         scienceSkySubtraction = options['scienceSkySubtraction']
 
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
