@@ -651,6 +651,25 @@ def sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageL
 
     logging.info("\nDone sorting and copying science and tellurics. Moving on to Calibrations.\n")
 
+    # Test for telluric directories with mis-identified sky frames. For now, we identify sky frames
+    # based on absolute P and Q offsets, not relative to a zero point. This can cause problems.
+    # TODO(nat): look into if it is worth it to use relative P and Q offsets.
+    for telluric_directory in telDirList:
+        if os.path.exists(telluric_directory + '/skyFrameList') and not os.path.exists(telluric_directory + '/tellist'):
+            logging.info("\n#####################################################################")
+            logging.info("#####################################################################")
+            logging.info("")
+            logging.info("     WARNING in sort: a telluric directory exists that Nifty thinks ")
+            logging.info("                      contains only sky frames. Nifty uses absolute")
+            logging.info("                      P and Q offsets to identify sky frames; a target")
+            logging.info("                      not being at 0, 0 can cause this. If this is not")
+            logging.info("                      the case you can try adjusting the skyThreshold")
+            logging.info("                      parameter in Nifty's configuration.")
+            logging.info("")
+            logging.info("#####################################################################")
+            logging.info("#####################################################################\n")
+            a = raw_input("Please make a tellist (list of telluric frames) in " + str(telluric_directory))
+
     os.chdir(path)
 
     return objDirList, scienceDirList, telDirList
@@ -748,6 +767,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
+        # TODO(nat): this is horrendous. Do this in a better way.
+        # "Flat is better than nested."
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
@@ -761,16 +782,16 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                                 else:
                                     if path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating not in calDirList:
                                         calDirList.append(path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating)
-                        # Copy lamps on flats to appropriate directory.
-                        shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
-                        flatlist[i][1] = 0
-                        logging.info(flatlist[i][0])
-                        count += 1
-                        path = objDir+'/Calibrations_'+grating+'/'
-                        # Create a flatlist in the relevent directory.
-                        # Create a text file called flatlist to store the names of the
-                        # lamps on flats for later use by the pipeline.
-                        writeList(flatlist[i][0], 'flatlist', path)
+                                # Copy lamps on flats to appropriate directory.
+                                shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
+                                flatlist[i][1] = 0
+                                logging.info(flatlist[i][0])
+                                count += 1
+                                path = objDir+'/Calibrations_'+grating+'/'
+                                # Create a flatlist in the relevent directory.
+                                # Create a text file called flatlist to store the names of the
+                                # lamps on flats for later use by the pipeline.
+                                writeList(flatlist[i][0], 'flatlist', path)
 
     # Sort lamps off flats.
     logging.info("\nSorting lamps off flats:")
@@ -784,6 +805,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
+                        if not os.path.exists(objDir+'/Calibrations_'+grating):
+                            os.mkdir(objDir+'/Calibrations_'+grating)
                         shutil.copy('./'+flatdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         flatdarklist[i][1] = 0
                         logging.info(flatdarklist[i][0])
@@ -804,6 +827,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
+                        if not os.path.exists(objDir+'/Calibrations_'+grating):
+                            os.mkdir(objDir+'/Calibrations_'+grating)
                         shutil.copy('./'+ronchilist[i][0], objDir+'/Calibrations_'+grating+'/')
                         ronchilist[i][1] = 0
                         logging.info(ronchilist[i][0])
@@ -820,6 +845,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
         grating = header[0].header['GRATING'][0:1]
         for objDir in objDirList:
             if date in objDir:
+                if not os.path.exists(objDir+'/Calibrations_'+grating):
+                    os.mkdir(objDir+'/Calibrations_'+grating)
                 shutil.copy('./'+arclist[i][0], objDir+'/Calibrations_'+grating+'/')
                 arclist[i][1] = 0
                 logging.info(arclist[i][0])
@@ -839,6 +866,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                 if obsid in item:
                     date = item[0]
                     if date in objDir:
+                        if not os.path.exists(objDir+'/Calibrations_'+grating):
+                            os.mkdir(objDir+'/Calibrations_'+grating)
                         shutil.copy('./'+arcdarklist[i][0], objDir+'/Calibrations_'+grating+'/')
                         arcdarklist[i][1] = 0
                         logging.info(arcdarklist[i][0])
