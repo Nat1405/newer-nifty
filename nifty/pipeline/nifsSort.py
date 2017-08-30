@@ -91,7 +91,7 @@ def start():
         program = options['program']
         date = options['date']
         debug = options['debug']
-        telluricSkySubtration = options['telluricSkySubtration']
+        telluricSkySubtration = options['telluricSkySubtraction']
         scienceSkySubtraction = options['scienceSkySubtraction']
 
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
@@ -748,6 +748,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
+        # TODO(nat): this is horrendous. Do this in a better way.
+        # "Flat is better than nested."
         for objDir in objDirList:
             for item in obsidDateList:
                 if obsid in item:
@@ -761,16 +763,16 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
                                 else:
                                     if path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating not in calDirList:
                                         calDirList.append(path1+'/'+entry[0]+'/'+entry[1]+'/Calibrations_'+grating)
-                        # Copy lamps on flats to appropriate directory.
-                        shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
-                        flatlist[i][1] = 0
-                        logging.info(flatlist[i][0])
-                        count += 1
-                        path = objDir+'/Calibrations_'+grating+'/'
-                        # Create a flatlist in the relevent directory.
-                        # Create a text file called flatlist to store the names of the
-                        # lamps on flats for later use by the pipeline.
-                        writeList(flatlist[i][0], 'flatlist', path)
+                                # Copy lamps on flats to appropriate directory.
+                                shutil.copy('./'+flatlist[i][0], objDir+'/Calibrations_'+grating+'/')
+                                flatlist[i][1] = 0
+                                logging.info(flatlist[i][0])
+                                count += 1
+                                path = objDir+'/Calibrations_'+grating+'/'
+                                # Create a flatlist in the relevent directory.
+                                # Create a text file called flatlist to store the names of the
+                                # lamps on flats for later use by the pipeline.
+                                writeList(flatlist[i][0], 'flatlist', path)
 
     # Sort lamps off flats.
     logging.info("\nSorting lamps off flats:")
