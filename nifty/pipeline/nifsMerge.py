@@ -86,7 +86,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
         obsid = temp1[1]
         obsPath = temp3[0]
         os.chdir(obsDir)
-        obsidlist.append(date+'_'+obsid)
+        obsidlist.append(obsPath+'/Merged/'+date+'_'+obsid)
 
         # Create a directory called Merged and copy all the data cubes to this directory.
         if not os.path.exists(obsPath+'/Merged/'):
@@ -152,8 +152,8 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
     for cubes in listsOfCubes:
 
         shiftlist = []
-        os.chdir(Merged+'/'+obsidlist[n])
-        iraffunctions.chdir(Merged+'/'+obsidlist[n])
+        os.chdir(obsidlist[n])
+        iraffunctions.chdir(obsidlist[n])
 
         if use_pq_offsets:
             # Set the zero point p and q offsets to the p and q offsets of the first cube in each list of cubes.
@@ -221,7 +221,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
 
         if not use_pq_offsets:
             # Before we combine make sure a suitable offsets.txt file exists.
-            a = raw_input("\nPaused. Please provide a suitable offsets.txt file in ", Merged+'/'+obsidlist[n])
+            a = raw_input("\nPaused. Please provide a suitable offsets.txt file in ", obsidlist[n])
             while not os.path.exists('offsets.txt'):
                 a = raw_input("No offsets.txt file found. Please try again.")
             logging.info('offsets.txt found successfully for', obsidlist[n])
@@ -254,7 +254,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
 
     # Copy the merged observation sequence data cubes to the Merged directory.
     for i in range(len(mergedCubes)):
-        shutil.copy(Merged+'/'+obsidlist[i]+'/'+mergedCubes[i], './')
+        shutil.copy(obsidlist[i]+'/'+mergedCubes[i], './')
 
     # Merge all the individual merged observation sequence data cubes.
     # TODO: test. Still untested.
