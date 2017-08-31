@@ -19,6 +19,17 @@ from configobj.configobj import ConfigObj
 RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
 RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
+# Let us print colors to the terminal
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 #--------------------------------------------------------------------#
 #                                                                    #
 #     DEFS                                                           #
@@ -96,7 +107,7 @@ def getUserInput():
         "Stopping point of science and telluric reductions? [6]: ",
         6
         )
-        telluricSkySubtration = getParam(
+        telluricSkySubtraction = getParam(
         "Subtract sky frames from telluric frames? [yes]: ",
         'yes'
         )
@@ -168,45 +179,46 @@ def getUserInput():
         "Overwrite old files? [no]: ",
         False
         )
-        debug = getParam(
+        manualMode = getParam(
         "Pause after each data reduction step? [yes]: ",
         "yes"
         )
 
         # Serialize and save the options as a .cfg file.
-        options = ConfigObj(unrepr=True)
-        options['date'] = date
-        options['program'] = program
-        options['rawPath'] = rawPath
-        options['over'] = over
-        options['copy'] = copy
-        options['sort'] = sort
-        options['calibrationReduction'] = calibrationReduction
-        options['scienceReduction'] = scienceReduction
-        options['scienceSkySubtraction'] = scienceSkySubtraction
-        options['merge'] = merge
-        options['tel'] = tel
-        options['telluricReduction'] = telluricReduction
-        options['spectemp'] = spectemp
-        options['mag'] = mag
-        options['efficiencySpectrumCorrection'] = efficiencySpectrumCorrection
-        options['rstart']= rstart
-        options['rstop'] = rstop
-        options['telStart'] = telStart
-        options['telStop'] = telStop
-        options['sciStart'] = sciStart
-        options['sciStop'] = sciStop
-        options['hline_method'] = hline_method
-        options['hlineinter'] = hlineinter
-        options['continuuminter'] = continuuminter
-        options['telluric_correction_method'] = telluric_correction_method
-        options['telinter'] = telinter
-        options['telluricSkySubtration'] = telluricSkySubtration
-        options['use_pq_offsets'] = use_pq_offsets
-        options['im3dtran'] = im3dtran
-        options['debug'] = debug
+        config = ConfigObj(unrepr=True)
+        config['nifsSortConfig'] = {}
+        config['nifsSortConfig']['sort'] = sort
+        config['nifsSortConfig']['copy'] = copy
+        config['nifsSortConfig']['date'] = date
+        config['nifsSortConfig']['program'] = program
+        config['nifsSortConfig']['rawPath'] = rawPath
+        config['over'] = over
+        config['calibrationReduction'] = calibrationReduction
+        config['scienceReduction'] = scienceReduction
+        config['scienceSkySubtraction'] = scienceSkySubtraction
+        config['merge'] = merge
+        config['tel'] = tel
+        config['telluricReduction'] = telluricReduction
+        config['spectemp'] = spectemp
+        config['mag'] = mag
+        config['efficiencySpectrumCorrection'] = efficiencySpectrumCorrection
+        config['rstart']= rstart
+        config['rstop'] = rstop
+        config['telStart'] = telStart
+        config['telStop'] = telStop
+        config['sciStart'] = sciStart
+        config['sciStop'] = sciStop
+        config['hline_method'] = hline_method
+        config['hlineinter'] = hlineinter
+        config['continuuminter'] = continuuminter
+        config['telluric_correction_method'] = telluric_correction_method
+        config['telinter'] = telinter
+        config['telluricSkySubtraction'] = telluricSkySubtraction
+        config['use_pq_offsets'] = use_pq_offsets
+        config['im3dtran'] = im3dtran
+        config['manualMode'] = manualMode
         with open(RUNTIME_DATA_PATH+'/config.cfg', 'w') as outfile:
-            options.write(outfile)
+            config.write(outfile)
 
     return fullReduction
 
@@ -254,13 +266,11 @@ def getParam(prompt, default, helpMessage="No help implemented yet!"):
     """Get a parameter from the user interactively. Also sets a default and
     displays a help message if a user types "h" or "help".
     """
-    while True:
-        param = raw_input(prompt)
-        param = param or default
-        if param == "h" or param == "help":
-            print "\n"+helpMessage+"\n"
-        else:
-            break
+
+    print "\n" + bcolors.OKBLUE + helpMessage + bcolors.ENDC + "\n"
+    param = raw_input(prompt)
+    param = param or default
+
     return param
 
 #-----------------------------------------------------------------------------#

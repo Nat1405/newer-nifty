@@ -107,26 +107,37 @@ def start(args):
 
     # Parse command line options.
     parser = argparse.ArgumentParser(description='Do a Gemini NIFS data reduction.')
+    # Create a configuration file interactively
+    parser.add_argument('-i', '--interactive', dest = 'interactive', default = False, action = 'store_true', help = 'Create a config.cfg file interactively.')
     # Ability to repeat the last data reduction
     parser.add_argument('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeData/config.cfg.')
     # Ability to load a built-in configuration file (recipe)
     parser.add_argument('-l', '--recipe', dest = 'recipe', action = 'store', help = 'Load data reduction parameters from the a provided recipe. Default is default_input.cfg.')
     # Ability to load your own configuration file
-    parser.add_argument(dest = 'inputfile', action = 'store', help = 'Load data reduction parameters from <inputfile>.cfg.')
+    parser.add_argument(dest = 'inputfile', nargs='?', action = 'store', help = 'Load data reduction parameters from <inputfile>.cfg.')
     # Ability to do a quick and dirty fully automatic data reduction with no user input
     # TODO(nat): make it so Nifty does this when you type "niftyRun" with no options
     parser.add_argument('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full reduction with data reduction parameters loaded from runtimeData/default_input.cfg')
 
     args = parser.parse_args(args)
 
+    interactive = args.interactive
     repeat = args.repeat
     fullReduction = args.fullReduction
     inputfile = args.inputfile
 
+    if inputfile:
+        # Load input from a .cfg file user specified at command line.
+        logging.info("\nPipeline configuration for this data reduction was read from " + str(inputfile) + \
+        " and copied to ./config.cfg.")
+    else:
+        shutil.copy(RUNTIME_DATA_PATH+'config.cfg', './config.cfg')
+
     # Check if the user specified at command line to repeat the last Reduction, do a full default data reduction from a
     # recipe file or do a full data reduction from a handmade file.
-    if not repeat and not fullReduction and not inputfile:
-        # If not get user input and check if user specified a full data reduction.
+    if interactive:
+        # Get user input interactively.
+        logging.info('\nInteractively creating a ./config.cfg configuration file.')
         fullReduction = getUserInput()
 
     # TODO(nat): Add proper documentation on supplying an input file name (the args option here).
@@ -136,16 +147,8 @@ def start(args):
         shutil.copy(RECIPES_PATH+'default_input.cfg', RUNTIME_DATA_PATH+'config.cfg')
         logging.info("\nData reduction parameters for this reduction were copied from recipes/default_input.cfg to runtimeData/config.cfg.")
 
-    if inputfile:
-        # Load input from a .cfg file user specified at command line.
-        logging.info("\nPipeline configuration for this data reduction was read from " + str(inputfile) + \
-        " and copied to ./config.cfg.")
-    else:
-        shutil.copy(RUNTIME_DATA_PATH+'config.cfg', './config.cfg')
-        logging.info("\nPipeline configuration for this data reduction has been written to ./config.cfg")
-
     # Print data reduction parameters for a user's peace-of-mind.
-    logging.info("\nParameters for this data reduction as read from that file:\n")
+    logging.info("\nParameters for this data reduction as read from ./config.cfg:\n")
     with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
         for i in options:
@@ -155,11 +158,12 @@ def start(args):
     # Define parameters used by this script:
     with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
-        sort = options['sort']
+        nifsSortConfig = options['nifsSortConfig']
+        sort = nifsSortConfig['sort']
         calibrationReduction = options['calibrationReduction']
         telluricReduction = options['telluricReduction']
         scienceReduction = options['scienceReduction']
-        debug = options['debug']
+        manualMode = options['manualMode']
 
     ###########################################################################
     ##                         SETUP COMPLETE                                ##
@@ -178,7 +182,7 @@ def start(args):
     ###########################################################################
 
     if sort:
-        if debug:
+        if manualMode:
             a = raw_input('About to enter sort.')
         nifsSort.start()
     printDirectoryLists()
@@ -188,7 +192,7 @@ def start(args):
     ###########################################################################
 
     if calibrationReduction:
-        if debug:
+        if manualMode:
             a = raw_input('About to enter calibrate.')
         nifsBaselineCalibration.start()
 
@@ -197,7 +201,7 @@ def start(args):
     ###########################################################################
 
     if telluricReduction:
-        if debug:
+        if manualMode:
             a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
         nifsReduce.start('Telluric')
 
@@ -206,7 +210,7 @@ def start(args):
     ###########################################################################
 
     if scienceReduction:
-        if debug:
+        if manualMode:
             a = raw_input('About to enter reduce to reduce science images.')
         nifsReduce.start('Science')
 

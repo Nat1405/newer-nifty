@@ -47,7 +47,7 @@ def start():
         over (boolean):  overwrite old files. Default: False.
         start (int):     starting step of daycal reduction. Specified at command line with -a. Default: 1.
         stop (int):      stopping step of daycal reduction. Specified at command line with -z. Default: 6.
-        debug (boolean): enable optional debugging pauses. Default: False.
+        manualMode (boolean): enable optional manualModeging pauses. Default: False.
 
     """
 
@@ -103,7 +103,7 @@ def start():
         over = options['over']
         start = options['rstart']
         stop = options['rstop']
-        debug = options['debug']
+        manualMode = options['manualMode']
 
     ################################################################################
     # Define Variables, Reduction Lists AND identify/run number of reduction steps #
@@ -184,7 +184,7 @@ def start():
             #############################################################################
 
             if valindex == 1:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 1: locate the spectrum.")
                 getShift(calflat, over, log)
                 print "\n###################################################################"
@@ -200,7 +200,7 @@ def start():
             #############################################################################
 
             elif valindex == 2:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 2: flat field.")
                 makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
                 print "\n###################################################################"
@@ -217,7 +217,7 @@ def start():
             ############################################################################
 
             elif valindex == 3:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 3: wavelength solution.")
                 makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path)
                 print "\n###################################################################"
@@ -234,7 +234,7 @@ def start():
             ######################################################################################
 
             elif valindex == 4:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 4: spatial distortion.")
                 makeRonchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
                 print "\n###################################################################"

@@ -126,7 +126,7 @@ def start(kind):
             observationDirectoryList = options['scienceDirectoryList']
             start = options['sciStart']
             stop = options['sciStop']
-        telluricSkySubtration = options['telluricSkySubtraction']
+        telluricSkySubtraction = options['telluricSkySubtraction']
         scienceSkySubtraction = options['scienceSkySubtraction']
         calDirList = options['calibrationDirectoryList']
         telinter = options['telinter']
@@ -141,7 +141,7 @@ def start(kind):
         use_pq_offsets = options['use_pq_offsets']
         merge = options['merge']
         im3dtran = options['im3dtran']
-        debug = options['debug']
+        manualMode = options['manualMode']
 
     ###########################################################################
     ##                                                                       ##
@@ -222,7 +222,7 @@ def start(kind):
             os.mkdir('./database/')
         iraf.copy(input=calDir+"database/*", output="./database/")
 
-        if telluricSkySubtration or scienceSkySubtraction:
+        if telluricSkySubtraction or scienceSkySubtraction:
             # Read the list of sky frames in the observation directory.
             try:
                 skyFrameList = open("skyFrameList", "r").readlines()
@@ -283,13 +283,13 @@ def start(kind):
             ###########################################################################
 
             if valindex == 1:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 1: locate the spectrum.")
                 if kind=='Telluric':
                     tellist = prepare(tellist, shift, sflat_bpm, log, over)
                 elif kind=='Science':
                     scienceFrameList = prepare(scienceFrameList, shift, sflat_bpm, log, over)
-                if telluricSkySubtration or scienceSkySubtraction:
+                if telluricSkySubtraction or scienceSkySubtraction:
                     skyFrameList = prepare(skyFrameList, shift, sflat_bpm, log, over)
                 logging.info("\n##############################################################################")
                 logging.info("")
@@ -302,11 +302,11 @@ def start(kind):
             ###########################################################################
 
             elif valindex == 2:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 2: sky subtraction.")
                 # Combine telluric sky frames.
                 if kind=='Telluric':
-                    if telluricSkySubtration:
+                    if telluricSkySubtraction:
                         if len(skyFrameList)>1:
                             combineImages(skyFrameList, "gn"+sky, log, over)
                         else:
@@ -334,7 +334,7 @@ def start(kind):
             ##############################################################################
 
             elif valindex == 3:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 3: flat fielding and bad pixels correction.")
                 if kind=='Telluric':
                     applyFlat(tellist, flat, log, over, kind)
@@ -354,7 +354,7 @@ def start(kind):
             ###########################################################################
 
             elif valindex == 4:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 4: 2D to 3D transformation and Wavelength Calibration.")
                 if kind=='Telluric':
                     fitCoords(tellist, arc, ronchi, log, over, kind)
@@ -383,7 +383,7 @@ def start(kind):
             ############################################################################
 
             elif valindex == 5:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 5.")
                 # For telluric data:
                 # Make a 1D telluric correction spectrum from reduced telluric data.
@@ -427,7 +427,7 @@ def start(kind):
             ###########################################################################
 
             elif valindex == 6:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 6.")
                 if kind == 'Telluric' and efficiencySpectrumCorrection:
                     createEfficiencySpectrum(

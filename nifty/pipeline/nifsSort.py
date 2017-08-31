@@ -10,10 +10,11 @@ from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
 import astropy.io.fits
-import os, sys, shutil, glob, math, logging, pkg_resources
+import os, sys, shutil, glob, math, logging, pkg_resources, time, datetime
 import numpy as np
 # Import config parsing.
 from configobj.configobj import ConfigObj
+
 
 # LOCAL
 
@@ -84,14 +85,15 @@ def start():
     # Load reduction parameters from runtimeData/config.cfg.
     with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
-        rawPath = options['rawPath']
+        nifsSortConfig = options['nifsSortConfig']
+        rawPath = nifsSortConfig['rawPath']
+        copy = nifsSortConfig['copy']
+        program = nifsSortConfig['program']
+        date = nifsSortConfig['date']
         telluricReduction = options['telluricReduction']
         over = options['over']
-        copy = options['copy']
-        program = options['program']
-        date = options['date']
-        debug = options['debug']
-        telluricSkySubtration = options['telluricSkySubtraction']
+        manualMode = options['manualMode']
+        telluricSkySubtraction = options['telluricSkySubtraction']
         scienceSkySubtraction = options['scienceSkySubtraction']
 
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
@@ -129,19 +131,19 @@ def start():
 
     # IF a local raw directory path is provided, sort data.
     if rawPath:
-        if debug:
+        if manualMode:
             a = raw_input("About to enter makePythonLists().")
         allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objectDateGratingList, skyFrameList, telskyFrameList, obsidDateList, sciImageList = makePythonLists(rawPath)
-        if debug:
+        if manualMode:
             a = raw_input("About to enter sortScienceAndTelluric().")
         objDirList, scienceDirectoryList, telluricDirectoryList = sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageList, rawPath)
-        if debug:
+        if manualMode:
             a = raw_input("About to enter sortCalibrations().")
-        calibrationDirectoryList = sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath)
+        calibrationDirectoryList = sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath, manualMode)
         # If a telluric reduction will be performed sort the science and telluric images based on time between observations.
         # This will NOT be executed if -t False is specified at command line.
         if telluricReduction:
-            if debug:
+            if manualMode:
                 a = raw_input("About to enter matchTellurics().")
             matchTellurics(telluricDirectoryList, scienceDirectoryList)
 
@@ -676,7 +678,7 @@ def sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageL
 
 #----------------------------------------------------------------------------------------#
 
-def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath):
+def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath, manualMode):
 
     """Sort calibrations into appropriate directories based on date.
     """
@@ -960,8 +962,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # flatlist exists and has more than one file.
         try:
-            flatlist = open('flatlist', "r").readlines()
-            if len(flatlist) <= 1:
+            flatListFile = open('flatlist', "r").readlines()
+            if len(flatListFile) <= 1:
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
@@ -984,8 +986,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # flatdarklist exists and has more than one file.
         try:
-            flatdarklist = open('flatdarklist', "r").readlines()
-            if len(flatdarklist) <= 1:
+            flatDarkListFile = open('flatdarklist', "r").readlines()
+            if len(flatDarkListFile) <= 1:
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
@@ -1009,7 +1011,7 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # arclist exists.
         try:
-            arclist = open('arclist', "r").readlines()
+            arcListFile = open('arclist', "r").readlines()
         except IOError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
@@ -1019,13 +1021,41 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
-            # Give user a chance now to try and provide an arc file.
-            a = raw_input("\n Please provide a textfile called arclist in " + str(os.getcwd()) + \
-            " or be sure not to attempt a wavelength calibration for this directory.")
+
+            if not manualMode:
+                # Sometimes arcs can be taken a day after the observing night. First
+                # look for these, and if they are not found, ask the user to provide some arcs.
+                foundArcFlag = False
+                # Get date after the science observation
+                t=time.strptime(date,'%Y%m%d')
+                newdate=datetime.date(t.tm_year,t.tm_mon,t.tm_mday)+datetime.timedelta(1)
+                # Loop through arclist and see if there is an arc taken on this date
+                for i in range(len(arclist)):
+                    header = astropy.io.fits.open(rawPath+'/'+arclist[i][0])
+                    date = header[0].header[ 'DATE'].replace('-','')
+                    if str(date) == newdate.strftime('%Y%m%d'):
+                        # If so, copy it to the appropriate calibrations directory and write an arclist.
+                        shutil.copy(rawPath + '/' + arclist[i][0], './')
+                        writeList(arclist[i][0], 'arclist', path)
+                        logging.info("\n#####################################################################")
+                        logging.info("#####################################################################")
+                        logging.info("")
+                        logging.info("     WARNING in sort: found an arc taken one day after a science frame.")
+                        logging.info("                      "+str(sciImageList[i]))
+                        logging.info("                       using that.")
+                        logging.info("")
+                        logging.info("#####################################################################")
+                        logging.info("#####################################################################\n")
+                        foundArcFlag = True
+                        arclist[i][1] = 0
+                if not foundArcFlag:
+                    # If that quick check fails, give user a chance to try and provide an arc file.
+                    a = raw_input("\n Please provide a textfile called arclist in " + str(os.getcwd()) + \
+                    " or be sure not to attempt a wavelength calibration for this directory.")
 
         # arcdarklist exists.
         try:
-            arcdarklist = open('arcdarklist', "r").readlines()
+            arcDarkListFile = open('arcdarklist', "r").readlines()
         except IOError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
@@ -1038,8 +1068,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # ronchilist exists and has more than one file.
         try:
-            ronchilist = open('ronchilist', "r").readlines()
-            if len(ronchilist) <= 1:
+            ronchiListFile = open('ronchilist', "r").readlines()
+            if len(ronchiListFile) <= 1:
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
