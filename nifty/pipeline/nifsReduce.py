@@ -408,7 +408,7 @@ def start(kind):
                     makeCube('atfbrsn', scienceFrameList, log, over)
 
                 # DON'T apply the telluric correction and absolute flux calibration; just make a cube.
-            elif kind=='Science' and telluric_correction_method == "none":
+                elif kind=='Science' and telluric_correction_method == "none":
                     # Make cube without telluric correction.
                     makeCube('tfbrsn', scienceFrameList, log, over)
 

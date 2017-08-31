@@ -597,11 +597,12 @@ def makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path):
     # Determine the wavelength setting.
     hdulist = astropy.io.fits.open("rgn"+arc+".fits")
     band = hdulist[0].header['GRATING'][0:1]
+    central_wavelength = float(hdulist[0].header['GRATWAVE'])
 
     # Set interactive mode. Default False for standard configurations (and True for non-standard wavelength configurations ).
     pauseFlag = False
 
-    if band == "K":
+    if band == "K" and central_wavelength == 2.20:
         clist=RUNTIME_DATA_PATH+"k_ar.dat"
         my_thresh = 50.0
     elif band == "J":
