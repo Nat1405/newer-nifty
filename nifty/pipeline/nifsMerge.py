@@ -20,6 +20,14 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
     in the observation directory (ie. obs108). This is necessary
     for very faint objects.
 
+    TODO(nat): I think what we want as a final product is one cube per grating,
+    per object. I need to finish generalizing this so it really works with multiple
+    gratings, observations and objects.
+
+    We should loop like this: For each object, for each grating, for each observation.
+    Merge all cubes in an observation. Then Merge all cubes of the same grating. Then
+    do that for every object in the program.
+
     INPUT:
         - Reference data cubes
         - A list of paths where final data cubes are located
@@ -252,13 +260,14 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
         n+=1
         os.chdir(Merged)
 
+    """
     # Copy the merged observation sequence data cubes to the Merged directory.
     for i in range(len(mergedCubes)):
-        shutil.copy(obsidlist[i]+'/'+mergedCubes[i], './')
+        shutil.copy(mergedCubes[i], './')
 
     # Merge all the individual merged observation sequence data cubes.
     # TODO: test. Still untested.
-    """
+
     if len(mergedCubes)>1:
         os.chdir(Merged)
         iraffunctions.chdir(Merged)
