@@ -185,7 +185,7 @@ def getUserInput():
         )
 
         # Serialize and save the options as a .cfg file.
-        config = ConfigObj(unrepr=True)
+        config = ConfigObj(unrepr=True, RUNTIME_DATA_PATH+'defaultConfig.cfg')
         config['nifsSortConfig'] = {}
         config['nifsSortConfig']['sort'] = sort
         config['nifsSortConfig']['copy'] = copy
