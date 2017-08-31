@@ -289,7 +289,8 @@ def start(kind):
                     tellist = prepare(tellist, shift, sflat_bpm, log, over)
                 elif kind=='Science':
                     scienceFrameList = prepare(scienceFrameList, shift, sflat_bpm, log, over)
-                skyFrameList = prepare(skyFrameList, shift, sflat_bpm, log, over)
+                if telluricSkySubtration or scienceSkySubtraction:
+                    skyFrameList = prepare(skyFrameList, shift, sflat_bpm, log, over)
                 logging.info("\n##############################################################################")
                 logging.info("")
                 logging.info("  STEP 1: Locate the Spectrum (and prepare raw data) ->n - COMPLETED ")
@@ -397,17 +398,17 @@ def start(kind):
 
                 # For science data, either:
                 # Apply the telluric correction and absolute flux calibration by dividing by efficiency spectrum with Python.
-                elif kind=='Science' and tel and telluric_correction_method == "python":
+                elif kind=='Science' and telluric_correction_method == "python":
                     makeCube('tfbrsn', scienceFrameList, log, over)
                     applyTelluricPython(over)
 
                 # Apply the telluric correction and absolute flux calibration with iraf.nftelluric().
-                elif kind=='Science' and tel and telluric_correction_method == "iraf":
+                elif kind=='Science' and telluric_correction_method == "iraf":
                     applyTelluricIraf(scienceFrameList, obsid, telinter, log, over)
                     makeCube('atfbrsn', scienceFrameList, log, over)
 
                 # DON'T apply the telluric correction and absolute flux calibration; just make a cube.
-                elif kind=='Science' or telluric_correction_method == "none":
+            elif kind=='Science' and telluric_correction_method == "none":
                     # Make cube without telluric correction.
                     makeCube('tfbrsn', scienceFrameList, log, over)
 

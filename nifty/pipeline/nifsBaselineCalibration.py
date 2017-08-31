@@ -599,24 +599,20 @@ def makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path):
     band = hdulist[0].header['GRATING'][0:1]
 
     # Set interactive mode. Default False for standard configurations (and True for non-standard wavelength configurations ).
-    interactive = 'no'
+    pauseFlag = False
 
     if band == "K":
         clist=RUNTIME_DATA_PATH+"k_ar.dat"
         my_thresh = 50.0
-        interactive = 'no'
     elif band == "J":
         clist=RUNTIME_DATA_PATH+"j_ar.dat"
         my_thresh=100.0
-        interactive = 'no'
     elif band == "H":
         clist=RUNTIME_DATA_PATH+"h_ar.dat"
         my_thresh=100.0
-        interactive = 'no'
     elif band == "Z":
         clist="nifs$data/ArXe_Z.dat"
         my_thresh=100.0
-        interactive = 'yes'
     else:
         # Print a warning that the pipeline is being run with non-standard grating.
         print "\n#####################################################################"
@@ -633,12 +629,17 @@ def makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path):
         my_thresh=100.0
         interactive = 'yes'
 
-    # Establish wavelength calibration for arclamp spectra. Output: A series of
-    # files in a "database/" directory containing the wavelength solutions of
-    # each slice and a reduced arc frame "wrgn"+ARC+".fits".
-    iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, \
-                      trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter='no',nfound=10,nlost=10, \
-                      logfile=log)
+    if not pauseFlag:
+        # Establish wavelength calibration for arclamp spectra. Output: A series of
+        # files in a "database/" directory containing the wavelength solutions of
+        # each slice and a reduced arc frame "wrgn"+ARC+".fits".
+        iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, \
+                          trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter='no',nfound=10,nlost=10, \
+                          logfile=log)
+    else:
+        a = raw_input("For now, interactive Z or non-standard wavelength calibrations are unsupported. " + \
+        "Bugs running IRAF tasks interactively from python mean iraf.nswavelength cannot be activated automatically. " + \
+        "Therefore please run iraf.nswavelength() interactively from Pyraf to do a wavelength calibration by hand.")
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
@@ -695,7 +696,7 @@ def makeRonchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
     else:
         # Determine the spatial distortion correction. Output: overwrites "rgn"+ronchiflat+".fits" and makes
         # changes to files in /database directory.
-        iraf.nfsdist("rgn"+ronchiflat,fwidth=6.0, cradius=8.0, glshift=2.8, minsep=6.5, thresh=2000.0, nlost=3, fl_inter='yes',logfile=log)
+        iraf.nfsdist("rgn"+ronchiflat,fwidth=6.0, cradius=8.0, glshift=2.8, minsep=6.5, thresh=2000.0, nlost=3, fl_inter='no',logfile=log)
 
     # Put the name of the spatially referenced ronchi flat "rgn"+ronchiflat into a
     # text file called ronchifile to be used by the pipeline later. Also associated files
