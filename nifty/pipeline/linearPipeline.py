@@ -128,6 +128,7 @@ def start(args):
     # Make sure to change this if you change the default logfile.
     logging.info('The log file is Nifty.log.')
 
+    # TODO(nat): This all seems a bit clunky. Is there a better way to do this?
     # Parse command line options.
     parser = argparse.ArgumentParser(description='Do a Gemini NIFS data reduction.')
     # Create a configuration file interactively
@@ -139,7 +140,6 @@ def start(args):
     # Ability to load your own configuration file
     parser.add_argument(dest = 'inputfile', nargs='?', action = 'store', help = 'Load data reduction parameters from <inputfile>.cfg.')
     # Ability to do a quick and dirty fully automatic data reduction with no user input
-    # TODO(nat): make it so Nifty does this when you type "niftyRun" with no options
     parser.add_argument('-f', '--fullReductionPathOrProgramID', dest = 'fullReduction', default = False, action = 'store', help = 'Do a quick reduction from recipes/defaultConfig.cfg, specifying path to raw data or program ID.')
 
     args = parser.parse_args(args)
@@ -196,7 +196,7 @@ def start(args):
         os.remove(RUNTIME_DATA_PATH+'config.cfg')
     shutil.copy('./config.cfg', RUNTIME_DATA_PATH+'config.cfg')
 
-
+    # TODO(nat): fix this. It isn't recursively printing the dictionaries of values.
     logging.info("\nParameters for this data reduction as read from ./config.cfg:\n")
     with open('./config.cfg') as config_file:
         config = ConfigObj(config_file, unrepr=True)

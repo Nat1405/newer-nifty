@@ -84,11 +84,11 @@ def start():
     # Set up the logging file.
     log = os.getcwd()+'/Nifty.log'
 
-    logging.info('#################################################')
+    logging.info('\n#################################################')
     logging.info('#                                               #')
     logging.info('# Start the NIFS Baseline Calibration Reduction #')
     logging.info('#                                               #')
-    logging.info('#################################################')
+    logging.info('#################################################\n')
 
     # Set up/prepare IRAF.
     iraf.gemini()
