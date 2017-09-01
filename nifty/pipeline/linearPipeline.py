@@ -151,11 +151,11 @@ def start(args):
 
     if inputfile:
         # Load input from a .cfg file user specified at command line.
-        if os.path.exists('./config.cfg'):
+        if inputfile != "config.cfg" and os.path.exists('./config.cfg'):
             os.remove('./config.cfg')
-        shutil.copy(inputfile, './config.cfg')
+            shutil.copy(inputfile, './config.cfg')
         logging.info("\nPipeline configuration for this data reduction was read from " + str(inputfile) + \
-        " and copied to ./config.cfg.")
+        ", and if not named config.cfg, copied to ./config.cfg.")
 
     # Check if the user specified at command line to repeat the last Reduction, do a full default data reduction from a
     # recipe file or do a full data reduction from a handmade file.
