@@ -220,7 +220,7 @@ def getUserInput():
         "a SIMBAD query to look it up."
         )
         merge = getParam(
-        "Make a merged cubes, one per grating per object? [yes]: ",
+        "Make merged cubes, one per grating per object? [yes]: ",
         'yes',
         "Nifty can also merge cubes in a unique observations to make one final cube per object, per grating."
         )
