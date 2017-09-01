@@ -14,7 +14,7 @@ Nifty
 A Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
 Field Spectrometer (NIFS).
 
-You can find the full documentation `You can find the full documentation. <http://newer-nifty.readthedocs.io/en/latest/>`_
+Full documentation: `ReadTheDocs <http://newer-nifty.readthedocs.io/en/latest/>`_.
 
 This is a new data reduction Python pipeline that uses Astroconda and the Gemini
 IRAF Package to reduce NIFS data. It offers a complete data reduction process from
