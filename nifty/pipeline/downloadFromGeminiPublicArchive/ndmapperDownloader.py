@@ -27,6 +27,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 # Copyright(c) 2015 Association of Universities for Research in Astronomy, Inc.
 # by James E.H. Turner.
+# Modified in 2017 by Nat Comeau
 
 import os, os.path
 import sys
