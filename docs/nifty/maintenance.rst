@@ -24,7 +24,7 @@ a pdf.
 
 This file, others like it in the docs/ directory and the README are written in
 reStructuredText. This markup language integrates well with Python's automatic
-documentation builder (read Sphinx) and Github as well as being human readable. You can
+documentation builder (we used Sphinx) and Github as well as being human readable. You can
 read more about reStructuredText `here.<http://www.sphinx-doc.org/en/stable/rest.html>`_
 
 Comments and DocStrings in Source Code
