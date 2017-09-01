@@ -135,7 +135,7 @@ def start():
         logging.info('\nDownloading data from Gemini public archive to ./rawData. This will take a few minutes.')
         logging.info('\nURL used for the download: \n' + str(url))
         downloadFromGeminiPublicArchive.download_query_gemini(url, './rawData')
-        rawPath = './rawData'
+        rawPath = os.getcwd()+'/rawData'
 
 
     ############################################################################
