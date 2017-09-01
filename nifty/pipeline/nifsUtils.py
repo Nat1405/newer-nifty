@@ -1,3 +1,25 @@
+# MIT License
+
+# Copyright (c) 2015, 2017 Marie Lemoine-Busserolle
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
@@ -52,12 +74,12 @@ def getUserInput():
 
     """
 
-    logging.info("\nGood day! Press enter to accept default reduction options.")
+    logging.info("\nWelcome to Nifty! Please make sure you have at least 20 Gigabytes of disk space available before starting. \n\nPress enter to accept default data reduction options.")
 
     fullReduction = getParam(
-                "Do a full data reduction with default parameters loaded from recipes/default_input.cfg? [no]: ",
+                "Do a full data reduction with default parameters loaded from recipes/defaultConfig.cfg? [no]: ",
                 False,
-                "Type yes to start Nifty with data reduction input parameters loaded from recipes/default_input.cfg file."
+                "Type yes to start Nifty with data reduction input parameters loaded from recipes/defaultConfig.cfg file."
     )
     if fullReduction == False:
         # "Select in". User has to turn individual steps on.
@@ -66,158 +88,211 @@ def getUserInput():
         program = ""
         copy = ""
 
+        # Get sort params.
         sort = getParam(
-        "Sort data? [no]: ",
-        False
+        "Sort raw data? [yes]: ",
+        'yes',
+        "Nifty needs raw data to be in a specific directory structure with text files helping it. " + \
+        "You can have it build a structure automatically."
+        )
+        program = getParam(
+        "Gemini Program ID? []: ",
+        "",
+        "Nifty can either download raw data from the Gemini Public archive (to ./rawData) or copy it from " + \
+        "a local directory. An example of a valid program string: \"GN-2013A-Q-62\". "
         )
         rawPath = getParam(
-        "Path to raw files directory? [~/data]: ",
-        "~/data"
-        )
-        tel = getParam(
-        "Apply a telluric correction? [no]: ",
-        False
+        "Path to raw files directory? []: ",
+        "",
+        "An example of a valid raw files path string: \"/Users/nat/data/spaceMonster\""
         )
         # See if we want to reduce the baseline calibrations. And if so, which substeps
         # to perform.
         calibrationReduction = getParam(
-        "Reduce baseline calibrations? [no]: ",
-        False
+        "Reduce baseline calibrations? [yes]: ",
+        'yes',
+        "NIFS data comes with a set of calibrations that should be reduced and used."
         )
         # By default do all of them.
-        rstart = getParam(
+        baselineCalibrationStart = getParam(
         "Starting point of baseline calibration reductions? [1]: ",
-        1
+        1,
+        "Specify the start step for the reduction of calibrations here."
         )
-        rstop = getParam(
+        baselineCalibrationStop = getParam(
         "Stopping point of baseline calibration reductions? [4]: ",
-        4
+        4,
+        "Specify the stop step for the reduction of calibrations here."
         )
-
-        # Check for tellurics as well; by default do all reduction steps.
+        # Check and get params for a telluric data reduction.
         telluricReduction = getParam(
-        "Reduce telluric data? [no]: ",
-        False
+        "Reduce telluric data? [yes]: ",
+        'yes',
+        "You can specify to do a telluric data reduction."
         )
         telStart = getParam(
-        "Starting point of science and telluric reductions? [1]: ",
-        1
+        "Start point? [1]: ",
+        1,
+        "Starting point of science and telluric reductions."
         )
         telStop = getParam(
-        "Stopping point of science and telluric reductions? [6]: ",
-        6
+        "Stop point? [6]: ",
+        6,
+        "Stopping point of science and telluric reductions"
         )
         telluricSkySubtraction = getParam(
-        "Subtract sky frames from telluric frames? [yes]: ",
-        'yes'
+        "Do a telluric sky subtraction? [yes]: ",
+        'yes',
+        "Specify to subtract sky frames from telluric frames."
         )
         # Set the telluric application correction method. Choices are iraf.telluric and a python variant.
         # Set the h-line removal method with the vega() function in nifsReduce as default.
         hline_method = getParam(
         "H-line removal method? [vega]: ",
-        "vega"
+        "none",
+        "Nifty can attempt to remove H-lines from a telluric correction spectrum. The available options are \"vega\" and \"none\"."
         )
         # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
-        hlineinter = getParam(
+
+        # Disabled for now because of bugs in interactive Pyraf tasks.
+        # TODO(nat): when interactive is fixed re-enable this.
+        # Temp fix:
+        hlineinter = False
+        """hlineinter = getParam(
         "Interative H-line removal? [no]: ",
         False
-        )
-        continuuminter = getParam(
+        )"""
+        continuuminter = False
+        """continuuminter = getParam(
         "Interative telluric continuum fitting? [no]: ",
         False
-        )
+        )"""
         telluric_correction_method = getParam(
-        "Telluric correction method? [python]: ",
-        "python"
+        "Telluric correction method? [none]: ",
+        "none",
+        "Specify whether to not apply a telluric correction, to apply one using Python and numpy " + \
+        "or to apply one using iraf.telluric(). The options are \"none\", \"python\" and \"iraf\"."
         )
+        # TODO(nat): disabled for now because of that interactive task bug.
+        telinter = False
+        """
         telinter = getParam(
         "Interactive telluric correction? [no]: ",
         False
-        )
+        )"""
         # Check for science as well.
         scienceReduction = getParam(
-        "Reduce science data? [no]: ",
-        False
+        "Reduce science data? [yes]: ",
+        'yes',
+        "Nifty can reduce science data producing UNMERGED 3D data cubes."
         )
         sciStart = getParam(
         "Starting point of science and telluric reductions? [1]: ",
-        1
+        1,
+        "Starting point of science reduction."
         )
         sciStop = getParam(
         "Stopping point of science and telluric reductions? [6]: ",
-        6
+        6,
+        "Stopping point of science reduction."
         )
         scienceSkySubtraction = getParam(
         "Subtract sky frames from science frames? [yes]: ",
-        'yes'
+        'yes',
+        "Nifty can subtract a sky frame of the same exposure duration from each science frame."
         )
         efficiencySpectrumCorrection = getParam(
         "Do a flux calibration? [no]: ",
-        False
+        False,
+        "Nifty can divide each spectrum in a cube (62x64 unique spectra) by an efficiency spectrum " + \
+        "derived from observing telluric standard stars."
         )
         spectemp = getParam(
         "Effective temperature in kelvin of telluric standard star? [""]: ",
-        ""
+        "",
+        "You can specify the temperature of the telluric standard star; if not Nifty will attempt " + \
+        "a SIMBAD query to find Teff."
         )
         mag = getParam(
         "Magnitude of standard star? [""]: ",
-        ""
+        "",
+        "You can specify the magnitude of the telluric standard star. If not Nifty will attempt "+ \
+        "a SIMBAD query to look it up."
         )
         merge = getParam(
-        "Produce one final 3D cube? [no]: ",
-        False
+        "Make a merged cubes, one per grating per object? [yes]: ",
+        'yes',
+        "Nifty can also merge cubes in a unique observations to make one final cube per object, per grating."
         )
         use_pq_offsets = getParam(
         "Use pq offsets to merge data cubes? [yes]: ",
-        "yes"
+        "yes",
+        "Nifty can merge cubes blindly using telescope P and Q offsets. If not, Nifty will pause and "+ \
+        "ask you to first shift cubes by hand (say, in QFitsView) before merging cubes."
         )
         im3dtran = getParam(
-        "Transpose cubes for faster merging? [no]: ",
-        False
+        "Transpose cubes for faster merging? [yes]: ",
+        'yes',
+        "Nifty can transpose cubes to work around a bug in iraf.imcombine(). If not using this, note Nifty " + \
+        "will take over 25 minutes to merge each cube."
         )
         over = getParam(
         "Overwrite old files? [no]: ",
-        False
+        False,
+        "Nifty can attempt to overwrite old files. Use with caution; this is very lightly tested."
         )
         manualMode = getParam(
-        "Pause after each data reduction step? [yes]: ",
-        "yes"
+        "Pause after each data reduction step? [no]: ",
+        False,
+        "Nifty can pause before each major step and routine to make it easier to follow what it is doing."
         )
 
-        # Serialize and save the options as a .cfg file.
-        config = ConfigObj(unrepr=True, RUNTIME_DATA_PATH+'defaultConfig.cfg')
-        config['nifsSortConfig'] = {}
-        config['nifsSortConfig']['sort'] = sort
-        config['nifsSortConfig']['copy'] = copy
-        config['nifsSortConfig']['date'] = date
-        config['nifsSortConfig']['program'] = program
-        config['nifsSortConfig']['rawPath'] = rawPath
+        # Save the options as a .cfg file.
+        config = ConfigObj(RECIPES_PATH+'defaultConfig.cfg', unrepr=True)
+
+        # General config used by all scripts.
         config['over'] = over
-        config['calibrationReduction'] = calibrationReduction
-        config['scienceReduction'] = scienceReduction
-        config['scienceSkySubtraction'] = scienceSkySubtraction
-        config['merge'] = merge
-        config['tel'] = tel
-        config['telluricReduction'] = telluricReduction
-        config['spectemp'] = spectemp
-        config['mag'] = mag
-        config['efficiencySpectrumCorrection'] = efficiencySpectrumCorrection
-        config['rstart']= rstart
-        config['rstop'] = rstop
-        config['telStart'] = telStart
-        config['telStop'] = telStop
-        config['sciStart'] = sciStart
-        config['sciStop'] = sciStop
-        config['hline_method'] = hline_method
-        config['hlineinter'] = hlineinter
-        config['continuuminter'] = continuuminter
-        config['telluric_correction_method'] = telluric_correction_method
-        config['telinter'] = telinter
-        config['telluricSkySubtraction'] = telluricSkySubtraction
-        config['use_pq_offsets'] = use_pq_offsets
-        config['im3dtran'] = im3dtran
         config['manualMode'] = manualMode
-        with open(RUNTIME_DATA_PATH+'/config.cfg', 'w') as outfile:
+        config['merge'] = merge # Obsolete- TODO(nat): eliminate this
+
+        config['linearPipelineConfig'] = {}
+        config['linearPipelineConfig']['sort'] = sort
+        config['linearPipelineConfig']['calibrationReduction'] = calibrationReduction
+        config['linearPipelineConfig']['telluricReduction'] = telluricReduction
+        config['linearPipelineConfig']['scienceReduction'] = scienceReduction
+
+        config['sortConfig'] = {}
+        config['sortConfig']['rawPath'] = rawPath
+        config['sortConfig']['program'] = program
+        config['sortConfig']['sortTellurics'] = telluricReduction
+        config['sortConfig']['date'] = date
+        config['sortConfig']['copy'] = copy
+
+        config['calibrationReductionConfig'] = {}
+        config['calibrationReductionConfig']['baselineCalibrationStart']= baselineCalibrationStart
+        config['calibrationReductionConfig']['baselineCalibrationStop'] = baselineCalibrationStop
+
+        config['telluricReductionConfig'] = {}
+        config['telluricReductionConfig']['telStart'] = telStart
+        config['telluricReductionConfig']['telStop'] = telStop
+        config['telluricReductionConfig']['telluricSkySubtraction'] = telluricSkySubtraction
+        config['telluricReductionConfig']['spectemp'] = spectemp
+        config['telluricReductionConfig']['mag'] = mag
+        config['telluricReductionConfig']['hline_method'] = hline_method
+        config['telluricReductionConfig']['hlineinter'] = hlineinter
+        config['telluricReductionConfig']['continuuminter'] = continuuminter
+
+        config['scienceReductionConfig'] = {}
+        config['scienceReductionConfig']['sciStart'] = sciStart
+        config['scienceReductionConfig']['sciStop'] = sciStop
+        config['scienceReductionConfig']['scienceSkySubtraction'] = scienceSkySubtraction
+        config['scienceReductionConfig']['telluric_correction_method'] = telluric_correction_method
+        config['scienceReductionConfig']['telinter'] = telinter
+        config['scienceReductionConfig']['efficiencySpectrumCorrection'] = efficiencySpectrumCorrection
+        config['scienceReductionConfig']['use_pq_offsets'] = use_pq_offsets
+        config['scienceReductionConfig']['im3dtran'] = im3dtran
+
+        with open('./config.cfg', 'w') as outfile:
             config.write(outfile)
 
     return fullReduction
@@ -240,13 +315,7 @@ def printDirectoryLists():
           correctly.
     """
     # Print the current directory of data being reduced.
-    logging.info("\n#################################################################################")
-    logging.info("                                   ")
-    logging.info("  COMPLETE - sorting. I've updated scienceDirectoryList,")
-    logging.info("             telluricDirectoryList and calibrationDirectoryList in")
-    logging.info("             runtimeData/config.cfg with the following values:")
-    logging.info("")
-    logging.info("#################################################################################\n")
+    logging.info("\nThe following values were found in ./config.cfg: ")
 
     with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
@@ -269,6 +338,10 @@ def getParam(prompt, default, helpMessage="No help implemented yet!"):
 
     print "\n" + bcolors.OKBLUE + helpMessage + bcolors.ENDC + "\n"
     param = raw_input(prompt)
+    if param == "no" or "No" or "N" or "n":
+        param == False
+    if param == "yes" or "Yes" or "Y" or "n":
+        parm = True
     param = param or default
 
     return param

@@ -1,4 +1,27 @@
 #!/usr/bin/env python
+
+# MIT License
+
+# Copyright (c) 2015, 2017 Marie Lemoine-Busserolle
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
@@ -43,7 +66,7 @@ def start():
 
     Args:
         # Loaded from runtimeData/config.cfg
-        calDirList:      list of paths to calibrations. ['path/obj/date/Calibrations_grating']
+        calibrationDirectoryList:      list of paths to calibrations. ['path/obj/date/Calibrations_grating']
         over (boolean):  overwrite old files. Default: False.
         start (int):     starting step of daycal reduction. Specified at command line with -a. Default: 1.
         stop (int):      stopping step of daycal reduction. Specified at command line with -z. Default: 6.
@@ -98,19 +121,22 @@ def start():
 
     # Load reduction parameters from ./config.cfg.
     with open('./config.cfg') as config_file:
-        options = ConfigObj(config_file, unrepr=True)
-        calDirList = options['calibrationDirectoryList']
-        over = options['over']
-        start = options['rstart']
-        stop = options['rstop']
-        manualMode = options['manualMode']
+        config = ConfigObj(config_file, unrepr=True)
+        # Read general pipeline config.
+        manualMode = config['manualMode']
+        over = config['over']
+        calibrationDirectoryList = config['calibrationDirectoryList']
+        # Read baselineCalibrationReduction specfic config.
+        calibrationReductionConfig = config['calibrationReductionConfig']
+        start = calibrationReductionConfig['baselineCalibrationStart']
+        stop = calibrationReductionConfig['baselineCalibrationStop']
 
     ################################################################################
     # Define Variables, Reduction Lists AND identify/run number of reduction steps #
     ################################################################################
 
     # Loop over the Calibrations directories and reduce the day calibrations in each one.
-    for calpath in calDirList:
+    for calpath in calibrationDirectoryList:
         os.chdir(calpath)
         pwdDir = os.getcwd()+"/"
         iraffunctions.chdir(pwdDir)

@@ -1,5 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# MIT License
+
+# Copyright (c) 2015, 2017 Marie Lemoine-Busserolle
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
@@ -103,21 +126,21 @@ def start(args):
     logging.info("####################################\n")
 
     # Make sure to change this if you change the default logfile.
-    logging.info('The log file is Nifty.log.\n')
+    logging.info('The log file is Nifty.log.')
 
     # Parse command line options.
     parser = argparse.ArgumentParser(description='Do a Gemini NIFS data reduction.')
     # Create a configuration file interactively
     parser.add_argument('-i', '--interactive', dest = 'interactive', default = False, action = 'store_true', help = 'Create a config.cfg file interactively.')
     # Ability to repeat the last data reduction
-    parser.add_argument('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading parameters from runtimeData/config.cfg.')
+    parser.add_argument('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading saved reduction parameters from runtimeData/config.cfg.')
     # Ability to load a built-in configuration file (recipe)
     parser.add_argument('-l', '--recipe', dest = 'recipe', action = 'store', help = 'Load data reduction parameters from the a provided recipe. Default is default_input.cfg.')
     # Ability to load your own configuration file
     parser.add_argument(dest = 'inputfile', nargs='?', action = 'store', help = 'Load data reduction parameters from <inputfile>.cfg.')
     # Ability to do a quick and dirty fully automatic data reduction with no user input
     # TODO(nat): make it so Nifty does this when you type "niftyRun" with no options
-    parser.add_argument('-f', '--fullReduction', dest = 'fullReduction', default = False, action = 'store_true', help = 'Do a full reduction with data reduction parameters loaded from runtimeData/default_input.cfg')
+    parser.add_argument('-f', '--fullReductionPathOrProgramID', dest = 'fullReduction', default = False, action = 'store', help = 'Do a quick reduction from recipes/defaultConfig.cfg, specifying path to raw data or program ID.')
 
     args = parser.parse_args(args)
 
@@ -128,10 +151,11 @@ def start(args):
 
     if inputfile:
         # Load input from a .cfg file user specified at command line.
+        if os.path.exists('./config.cfg'):
+            os.remove('./config.cfg')
+        shutil.copy(inputfile, './config.cfg')
         logging.info("\nPipeline configuration for this data reduction was read from " + str(inputfile) + \
         " and copied to ./config.cfg.")
-    else:
-        shutil.copy(RUNTIME_DATA_PATH+'config.cfg', './config.cfg')
 
     # Check if the user specified at command line to repeat the last Reduction, do a full default data reduction from a
     # recipe file or do a full data reduction from a handmade file.
@@ -140,30 +164,59 @@ def start(args):
         logging.info('\nInteractively creating a ./config.cfg configuration file.')
         fullReduction = getUserInput()
 
-    # TODO(nat): Add proper documentation on supplying an input file name (the args option here).
     if fullReduction:
-        # TODO(nat): move this code to a function.
-        # Read and use parameters of the last Reduction from runtimeData/config.cfg.
-        shutil.copy(RECIPES_PATH+'default_input.cfg', RUNTIME_DATA_PATH+'config.cfg')
-        logging.info("\nData reduction parameters for this reduction were copied from recipes/default_input.cfg to runtimeData/config.cfg.")
+        # Copy default input and use it
+        shutil.copy(RECIPES_PATH+'defaultConfig.cfg', './config.cfg')
+        # Update default config file with path to raw data or program ID.
+        with open('./config.cfg', 'r') as config_file:
+            config = ConfigObj(config_file, unrepr=True)
+            sortConfig = config['sortConfig']
+            if fullReduction[0] == "G":
+                # Treat it as a program ID.
+                sortConfig['program'] = fullReduction
+                sortConfig['rawPath'] = ""
+            else:
+                # Else treat it as a path.
+                sortConfig['program'] = ""
+                sortConfig['rawPath'] = fullReduction
+        with open('./config.cfg', 'w') as outfile:
+            config.write(outfile)
+
+        logging.info("\nData reduction parameters for this reduction were copied from recipes/defaultConfig.cfg to ./config.cfg.")
+
+    if repeat:
+        logging.info("\nOverwriting ./config.cfg with saved config from most recent data reduction.")
+        if os.path.exists('./config.cfg'):
+            os.remove('./config.cfg')
+        shutil.copy(RUNTIME_DATA_PATH+'config.cfg', './config.cfg')
 
     # Print data reduction parameters for a user's peace-of-mind.
+    logging.info("\nSaving data reduction parameters.")
+    if os.path.exists(RUNTIME_DATA_PATH+'config.cfg'):
+        os.remove(RUNTIME_DATA_PATH+'config.cfg')
+    shutil.copy('./config.cfg', RUNTIME_DATA_PATH+'config.cfg')
+
+
     logging.info("\nParameters for this data reduction as read from ./config.cfg:\n")
     with open('./config.cfg') as config_file:
-        options = ConfigObj(config_file, unrepr=True)
-        for i in options:
-            logging.info(str(i) + " " + str(options[i]))
+        config = ConfigObj(config_file, unrepr=True)
+        for i in config:
+            logging.info(str(i) + " " + str(config[i]))
     logging.info("")
 
     # Define parameters used by this script:
     with open('./config.cfg') as config_file:
-        options = ConfigObj(config_file, unrepr=True)
-        nifsSortConfig = options['nifsSortConfig']
-        sort = nifsSortConfig['sort']
-        calibrationReduction = options['calibrationReduction']
-        telluricReduction = options['telluricReduction']
-        scienceReduction = options['scienceReduction']
-        manualMode = options['manualMode']
+        # Load general config.
+        config = ConfigObj(config_file, unrepr=True)
+        manualMode = config['manualMode']
+
+        # Load pipeline specific config.
+        linearPipelineConfig = config['linearPipelineConfig']
+
+        sort = linearPipelineConfig['sort']
+        calibrationReduction = linearPipelineConfig['calibrationReduction']
+        telluricReduction = linearPipelineConfig['telluricReduction']
+        scienceReduction = linearPipelineConfig['scienceReduction']
 
     ###########################################################################
     ##                         SETUP COMPLETE                                ##
