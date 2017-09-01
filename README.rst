@@ -14,7 +14,7 @@ Nifty
 A Python Data Reduction Pipeline for the Gemini-North Near-Infrared Integral
 Field Spectrometer (NIFS).
 
-This is a new data reduction python pipeline that uses Astroconda and the Gemini
+This is a new data reduction Python pipeline that uses Astroconda and the Gemini
 IRAF Package to reduce NIFS data. It offers a complete data reduction process from
 sorting the data to producing a final flux calibrated and wavelength calibrated
 combined cube with the full S/N for a science target.
@@ -42,7 +42,7 @@ Installation
 
 Pre-Requisites
 --------------
-Make sure you have the latest version of Gemini Astroconda installed and have activated an Astroconda environment.
+Make sure you have the latest version of Gemini Astroconda installed, have activated an Astroconda environment and have set up PYRAF.
 You can find instructions for installing Astroconda `here.<https://astroconda.readthedocs.io/en/latest/>`
 
 Installing
@@ -53,7 +53,7 @@ The following command installs Nifty from PyPi.org.
 
     pip install Nifty4NIFS
 
-You're ready to begin.
+You're ready to start reducing data!
 
 .. TODO(nat): implement these instructions.
 *Coming Soon: Instructions for installing in Developer mode.*
@@ -72,7 +72,7 @@ To run Nifty, getting data reduction parameters from an interactive input sessio
    runNifty -i
 
 To run Nifty in full-automatic mode with default input parameters, provide the -f flag
-and a local path to the raw data or a Gemini Program ID string (Eg: GN-2013A-Q-62).
+and a full local path to the raw data or a Gemini Program ID string (Eg: GN-2013A-Q-62).
 
 .. code-block:: text
 
@@ -99,23 +99,29 @@ To show help:
 
    runNifty -h
 
-To run Nifty, populating a configuration file with an interactive input session:
+To run Nifty, populating a configuration file interactively:
 
 .. code-block:: text
 
-   runNifty -i <data_location>
+   runNifty -i
 
-To run Nifty, getting data reduction parameters from the file <inputfile.cfg>:
+To run Nifty by supplying your own configuration file:
 
 .. code-block:: text
 
-   runNifty <inputfile.cfg>
+   runNifty <configurationfile.cfg>
 
 To do a full automatic data reduction with default options:
 
 .. code-block:: text
 
-   runNifty -f <data_location>
+   runNifty -f <pathOrProgramID>
+
+To redo the last data reduction, reading the config file saved at the beginning of the most recent reduction:
+
+.. code-block:: text
+
+  runNifty -f
 
 
 Input
@@ -148,22 +154,48 @@ or:
 
    python Nifty.py -l
 
-Command Line Arguments
-----------------------
+Practical Examples
+==================
 
-Nifty supports several command line arguments. Using these with a runtimeData/user_options.json input file
-makes Nifty integrate well with shell scripts.
+Observations of Titan
+---------------------
 
-Nifty may be invoked with the following command line arguments:
+Recipe used: defaultConfig.cfg
 
-**-l <recipe_name>**
-  Load the specified recipe from recipes/. If no recipe name is provided default_input.json is used.
-  .. TODO(nat): actually implement this!
-**-r**
-  Repeat. Repeat the last data reduction, loading parameters from a runtimeData/user_options.json file.
-  Equivalent to -l with
-**-f**
-  Full automatic run. Do a full automatic data reduction copying parameters from the included default_input.json.
+Observations of a Moderate Redshift Galaxy
+------------------------------------------
+
+Recipe used: defaultConfig.cfg
+
+Let's reduce NIFS data of a moderate redshift galaxy, located at z ~ 1.284. This is a faint target, so after making
+individual cubes we use the reported telescope P and Q offsets to blindly merge our final cubes.
+
+As this program is out of its proprietary period and available on the Gemini Public Archive, we can use the defaultConfig.cfg configuration
+file and specify its program ID to reduce it.
+
+.. code-block:: text
+
+   runNifty -f GN-2013A-Q-62
+
+We could also launch the reduction from a provided configuration file.
+
+
+Contents of the configuration file:
+
+.. code-block:: text
+
+   TODO(nat): When finalized fill this out!
+
+To launch the reduction:
+
+.. code-block:: text
+
+   runNifty <configurationFile>
+
+
+
+
+
 
 Editable Control Files
 ======================

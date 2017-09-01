@@ -1,3 +1,25 @@
+# MIT License
+
+# Copyright (c) 2015, 2017 Marie Lemoine-Busserolle
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import getopt
 import os, glob, shutil, logging
 import pexpect as p
@@ -19,6 +41,14 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
     attach the prefix "shif" to each shifted image and save them
     in the observation directory (ie. obs108). This is necessary
     for very faint objects.
+
+    TODO(nat): I think what we want as a final product is one cube per grating,
+    per object. I need to finish generalizing this so it really works with multiple
+    gratings, observations and objects.
+
+    We should loop like this: For each object, for each grating, for each observation.
+    Merge all cubes in an observation. Then Merge all cubes of the same grating. Then
+    do that for every object in the program.
 
     INPUT:
         - Reference data cubes
@@ -86,7 +116,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
         obsid = temp1[1]
         obsPath = temp3[0]
         os.chdir(obsDir)
-        obsidlist.append(date+'_'+obsid)
+        obsidlist.append(obsPath+'/Merged/'+date+'_'+obsid)
 
         # Create a directory called Merged and copy all the data cubes to this directory.
         if not os.path.exists(obsPath+'/Merged/'):
@@ -152,8 +182,8 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
     for cubes in listsOfCubes:
 
         shiftlist = []
-        os.chdir(Merged+'/'+obsidlist[n])
-        iraffunctions.chdir(Merged+'/'+obsidlist[n])
+        os.chdir(obsidlist[n])
+        iraffunctions.chdir(obsidlist[n])
 
         if use_pq_offsets:
             # Set the zero point p and q offsets to the p and q offsets of the first cube in each list of cubes.
@@ -221,7 +251,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
 
         if not use_pq_offsets:
             # Before we combine make sure a suitable offsets.txt file exists.
-            a = raw_input("\nPaused. Please provide a suitable offsets.txt file in ", Merged+'/'+obsidlist[n])
+            a = raw_input("\nPaused. Please provide a suitable offsets.txt file in ", obsidlist[n])
             while not os.path.exists('offsets.txt'):
                 a = raw_input("No offsets.txt file found. Please try again.")
             logging.info('offsets.txt found successfully for', obsidlist[n])
@@ -252,13 +282,14 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
         n+=1
         os.chdir(Merged)
 
+    """
     # Copy the merged observation sequence data cubes to the Merged directory.
     for i in range(len(mergedCubes)):
-        shutil.copy(Merged+'/'+obsidlist[i]+'/'+mergedCubes[i], './')
+        shutil.copy(mergedCubes[i], './')
 
     # Merge all the individual merged observation sequence data cubes.
     # TODO: test. Still untested.
-    """
+
     if len(mergedCubes)>1:
         os.chdir(Merged)
         iraffunctions.chdir(Merged)

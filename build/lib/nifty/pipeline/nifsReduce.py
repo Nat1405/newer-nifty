@@ -1,4 +1,27 @@
 #!/usr/bin/env python
+
+# MIT License
+
+# Copyright (c) 2015, 2017 Marie Lemoine-Busserolle
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
@@ -113,33 +136,56 @@ def start(kind):
     user_clobber=iraf.envget("clobber")
     iraf.reset(clobber='yes')
 
+    # This helps make sure all variables are initialized to prevent bugs.
+    continuuminter = None
+    hlineinter = None
+    hline_method = None
+    spectemp = None
+    mag = None
+    scienceSkySubtraction = None
+    telluricSkySubtraction = None
+    telluric_correction_method = None
+    telinter = None
+    efficiencySpectrumCorrection = None
+    use_pq_offsets = None
+    im3dtran = None
+
     # Load reduction parameters from runtimeData/config.cfg.
     with open('./config.cfg') as config_file:
-        options = ConfigObj(config_file, unrepr=True)
+        config = ConfigObj(config_file, unrepr=True)
+        # Read general pipeline config.
+        over = config['over']
+        manualMode = config['manualMode']
+        merge = config['merge']
+        calDirList = config['calibrationDirectoryList']
+
         if kind == 'Telluric':
-            # Load telluricDirectoryList as observationDirectoryList
-            observationDirectoryList = options['telluricDirectoryList']
-            start = options['telStart']
-            stop = options['telStop']
-        elif kind == 'Science':
-            # Load scienceDirectoryList as observationDirectoryList
-            observationDirectoryList = options['scienceDirectoryList']
-            start = options['sciStart']
-            stop = options['sciStop']
-        calDirList = options['calibrationDirectoryList']
-        telinter = options['telinter']
-        efficiencySpectrumCorrection = options['efficiencySpectrumCorrection']
-        continuuminter = options['continuuminter']
-        hlineinter = options['hlineinter']
-        hline_method = options['hline_method']
-        spectemp = options['spectemp']
-        mag = options['mag']
-        over = options['over']
-        telluric_correction_method = options['telluric_correction_method']
-        use_pq_offsets = options['use_pq_offsets']
-        merge = options['merge']
-        im3dtran = options['im3dtran']
-        debug = options['debug']
+            # Telluric reduction specific config.
+            telluricReductionConfig = config['telluricReductionConfig']
+
+            observationDirectoryList = config['telluricDirectoryList']
+            start = telluricReductionConfig['telStart']
+            stop = telluricReductionConfig['telStop']
+            telluricSkySubtraction = telluricReductionConfig['telluricSkySubtraction']
+            continuuminter = telluricReductionConfig['continuuminter']
+            hlineinter = telluricReductionConfig['hlineinter']
+            hline_method = telluricReductionConfig['hline_method']
+            spectemp = telluricReductionConfig['spectemp']
+            mag = telluricReductionConfig['mag']
+
+        if kind == 'Science':
+            # Science reduction specific config.
+            scienceReductionConfig = config['scienceReductionConfig']
+
+            observationDirectoryList = config['scienceDirectoryList']
+            start = scienceReductionConfig['sciStart']
+            stop = scienceReductionConfig['sciStop']
+            scienceSkySubtraction = scienceReductionConfig['scienceSkySubtraction']
+            telluric_correction_method = scienceReductionConfig['telluric_correction_method']
+            telinter = scienceReductionConfig['telinter']
+            efficiencySpectrumCorrection = scienceReductionConfig['efficiencySpectrumCorrection']
+            use_pq_offsets = scienceReductionConfig['use_pq_offsets']
+            im3dtran = scienceReductionConfig['im3dtran']
 
     ###########################################################################
     ##                                                                       ##
@@ -220,21 +266,22 @@ def start(kind):
             os.mkdir('./database/')
         iraf.copy(input=calDir+"database/*", output="./database/")
 
-        # Read the list of sky frames in the observation directory.
-        try:
-            skyFrameList = open("skyFrameList", "r").readlines()
-            skyFrameList = [frame.strip() for frame in skyFrameList]
-        except:
-            logging.info("\n#####################################################################")
-            logging.info("#####################################################################")
-            logging.info("")
-            logging.info("     WARNING in reduce: No sky frames were found in a directory.")
-            logging.info("              Please make a skyFrameList in: " + str(os.getcwd()))
-            logging.info("")
-            logging.info("#####################################################################")
-            logging.info("#####################################################################\n")
-            raise SystemExit
-        sky = skyFrameList[0]
+        if telluricSkySubtraction or scienceSkySubtraction:
+            # Read the list of sky frames in the observation directory.
+            try:
+                skyFrameList = open("skyFrameList", "r").readlines()
+                skyFrameList = [frame.strip() for frame in skyFrameList]
+            except:
+                logging.info("\n#####################################################################")
+                logging.info("#####################################################################")
+                logging.info("")
+                logging.info("     WARNING in reduce: No sky frames were found in a directory.")
+                logging.info("              Please make a skyFrameList in: " + str(os.getcwd()))
+                logging.info("")
+                logging.info("#####################################################################")
+                logging.info("#####################################################################\n")
+                raise SystemExit
+            sky = skyFrameList[0]
 
         # If we are doing a telluric reduction, open the list of telluric frames in the observation directory.
         # If we are doing a science reduction, open the list of science frames in the observation directory.
@@ -246,8 +293,9 @@ def start(kind):
             scienceFrameList = [frame.strip() for frame in scienceFrameList]
             # For science frames, check to see if the number of sky frames matches the number of science frames.
             # IF NOT duplicate the sky frames and rewrite the sky file and skyFrameList.
-            if not len(skyFrameList)==len(scienceFrameList):
-                skyFrameList = makeSkyList(skyFrameList, scienceFrameList, observationDirectory)
+            if scienceSkySubtraction:
+                if not len(skyFrameList)==len(scienceFrameList):
+                    skyFrameList = makeSkyList(skyFrameList, scienceFrameList, observationDirectory)
 
         ###########################################################################
         ##                                                                       ##
@@ -279,13 +327,14 @@ def start(kind):
             ###########################################################################
 
             if valindex == 1:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 1: locate the spectrum.")
                 if kind=='Telluric':
                     tellist = prepare(tellist, shift, sflat_bpm, log, over)
                 elif kind=='Science':
                     scienceFrameList = prepare(scienceFrameList, shift, sflat_bpm, log, over)
-                skyFrameList = prepare(skyFrameList, shift, sflat_bpm, log, over)
+                if telluricSkySubtraction or scienceSkySubtraction:
+                    skyFrameList = prepare(skyFrameList, shift, sflat_bpm, log, over)
                 logging.info("\n##############################################################################")
                 logging.info("")
                 logging.info("  STEP 1: Locate the Spectrum (and prepare raw data) ->n - COMPLETED ")
@@ -297,23 +346,27 @@ def start(kind):
             ###########################################################################
 
             elif valindex == 2:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 2: sky subtraction.")
                 # Combine telluric sky frames.
                 if kind=='Telluric':
-                    if len(skyFrameList)>1:
-                        combineImages(skyFrameList, "gn"+sky, log, over)
+                    if telluricSkySubtraction:
+                        if len(skyFrameList)>1:
+                            combineImages(skyFrameList, "gn"+sky, log, over)
+                        else:
+                            copyImage(skyFrameList, 'gn'+sky+'.fits', over)
+                        skySubtractTel(tellist, "gn"+sky, log, over)
                     else:
-                        copyImage(skyFrameList, 'gn'+sky+'.fits', over)
-                if kind=='Telluric':
-                    skySubtractTel(tellist, "gn"+sky, log, over)
-                elif kind=='Science':
-                    # Temporary code to let us skip the sky subtraction.
-                    if False:
+                        for image in tellist:
+                            iraf.copy('n'+image+'.fits', 'sn'+image+'.fits')
+
+                if kind=='Science':
+                    if scienceSkySubtraction:
                         skySubtractObj(scienceFrameList, skyFrameList, log, over)
                     else:
                         for image in scienceFrameList:
                             iraf.copy('n'+image+'.fits', 'sn'+image+'.fits')
+
                 logging.info("\n##############################################################################")
                 logging.info("")
                 logging.info("  STEP 2: Sky Subtraction ->sn - COMPLETED ")
@@ -325,7 +378,7 @@ def start(kind):
             ##############################################################################
 
             elif valindex == 3:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 3: flat fielding and bad pixels correction.")
                 if kind=='Telluric':
                     applyFlat(tellist, flat, log, over, kind)
@@ -345,7 +398,7 @@ def start(kind):
             ###########################################################################
 
             elif valindex == 4:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 4: 2D to 3D transformation and Wavelength Calibration.")
                 if kind=='Telluric':
                     fitCoords(tellist, arc, ronchi, log, over, kind)
@@ -374,7 +427,7 @@ def start(kind):
             ############################################################################
 
             elif valindex == 5:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 5.")
                 # For telluric data:
                 # Make a 1D telluric correction spectrum from reduced telluric data.
@@ -390,18 +443,18 @@ def start(kind):
                 # For science data, either:
                 # Apply the telluric correction and absolute flux calibration by dividing by efficiency spectrum with Python.
                 elif kind=='Science' and telluric_correction_method == "python":
-                    makeCube('tfbrsn', scienceFrameList, observationDirectory, log, over)
+                    makeCube('tfbrsn', scienceFrameList, log, over)
                     applyTelluricPython(over)
 
                 # Apply the telluric correction and absolute flux calibration with iraf.nftelluric().
                 elif kind=='Science' and telluric_correction_method == "iraf":
                     applyTelluricIraf(scienceFrameList, obsid, telinter, log, over)
-                    makeCube('atfbrsn', scienceFrameList, observationDirectory, log, over)
+                    makeCube('atfbrsn', scienceFrameList, log, over)
 
                 # DON'T apply the telluric correction and absolute flux calibration; just make a cube.
                 elif kind=='Science' and telluric_correction_method == "none":
                     # Make cube without telluric correction.
-                    makeCube('tfbrsn', scienceFrameList, observationDirectory, log, over)
+                    makeCube('tfbrsn', scienceFrameList, log, over)
 
                     logging.info("\n##############################################################################")
                     logging.info("")
@@ -418,7 +471,7 @@ def start(kind):
             ###########################################################################
 
             elif valindex == 6:
-                if debug:
+                if manualMode:
                     a = raw_input("About to enter step 6.")
                 if kind == 'Telluric' and efficiencySpectrumCorrection:
                     createEfficiencySpectrum(
@@ -649,7 +702,7 @@ def transform(objlist, log, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def makeCube(pre, scienceFrameList, observationDirectory, log, over):
+def makeCube(pre, scienceFrameList, log, over):
     """ Reformat the data into a 3-D datacube using iraf.nifcube. Output: If
     telluric correction to be applied, -->catfbrsgn. Else, -->ctfbrsgn.
 
@@ -661,7 +714,6 @@ def makeCube(pre, scienceFrameList, observationDirectory, log, over):
 
     """
 
-    os.chdir(observationDirectory)
     for frame in scienceFrameList:
         if os.path.exists("c"+pre+frame+".fits"):
             if over:

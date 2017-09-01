@@ -1,5 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# MIT License
+
+# Copyright (c) 2015, 2017 Marie Lemoine-Busserolle
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
@@ -10,16 +33,20 @@ from xml.dom.minidom import parseString
 import urllib
 from pyraf import iraf
 import astropy.io.fits
-import os, sys, shutil, glob, math, logging, pkg_resources
+import os, sys, shutil, glob, math, logging, pkg_resources, time, datetime
 import numpy as np
 # Import config parsing.
 from configobj.configobj import ConfigObj
+
 
 # LOCAL
 
 # Import custom Nifty functions.
 from nifsUtils import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
 datefmt, checkOverCopy, checkQAPIreq, checkDate, writeList, checkEntry, timeCalc, checkSameLengthFlatLists
+
+# Import NDMapper gemini data download, by James E.H. Turner.
+import downloadFromGeminiPublicArchive
 
 # Define constants
 # Paths to Nifty data.
@@ -52,8 +79,6 @@ def start():
 
     Args:
         rawPath (string):   Local path to raw files directory. Specified with -q at command line.
-        tel (boolean):  If False telluric data will not be sorted. Specified with
-                        -t at command line. Default: True.
         over (boolean): If True old files will be overwritten during data reduction. Specified
                         with -o at command line. Default: False.
             FOR INTERNAL GEMINI USE:
@@ -84,34 +109,33 @@ def start():
     # Load reduction parameters from runtimeData/config.cfg.
     with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
-        rawPath = options['rawPath']
-        telluricReduction = options['telluricReduction']
+        # Read general config.
         over = options['over']
-        copy = options['copy']
-        program = options['program']
-        date = options['date']
-        debug = options['debug']
-        telluricSkySubtration = options['telluricSkySubtraction']
-        scienceSkySubtraction = options['scienceSkySubtraction']
+        manualMode = options['manualMode']
+        # Read sort specific config.
+        sortConfig = options['sortConfig']
+        rawPath = sortConfig['rawPath']
+        program = sortConfig['program']
+        sortTellurics = sortConfig['sortTellurics']
+        date = sortConfig['date']
+        copy = sortConfig['copy']
 
     # Check for invalid command line input. Cannot both copy from Gemini and sort local files.
     # Exit if -q <path to raw frame files> and -c True are specified at command line (cannot copy from
     # Gemini North internal network AND use local raw data).
-    if rawPath and copy:
-        logging.info("\n Error in sort. Cannot specify -q AND -c True (local raw files directory AND copy files from Gemini network).\n")
+    if rawPath and program:
+        logging.info("\nError in sort: both a local path and a Gemini program ID (to download from Gemini Public Archive) were provided.\n")
         raise SystemExit
 
-    # TODO(nat): Implement public gemini archive downloads.
-    """# If downloadFromPublicArchive:
-    # Make a url to download from.
-    url = "https://archive.gemini.edu/download/"+program+"/notengineering/NotFail/present/canonical"
-    # Download the file to a local directory.
-    # Download the file from `url` and save it locally under `file_name`:
-    with urllib.request.urlopen(url) as response, open('rawData', 'wb') as out_file:
-        shutil.copyfileobj(response, out_file)
-    # Decompress the .bz2 raw files.
-    # Let path = path/to/downloaded/files.
-    """
+    # Download data from gemini public archive to ./rawData/.
+    if program:
+        url = 'https://archive.gemini.edu/download/'+ str(program) + '/notengineering/NotFail/present/canonical'
+        if not os.path.exists('./rawData'):
+            os.mkdir('./rawData')
+        logging.info('\nDownloading data from Gemini public archive to ./rawData. This will take a few minutes.')
+        logging.info('\nURL used for the download: \n' + str(url))
+        downloadFromGeminiPublicArchive.download_query_gemini(url, './rawData')
+        rawPath = os.getcwd()+'/rawData'
 
 
     ############################################################################
@@ -129,26 +153,31 @@ def start():
 
     # IF a local raw directory path is provided, sort data.
     if rawPath:
-        if debug:
+        if manualMode:
             a = raw_input("About to enter makePythonLists().")
         allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objectDateGratingList, skyFrameList, telskyFrameList, obsidDateList, sciImageList = makePythonLists(rawPath)
-        if debug:
+        if manualMode:
             a = raw_input("About to enter sortScienceAndTelluric().")
         objDirList, scienceDirectoryList, telluricDirectoryList = sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageList, rawPath)
-        if debug:
+        if manualMode:
             a = raw_input("About to enter sortCalibrations().")
-        calibrationDirectoryList = sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath)
+        calibrationDirectoryList = sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath, manualMode)
         # If a telluric reduction will be performed sort the science and telluric images based on time between observations.
         # This will NOT be executed if -t False is specified at command line.
-        if telluricReduction:
-            if debug:
+        if sortTellurics:
+            if manualMode:
                 a = raw_input("About to enter matchTellurics().")
             matchTellurics(telluricDirectoryList, scienceDirectoryList)
+
+    # Exit if no or incorrectly formatted input is given.
+    else:
+        logging.info("\nERROR in sort: Enter a program ID, observation date, or directory where the raw files are located.\n")
+        raise SystemExit
 
     ############################################################################
     ############################################################################
     #                                                                          #
-    #               CASE 2: NIFS RAW DATA in GEMINI NETWORK                    #
+    #               CASE 2: NIFS RAW DATA in GEMINI PRIVATE NETWORT            #
     #                                                                          #
     #     These conditions are used if a program, date or copy is specified    #
     #     with -p, -d or -c True at command line. Files can be copied from     #
@@ -158,7 +187,7 @@ def start():
     ############################################################################
     ############################################################################
 
-    # TODO(nat): implement private gemini archive downloads.
+    """# TODO(nat): implement private gemini archive downloads.
     elif copy or program or date:
         try:
             import gemini_sort
@@ -175,12 +204,8 @@ def start():
             logging.info("#####################################################################\n")
             raise SystemExit
         else:
-            gemini_sort.start(over, copy, program, date)
+            gemini_sort.start(over, copy, program, date)"""
 
-    # Exit if no or incorrectly formatted input is given.
-    else:
-        logging.info("\nERROR in sort: Enter a program ID, observation date, or directory where the raw files are located.\n")
-        raise SystemExit
 
     os.chdir(path)
 
@@ -634,8 +659,8 @@ def sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageL
             logging.info(str(allfilelist[i][0]) + " " + str(allfilelist[i][2]) + " was not copied.")
     logging.info("\nEnd non-copied science, tellurics and acquisitions.\n")
 
-    # Check that all science frames were copied.
-    count_from_raw_files = len(sciImageList)
+    # Check that all science frames and sky frames were copied.
+    count_from_raw_files = len(sciImageList) + len(skyFrameList)
 
     count = 0
     for science_directory in scienceDirList:
@@ -676,7 +701,7 @@ def sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageL
 
 #----------------------------------------------------------------------------------------#
 
-def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath):
+def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, objectDateGratingList, objDirList, obsidDateList, sciImageList, rawPath, manualMode):
 
     """Sort calibrations into appropriate directories based on date.
     """
@@ -960,8 +985,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # flatlist exists and has more than one file.
         try:
-            flatlist = open('flatlist', "r").readlines()
-            if len(flatlist) <= 1:
+            flatListFile = open('flatlist', "r").readlines()
+            if len(flatListFile) <= 1:
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
@@ -984,8 +1009,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # flatdarklist exists and has more than one file.
         try:
-            flatdarklist = open('flatdarklist', "r").readlines()
-            if len(flatdarklist) <= 1:
+            flatDarkListFile = open('flatdarklist', "r").readlines()
+            if len(flatDarkListFile) <= 1:
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
@@ -1009,7 +1034,7 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # arclist exists.
         try:
-            arclist = open('arclist', "r").readlines()
+            arcListFile = open('arclist', "r").readlines()
         except IOError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
@@ -1019,13 +1044,41 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
             logging.info("")
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
-            # Give user a chance now to try and provide an arc file.
-            a = raw_input("\n Please provide a textfile called arclist in " + str(os.getcwd()) + \
-            " or be sure not to attempt a wavelength calibration for this directory.")
+
+            if not manualMode:
+                # Sometimes arcs can be taken a day after the observing night. First
+                # look for these, and if they are not found, ask the user to provide some arcs.
+                foundArcFlag = False
+                # Get date after the science observation
+                t=time.strptime(date,'%Y%m%d')
+                newdate=datetime.date(t.tm_year,t.tm_mon,t.tm_mday)+datetime.timedelta(1)
+                # Loop through arclist and see if there is an arc taken on this date
+                for i in range(len(arclist)):
+                    header = astropy.io.fits.open(rawPath+'/'+arclist[i][0])
+                    date = header[0].header[ 'DATE'].replace('-','')
+                    if str(date) == newdate.strftime('%Y%m%d'):
+                        # If so, copy it to the appropriate calibrations directory and write an arclist.
+                        shutil.copy(rawPath + '/' + arclist[i][0], './')
+                        writeList(arclist[i][0], 'arclist', path)
+                        logging.info("\n#####################################################################")
+                        logging.info("#####################################################################")
+                        logging.info("")
+                        logging.info("     WARNING in sort: found an arc taken one day after a science frame.")
+                        logging.info("                      "+str(sciImageList[i]))
+                        logging.info("                       using that.")
+                        logging.info("")
+                        logging.info("#####################################################################")
+                        logging.info("#####################################################################\n")
+                        foundArcFlag = True
+                        arclist[i][1] = 0
+                if not foundArcFlag:
+                    # If that quick check fails, give user a chance to try and provide an arc file.
+                    a = raw_input("\n Please provide a textfile called arclist in " + str(os.getcwd()) + \
+                    " or be sure not to attempt a wavelength calibration for this directory.")
 
         # arcdarklist exists.
         try:
-            arcdarklist = open('arcdarklist', "r").readlines()
+            arcDarkListFile = open('arcdarklist', "r").readlines()
         except IOError:
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
@@ -1038,8 +1091,8 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
         # ronchilist exists and has more than one file.
         try:
-            ronchilist = open('ronchilist', "r").readlines()
-            if len(ronchilist) <= 1:
+            ronchiListFile = open('ronchilist', "r").readlines()
+            if len(ronchiListFile) <= 1:
                 logging.info("\n#####################################################################")
                 logging.info("#####################################################################")
                 logging.info("")
