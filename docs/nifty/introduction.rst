@@ -9,13 +9,23 @@ Documentation contents:
    preparingInput
    runningNifty
    availableRecipes
-   directoryModifications
    hlineRemoval
    merging
    knownissues
    maintenance
    futurework
    api
+
+   Table of Contents
+   -----------------
+
+   - nifsSort_
+
+   - nifsBaselineCalibration_
+
+   - nifsReduceTelluric_
+
+   - nifsReduceScience_
 
 Nifty Structure
 ---------------

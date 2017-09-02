@@ -166,6 +166,8 @@ def start(args):
 
     if fullReduction:
         # Copy default input and use it
+        if os.path.exists('./config.cfg'):
+            os.remove('./config.cfg')
         shutil.copy(RECIPES_PATH+'defaultConfig.cfg', './config.cfg')
         # Update default config file with path to raw data or program ID.
         with open('./config.cfg', 'r') as config_file:

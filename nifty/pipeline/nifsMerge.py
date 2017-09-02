@@ -228,7 +228,7 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
                 foff = open('offsets.txt', 'a')
                 if im3dtran:
                     # If we swap the y and lambda axis we must also write the offsets in x, lambda, y.
-                    foff.write('%d %d %d\n' % (-1*int(xShift), 0, int(yShift)))
+                    foff.write('%d %d %d\n' % (int(xShift), 0, int(yShift)))
                 else:
                     # Write offsets in regular x, y, lambda.
                     foff.write('%d\t%d\t%d\n' % (xShift, yShift, 0.))
