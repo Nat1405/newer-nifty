@@ -15,7 +15,11 @@ Unreleased
 ==========
 All in-development changes will be tracked here.
 
-- Fixed telluric correction and absolute flux calibration.
+- Fixing merge flip due to differences between NIFS + ALTAIR and NIFS w/o ALTAIR
+on the bottom port.
+- Adding remaining overwrite blocks.
+- Adding unit tests for each step and integration test for pipeline.
+- Fixing telluric correction and absolute flux calibration.
 
 1.0a1 - 2017-08-31
 ==================
