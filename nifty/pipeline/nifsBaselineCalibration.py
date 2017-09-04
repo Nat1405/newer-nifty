@@ -406,8 +406,6 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
         else:
             iraf.copy('n'+flatdark+'.fits', 'gn'+flatdark+'.fits')
 
-
-
     # NSREDUCE on lamps on flat images, "gn"+calflat+".fits", to extract the slices and apply an approximate wavelength calibration.
     if os.path.exists('rgn'+calflat+'.fits'):
         if over:

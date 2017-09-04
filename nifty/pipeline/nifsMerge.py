@@ -214,6 +214,9 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
             if i == 0:
                 continue
             header2 = astropy.io.fits.open(cubes[i])
+            # Check to see if we are using ALTAIR. If we are, later we will invert the x offset
+            # because of the different light path.
+            ALTAIR = header2[0].header['AOFOLD'].strip() == 'IN'
             suffix = cubes[i][-8:-5]
 
             # If user wants to merge using p and q offsets, grab those from .fits headers.
@@ -222,7 +225,10 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
                 xoff = header2[0].header['POFFSET']
                 yoff = header2[0].header['QOFFSET']
                 # calculate the difference between the zero point offsets and the offsets of the other cubes and convert that to pixels
-                xShift = round((xoff - p0)/pixScale)
+                if ALTAIR:
+                    xShift = round(-1*(xoff - p0)/pixScale)
+                else:
+                    xShift = round((xoff - p0)/pixScale)
                 yShift = round((yoff - q0)/pixScale)
                 # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
                 foff = open('offsets.txt', 'a')

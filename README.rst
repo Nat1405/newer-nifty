@@ -45,17 +45,15 @@ Installation
 Pre-Requisites
 --------------
 Make sure you have the latest version of Gemini Astroconda installed, have activated an Astroconda environment and have set up PYRAF.
-You can find instructions for installing Astroconda `here<https://astroconda.readthedocs.io/en/latest/>`_.
+You can find instructions for installing Astroconda `here <https://astroconda.readthedocs.io/en/latest/>`_.
 
 Installing
 ----------
-The following command installs Nifty from PyPi.org.
+From PyPi.org:
 
 .. code-block:: text
 
     pip install Nifty4NIFS
-
-You're ready to start reducing data!
 
 .. TODO(nat): implement these instructions.
 *Coming Soon: Instructions for installing in Developer mode.*

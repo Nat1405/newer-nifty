@@ -67,10 +67,10 @@ from nifsUtils import datefmt, printDirectoryLists, writeList, getParam, getUser
 #                                      +
 #
 
-# Welcome to Nifty, the nifs data reduction pipeline!
+# Welcome to Nifty.
 
 # The current version:
-# TODO(nat): fix this to work as a proper package. This should not be hardcoded.
+# TODO(nat): fix this to import the version from setup.py.
 __version__ = "1.0.0"
 
 # The time when Nifty was started is:
@@ -79,13 +79,14 @@ startTime = str(datetime.now())
 def start(args):
     """
 
-    NIFTY
+    nifsPipeline
 
-    This script launches a nifs data reduction.
+    This script is a full-featured NIFS data reduction pipeline. It can call up
+    to three "Steps".
 
-    It does two things; it:
+    This script does two things. It:
         - gets data reduction parameters; either from an interactive input session or
-          an input file
+          an input file, and
         - launches appropriate scripts to do the work. It can call up to 3 scripts directly:
                 1) nifsSort.py
                 2) nifsBaselineCalibration.py
@@ -206,7 +207,7 @@ def start(args):
             logging.info(str(i) + " " + str(config[i]))
     logging.info("")
 
-    # Define parameters used by this script:
+    # Load configuration from ./config.cfg that is used by this script.
     with open('./config.cfg') as config_file:
         # Load general config.
         config = ConfigObj(config_file, unrepr=True)
@@ -238,8 +239,9 @@ def start(args):
 
     if sort:
         if manualMode:
-            a = raw_input('About to enter sort.')
+            a = raw_input('About to enter nifsSort.')
         nifsSort.start()
+    # By now, we should have paths to the three types of raw data. Print them out.
     printDirectoryLists()
 
     ###########################################################################
@@ -248,7 +250,7 @@ def start(args):
 
     if calibrationReduction:
         if manualMode:
-            a = raw_input('About to enter calibrate.')
+            a = raw_input('About to enter nifsBaselineCalibration.')
         nifsBaselineCalibration.start()
 
     ###########################################################################
@@ -257,7 +259,7 @@ def start(args):
 
     if telluricReduction:
         if manualMode:
-            a = raw_input('About to enter reduce to reduce Telluric images, create telluric correction spectrum and blackbody spectrum.')
+            a = raw_input('About to enter nifsReduce to reduce Tellurics.')
         nifsReduce.start('Telluric')
 
     ###########################################################################
@@ -266,7 +268,7 @@ def start(args):
 
     if scienceReduction:
         if manualMode:
-            a = raw_input('About to enter reduce to reduce science images.')
+            a = raw_input('About to enter nifsReduce to reduce science.')
         nifsReduce.start('Science')
 
     ###########################################################################
@@ -279,14 +281,13 @@ def start(args):
     logging.info('#        DATA REDUCTION COMPLETE        #')
     logging.info('#     Good luck with your science!      #')
     logging.info('#        Check out ??                   #')
-    logging.info('#   For docs, recipes and examples.     #')
+    logging.info('#   For docs, tutorials and examples.   #')
     logging.info('#                                       #')
     logging.info('#########################################')
 
     return
 
 if __name__ == '__main__':
-    # If running ./linearPipeline or python linearPipeline.py, call start.
-    #Currently broken... Have to supply options somehow!
-    #start()
+    # This block could let us call start nifsPipeline.py from the command line. It is disabled for now.
+    # start(args)
     pass
