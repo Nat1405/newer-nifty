@@ -1,4 +1,4 @@
-# Shamelessly based on STScI's JWST calibration pipeline.
+# Based on STScI's JWST calibration pipeline.
 
 from __future__ import print_function
 

@@ -41,7 +41,7 @@ from configobj.configobj import ConfigObj
 RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
 RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
-# Let us print colors to the terminal
+# Let us print colors to the terminal!
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
