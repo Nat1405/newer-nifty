@@ -1102,7 +1102,7 @@ def createEfficiencySpectrum(
     # File for recording shift/scale from calls to "telluric"
     telluric_shift_scale_record = open('telluric_hlines.txt', 'w')
 
-    # Remove H lines from standard star
+    # Remove H lines from standard star correction spectrum
     no_hline = False
     if os.path.exists("final_tel_no_hlines_no_norm"+band+'.fits'):
         if over:
@@ -1162,7 +1162,7 @@ def createEfficiencySpectrum(
         lines = file.readlines()
         #Extract stellar temperature from std_star.txt file , for use in making blackbody
         star_kelvin = float(lines[0].replace('\n','').split()[3])
-        #Extract mag from std_star.txt file and convert to erg/cm2/s/A, for a rough flux scaling
+        #Extract mag from std_star.txt file
         #find out if a matching band mag exists in std_star.txt
         logging.info("Band = " + str(band))
         if band == 'K':
@@ -1185,9 +1185,9 @@ def createEfficiencySpectrum(
             logging.info("#####################################################################")
             logging.info("#####################################################################\n")
 
-            logging.info("star_kelvin="), star_kelvin
+            logging.info("star_kelvin=" + str(star_kelvin))
             star_mag = 1
-            logging.info("star_mag="), star_mag
+            logging.info("star_mag=" + str(star_mag))
 
         effspec(telluricDirectory, combined_extracted_1d_spectra, \
                 star_mag, star_kelvin, over)
@@ -1590,7 +1590,8 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     central_wavelength_index = np.where(bb_spectrum_wavelengths==min(bb_spectrum_wavelengths, key=lambda x:abs(x-central_wavelength)))
     # Define a function of wavelength and T...
     blackbodyFunction = lambda x, T: (2.*h*(c**2)*(x**(-5))) / ( (np.exp((h*c)/(x*k*T))) - 1 )
-    # Evaluate that function at each wavelength of the bb_spectrum_wavelengths array, at the temperature of the standard star.
+    # Evaluate that function at each wavelength of the bb_spectrum_wavelengths array,
+    # at the temperature of the standard star. Results in ergs/s/cm^2/Angstrom
     blackbodySpectrum = (blackbodyFunction(bb_spectrum_wavelengths*1e-10, T))*1e-7
 
     # Divide final telluric correction spectrum by blackbody spectrum.
