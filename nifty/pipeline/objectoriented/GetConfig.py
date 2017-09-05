@@ -10,7 +10,7 @@ from ..configobj.configobj import ConfigObj
 # Import custom Nifty functions.
 from ..nifsUtils import datefmt, printDirectoryLists, writeList, getParam, getUserInput
 
-class getConfig(object):
+class GetConfig(object):
     """
     A class to get configuration from the command line.
 
@@ -32,11 +32,12 @@ class getConfig(object):
         self.RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
         self.RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
-        self.args = name
+        self.args = args
         self.script = script
-
         if self.script == "linearPipeline":
             self.configFile = "config.cfg"
+
+        self.makeConfig()
 
     def makeConfig(self):
         """
@@ -57,7 +58,7 @@ class getConfig(object):
         # Ability to do a quick and dirty fully automatic data reduction with no user input
         self.parser.add_argument('-f', '--fullReductionPathOrProgramID', dest = 'fullReduction', default = False, action = 'store', help = 'Do a quick reduction from recipes/defaultConfig.cfg, specifying path to raw data or program ID.')
 
-        self.args = parser.parse_args(args)
+        self.args = self.parser.parse_args(self.args)
 
         self.interactive = self.args.interactive
         self.repeat = self.args.repeat
@@ -86,7 +87,7 @@ class getConfig(object):
             shutil.copy(self.RECIPES_PATH+'defaultConfig.cfg', './'+ self.configFile)
             # Update default config file with path to raw data or program ID.
             with open('./' + self.configFile, 'r') as self.config_file:
-                self.config = ConfigObj(config_file, unrepr=True)
+                self.config = ConfigObj(self.config_file, unrepr=True)
                 self.sortConfig = self.config['sortConfig']
                 if self.fullReduction[0] == "G":
                     # Treat it as a program ID.
@@ -110,7 +111,7 @@ class getConfig(object):
         logging.info("\nSaving data reduction parameters.")
         if os.path.exists(self.RUNTIME_DATA_PATH + self.configFile):
             os.remove(self.RUNTIME_DATA_PATH + self.configFile)
-        shutil.copy('./' + self.configFile, RUNTIME_DATA_PATH + self.configFile)
+        shutil.copy('./' + self.configFile, self.RUNTIME_DATA_PATH + self.configFile)
 
         # TODO(nat): fix this. It isn't recursively printing the dictionaries of values.
         logging.info("\nParameters for this data reduction as read from ./config.cfg:\n")

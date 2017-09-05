@@ -1451,7 +1451,8 @@ def write_line_positions(nextcur, var):
 #-------------------------------------------------------------------------------#
 
 def vega(spectrum, band, path, hlineinter, airmass, telluric_shift_scale_record, log, over):
-    """Use iraf.telluric to remove H lines from standard star, then remove
+    """
+    Use iraf.telluric to remove H lines from standard star, then remove
     normalization added by telluric with iraf.imarith.
 
     The extension for vega_ext.fits is specified from band (from header of
@@ -1597,7 +1598,6 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     # Divide final telluric correction spectrum by blackbody spectrum.
     final_telluric = astropy.io.fits.open('final_tel_no_hlines_no_norm'+band+'.fits')
     # Multiply by the gain to go from ADU to counts.
-    final_telluric[0].data *= 2.8
     tel_bb = final_telluric[0].data/blackbodySpectrum
 
     # Calculate the f0 constant.

@@ -34,7 +34,8 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # TODO(nat): find a better way to do this.
-    nifty.linearPipeline.start(sys.argv[1:])
+    if 'linearPipeline' in sys.argv[1]:
+        nifty.linearPipeline.start(sys.argv[2:])
     """elif 'nifsSort' in sys.argv:
         nifty.nifsSort.start()                            # TODO(nat): make these able parse input on their own.
     elif 'nifsBaselineCalibration' in sys.argv:           # Right now they assume config is in ./config.cfg...

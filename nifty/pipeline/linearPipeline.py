@@ -40,7 +40,9 @@ import nifsBaselineCalibration as nifsBaselineCalibration
 import nifsReduce as nifsReduce
 import nifsUtils as nifsUtils
 # Import config parsing.
+# Import config parsing.
 from configobj.configobj import ConfigObj
+from objectoriented.getConfig import GetConfig
 # Import custom Nifty functions.
 from nifsUtils import datefmt, printDirectoryLists, writeList, getParam, getUserInput
 
@@ -129,75 +131,9 @@ def start(args):
     # Make sure to change this if you change the default logfile.
     logging.info('The log file is Nifty.log.')
 
-    # TODO(nat): This all seems a bit clunky. Is there a better way to do this?
-    # Parse command line options.
-    parser = argparse.ArgumentParser(description='Do a Gemini NIFS data reduction.')
-    # Create a configuration file interactively
-    parser.add_argument('-i', '--interactive', dest = 'interactive', default = False, action = 'store_true', help = 'Create a config.cfg file interactively.')
-    # Ability to repeat the last data reduction
-    parser.add_argument('-r', '--repeat', dest = 'repeat', default = False, action = 'store_true', help = 'Repeat the last data reduction, loading saved reduction parameters from runtimeData/config.cfg.')
-    # Ability to load a built-in configuration file (recipe)
-    parser.add_argument('-l', '--recipe', dest = 'recipe', action = 'store', help = 'Load data reduction parameters from the a provided recipe. Default is default_input.cfg.')
-    # Ability to load your own configuration file
-    parser.add_argument(dest = 'inputfile', nargs='?', action = 'store', help = 'Load data reduction parameters from <inputfile>.cfg.')
-    # Ability to do a quick and dirty fully automatic data reduction with no user input
-    parser.add_argument('-f', '--fullReductionPathOrProgramID', dest = 'fullReduction', default = False, action = 'store', help = 'Do a quick reduction from recipes/defaultConfig.cfg, specifying path to raw data or program ID.')
-
-    args = parser.parse_args(args)
-
-    interactive = args.interactive
-    repeat = args.repeat
-    fullReduction = args.fullReduction
-    inputfile = args.inputfile
-
-    if inputfile:
-        # Load input from a .cfg file user specified at command line.
-        if inputfile != "config.cfg" and os.path.exists('./config.cfg'):
-            os.remove('./config.cfg')
-            shutil.copy(inputfile, './config.cfg')
-        logging.info("\nPipeline configuration for this data reduction was read from " + str(inputfile) + \
-        ", and if not named config.cfg, copied to ./config.cfg.")
-
-    # Check if the user specified at command line to repeat the last Reduction, do a full default data reduction from a
-    # recipe file or do a full data reduction from a handmade file.
-    if interactive:
-        # Get user input interactively.
-        logging.info('\nInteractively creating a ./config.cfg configuration file.')
-        fullReduction = getUserInput()
-
-    if fullReduction:
-        # Copy default input and use it
-        if os.path.exists('./config.cfg'):
-            os.remove('./config.cfg')
-        shutil.copy(RECIPES_PATH+'defaultConfig.cfg', './config.cfg')
-        # Update default config file with path to raw data or program ID.
-        with open('./config.cfg', 'r') as config_file:
-            config = ConfigObj(config_file, unrepr=True)
-            sortConfig = config['sortConfig']
-            if fullReduction[0] == "G":
-                # Treat it as a program ID.
-                sortConfig['program'] = fullReduction
-                sortConfig['rawPath'] = ""
-            else:
-                # Else treat it as a path.
-                sortConfig['program'] = ""
-                sortConfig['rawPath'] = fullReduction
-        with open('./config.cfg', 'w') as outfile:
-            config.write(outfile)
-
-        logging.info("\nData reduction parameters for this reduction were copied from recipes/defaultConfig.cfg to ./config.cfg.")
-
-    if repeat:
-        logging.info("\nOverwriting ./config.cfg with saved config from most recent data reduction.")
-        if os.path.exists('./config.cfg'):
-            os.remove('./config.cfg')
-        shutil.copy(RUNTIME_DATA_PATH+'config.cfg', './config.cfg')
-
-    # Print data reduction parameters for a user's peace-of-mind.
-    logging.info("\nSaving data reduction parameters.")
-    if os.path.exists(RUNTIME_DATA_PATH+'config.cfg'):
-        os.remove(RUNTIME_DATA_PATH+'config.cfg')
-    shutil.copy('./config.cfg', RUNTIME_DATA_PATH+'config.cfg')
+    # Read or write a configuration file, interactively or from some defaults.
+    # Second argument is the name of the current script. Used to get script-dependent configuration.
+    GetConfig(args, "linearPipeline")
 
     # TODO(nat): fix this. It isn't recursively printing the dictionaries of values.
     logging.info("\nParameters for this data reduction as read from ./config.cfg:\n")
