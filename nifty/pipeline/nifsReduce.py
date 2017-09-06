@@ -1582,14 +1582,7 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     # Starting at wstart, at intervals of wdelt, write a wavelength into each element of bb_spectrum_wavelengths.
     for i in range(len(bb_spectrum_wavelengths)):
         bb_spectrum_wavelengths[i] = wstart+(i*wdelt)
-    # Find the central wavelength of the original nfextracted and combined 1d spectra.
-    # We will use this later to scale the ouput spectrum of dividing by the blackbody back to the units of
-    # the original observed star spectrum.
-    central_wavelength = combined_spectra_file[0].header['WAVELENG']
-    # Find the index of of the blackbody spectrum array (and hence also the final efficiency
-    # spectrum array) that corresponds to the central wavelength.
-    central_wavelength_index = np.where(bb_spectrum_wavelengths==min(bb_spectrum_wavelengths, key=lambda x:abs(x-central_wavelength)))
-    # Define a function of wavelength and T...
+    # Plank function. Results in J/s/m^2/str/m
     blackbodyFunction = lambda x, T: (2.*h*(c**2)*(x**(-5))) / ( (np.exp((h*c)/(x*k*T))) - 1 )
     # Evaluate that function at each wavelength of the bb_spectrum_wavelengths array,
     # at the temperature of the standard star. Results in ergs/s/cm^2/Angstrom
@@ -1600,31 +1593,15 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     # Multiply by the gain to go from ADU to counts.
     tel_bb = final_telluric[0].data/blackbodySpectrum
 
-    # Calculate the f0 constant.
-    # Begin to create the function to calculate the f0 constant.
-    f0FunctionIncomplete = lambda p, T: p[0]*(np.log(T)**2)+p[1]*np.log(T)+p[2]
-
     # Look up the coefficients for the appropriate grating and filter.
     if 'HK' in telfilter:
-        coeff =[1.97547589e-02, -4.19035839e-01, -2.30083083e+01]
-        central_wavelength = 22000.
+        f0 = 5.09501198044e-12
     if 'JH' in telfilter:
-        coeff = [1.97547589e-02, -4.19035839e-01,  -2.30083083e+01]
-        central_wavelength = 15700.
+        f0 = 1.60036273943e-11
     if 'ZJ' in telfilter:
-        coeff = [0.14903624, -3.14636068, -9.32675924]
-        central_wavelength = 11100.
+        f0 = 7.38127838152e-11
 
-    # Evaluate the function at the given temperature and coefficients to return a constant. Return e**result as the f0 constant.
-    f0 = np.exp(f0FunctionIncomplete(coeff, T))
-
-    logging.info(tel_bb)
-    logging.info(exptime)
-    logging.info((final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]]))
-    logging.info((10**(0.4*mag)))
-    logging.info((f0)**-1)
-
-    effspec =  (tel_bb/exptime)*(final_telluric[0].data[central_wavelength_index[0]]/tel_bb[central_wavelength_index[0]])*(10**(0.4*mag))*(f0)**-1
+    effspec = (tel_bb/exptime)*(10**(0.4*mag))*(f0/3.631e-20)
 
     # Modify our working copy of the original extracted 1d spectrum. Note though that we aren't permanently writing these changes to disk.
     combined_spectra_file[1].data = effspec
