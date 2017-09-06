@@ -213,6 +213,7 @@ def start():
                 if manualMode:
                     a = raw_input("About to enter step 1: locate the spectrum.")
                 getShift(calflat, over, log)
+                print os.getcwd()
                 print "\n###################################################################"
                 print ""
                 print "    STEP 1: Locate the Spectrum (Determine the shift to the MDF) - COMPLETED"
