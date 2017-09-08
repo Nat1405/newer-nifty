@@ -784,5 +784,248 @@ def MEFarithOLD(MEF, image, out, op, result):
     iraf.fxcopy(input=MEF+'[0],'+out, output = result)
     iraf.hedit(result+'[1]', field = 'EXTNAME', value = 'SCI', add = 'yes', verify = 'no')
     iraf.hedit(result+'[1]', field='EXTVER', value='1', add='yes', verify='no')
-    
+
 # ---------------------------------------------------------------------------- #
+
+# old telluric and flux calibration code
+
+#--------------------------------------------------------------------------------------------------------------------------------#
+
+def applyTelluricPython(over):
+    """Python method to divide each spaxel by an efficiency spectrum.
+    Assumes function is called from a science observation directory.
+    Args:
+        over(bool): overwite old files.
+    """
+
+    """TODO(nat): implement this old code from makeCube. I think it makes more
+    sense to be placed somewhere in here.
+
+    hdulist = astropy.io.fits.open('c'+pre+frame+'.fits', mode = 'update')
+    #            hdulist.info()
+    exptime = hdulist[0].header['EXPTIME']
+    cube = hdulist[1].data
+    gain = 2.8
+    cube_calib = cube / (exptime * gain)
+    hdulist[1].data = cube_calib
+    hdulist.flush()
+    """
+
+    observationDirectory = os.getcwd()
+    # Get the efficiency spectrum we will use to do a telluric correction and flux calibration at the same time.
+    os.chdir('../Tellurics')
+    # Find a list of all the telluric observation directories.
+    telDirList_temp = glob.glob('*')
+    tempDir = os.path.split(observationDirectory)
+    telDirList = []
+    for telDir in telDirList_temp:
+        telDirList.append(tempDir[0]+'/Tellurics/'+telDir)
+    for telDir in telDirList:
+        # Change to the telluric directory.
+        os.chdir(telDir)
+        # Make sure an scienceMatchedTellsList is present.
+        try:
+            scienceMatchedTellsList = open('scienceMatchedTellsList', 'r').readlines()
+            scienceMatchedTellsList = [item.strip() for item in scienceMatchedTellsList]
+        except:
+            os.chdir('..')
+            continue
+
+        # Open the correction efficiency spectrum.
+        telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
+        logging.info("\nFound a finalcorrectionspectrum in\n"), telDir
+        # Open the final correction spectrum file as "telluric". Create a numpy array the same length
+        # as the telluric spectrum with each element a wavelength matching that of the telluric.
+
+        # Open the final correction spectrum so that we use its data.
+        telluric = astropy.io.fits.open(telluric+'.fits')
+        # Find the starting wavelength and the wavelength increment from the science header.
+        wstart = telluric[1].header['CRVAL1']
+        wdelt = telluric[1].header['CD1_1']
+        # Create a numpy array of zeros. We will use this to hold the efficiency spectrum.
+        effwave = np.zeros(2040)
+        # Create a wavelength array using the starting wavelength and the wavelength increment.
+        for i in range(2040):
+            effwave[i] = wstart+(wdelt*i)
+
+        # Open the efficiency spectrum as a numpy array.
+        effspec = telluric[1].data
+        # Store the airmass of the correction spectrum in telairmass.
+        telairmass = telluric[0].header['AIRMASS']
+
+        tempDir = observationDirectory.split(os.sep)
+        if tempDir[-1] in scienceMatchedTellsList:
+            os.chdir(observationDirectory)
+            logging.info("\nWorking to apply tellurics in:\n"+ str(observationDirectory))
+            scilist = glob.glob('c*.fits')
+            for frame in scilist:
+                # TODO: this will break if for some reason we don't do something like the sky subtraction... Perhaps we should
+                # make sure the prefix is correct before the function starts?
+                if frame.replace('ctfbrsn','').replace('.fits', '') in scienceMatchedTellsList:
+                    if os.path.exists(frame[0]+'p'+frame[1:]):
+                        if not over:
+                            logging.info('Output already exists and -over- not set - skipping telluric correction and flux calibration')
+                            continue
+                        if over:
+                            os.remove(frame[0]+'p'+frame[1:])
+                            pass
+                    logging.info("\nApplying python telluric correction to: \n"+ str(frame))
+                    np.set_printoptions(threshold=np.nan)
+
+                    # Read in cube data and create a 1D array "cubewave" of the wavelengths found in the cube.
+                    # Open a data cube with astropy.io.fits. Read the data header to find the starting wavelength and wavelength increment.
+                    # From readCube docstring:
+                    #       Create a 1D array with length equal to the spectral dimension of the cube.
+                    #    For each element in array, element[i] = starting wavelength + (i * wavelength increment).
+                    #    Returns:
+                    #        cube (object reference):   Reference to the opened data cube.
+                    #        cubewave (1D numpy array): array representing pixel-wavelength mapping of data cube.
+                    cube, cubewave = readCube(frame)
+
+                    # Interpolate a function using the telluric spectrum.
+                    # From scipy.interp1d help:
+                    #   interp1d(x,y)
+                    efficiencySpectrumFunction = interp1d(effwave, effspec, bounds_error = None, fill_value=0.)
+                    # Extend the function to allow extrapolation.
+                    extendedEfficiencySpectrumFunction = extrap1d(efficiencySpectrumFunction)
+                    # For each element of the cube wavelength array, a 1D numpy array holding wavelengths from a single spaxel of the cube, evaluate extrapolatedfunction(wavelength) and
+                    # store the result in the element.
+                    # Iterate over each element, ie, wavelength, of the cubes wavelength array.
+                    # evaluate f(wavelength) and store the result in that element.
+                    effspec = extendedEfficiencySpectrumFunction(cubewave)
+                    # Optional: plot things out.
+                    #plt.ion()
+                    #plt.figure(1)
+                    #plt.plot(effspec)
+
+                    exptime = cube[0].header['EXPTIME']
+
+                    # See if we should attempt an airmass correction.
+                    try:
+                        sciairmass = cube[0].header['AIRMASS']
+                        airmcor = True
+                    except:
+                        logging.info("No airmass found in header. No airmass correction being performed on "+ str(frame)+ " .\n")
+                        airmcor= False
+
+                    if airmcor:
+                        airmassCorrection = sciairmass/telairmass
+                        logging.info("\nDoing an airmass correction; correction factor is "+ str(airmassCorrection)+".")
+                        # If effspec[i] is between 0 and 1, apply an airmass correction by multiplying ln(effspec[i]) by the correction factor.
+                        for i in range(len(effspec)):
+                            if effspec[i]>0. and effspec[i]<1.:
+                                effspec[i] = np.log(effspec[i])
+                                effspec[i] *= airmassCorrection
+                                effspec[i] = np.exp(effspec[i])
+
+                    plt.plot(effspec,"r--")
+                    # Divide each spectrum in the cubedata array by the efficiency spectrum*exptime.
+                    for i in range(cube[1].header['NAXIS2']):         # NAXIS2 is the y axis of the final cube.
+                        for j in range(cube[1].header['NAXIS1']):     # NAXIS1 is the x axis of the final cube.
+                            cube[1].data[:,i,j] /= (effspec*exptime)  # For each y and x, divide entire spectrum by effspec*exptime.
+
+                    # Write the corrected cube to a new file with a "cp" prefix, "p" for "python corrected".
+                    cube.writeto('cp'+frame[1:], output_verify='ignore')
+
+    # Make sure we exit in the right directory.
+    os.chdir(observationDirectory)
+
+#--------------------------------------------------------------------------------------------------------------------------------#
+
+def applyTelluricIraf(scienceList, obsid, telinter, log, over):
+    """Corrects the data for telluric absorption features with iraf.nftelluric.
+    iraf.nftelluric is currently only run interactively. Output: -->atfbrsgn
+
+    NFTELLURIC
+
+    NFTELLURIC uses input science and a 1D spectrum of a telluric
+    calibrator to correct atmospheric absorption features.
+    """
+
+    observationDirectory = os.getcwd()
+    os.chdir('../Tellurics')
+    telDirList = glob.glob('*')
+
+    if telinter:
+        telinter = 'yes'
+    else:
+        telinter = 'no'
+
+    # Used for brighter objects.
+    for telDir in telDirList:
+        if 'obs' in telDir:
+            os.chdir(telDir)
+            if os.path.exists('scienceMatchedTellsList'):
+                scienceMatchedTellsList = open("scienceMatchedTellsList", "r").readlines()
+                scienceList = [frame.strip() for frame in scienceMatchedTellsList]
+            else:
+                os.chdir('..')
+                continue
+            try:
+                telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
+            except:
+                logging.info("No telluric spectrum found in "), telDir
+                os.chdir('..')
+                continue
+            shutil.copy(telluric+'.fits', observationDirectory)
+
+            '''
+            continuum = str(open('continuumfile', 'r').readlines()[0]).strip()
+            bblist = open('blackbodyfile', 'r').readlines()
+            bblist = [frame.strip() for frame in bblist]
+            '''
+
+            os.chdir(observationDirectory)
+            iraffunctions.chdir(observationDirectory)
+            if obsid in scienceList:
+                index = scienceList.index(obsid)
+                i=index+1
+
+                while i<len(scienceList) and 'obs' not in scienceList[i]:
+                    if os.path.exists("atfbrsn"+scienceList[i]+".fits"):
+                        if over:
+                            iraf.delete("atfbrsgn"+scienceList[i]+".fits")
+                            if telinter == "yes":
+                                iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', calspec=telluric, fl_inter = telinter, logfile=log)
+                            else:
+                                iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', xc=15.0, yc=33.0, calspec=telluric, fl_inter = telinter, logfile=log)
+                        else:
+                            logging.info("Output file exists and -over not set - skipping nftelluric in applyTelluric")
+                    elif not os.path.exists('atfbrsn'+scienceList[i]+'.fits'):
+                        logging.info('\ntfbrsn'+scienceList[i])
+                        logging.info(telluric)
+                        logging.info(telinter)
+                        if telinter == "yes":
+                            iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', calspec=telluric, fl_inter = telinter, logfile=log)
+                        else:
+                            iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', xc=15.0, yc=33.0, calspec=telluric, fl_inter = telinter, logfile=log)
+
+                    '''
+                    # remove continuum fit from reduced science image
+                    if over:
+                        if os.path.exists("cont"+scienceList[i]+".fits"):
+                            iraf.delete("cont"+scienceList[i]+".fits")
+                        MEFarithpy('atfbrsgn'+scienceList[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+scienceList[i]+'.fits')
+                    elif not os.path.exists('cont'+scienceList[i]+'.fits'):
+                        MEFarithpy('atfbrsgn'+scienceList[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+scienceList[i]+'.fits')
+                    else:
+                        logging.info("Output file exists and -over not set - skipping continuum division in applyTelluric")
+
+                    # multiply science by blackbody
+                    for bb in bblist:
+                        objheader = astropy.io.fits.open(observationDirectory+'/'+scienceList[i]+'.fits')
+                        exptime = objheader[0].header['EXPTIME']
+                        if str(int(exptime)) in bb:
+                            if over:
+                                if os.path.exists('bbatfbrsgn'+scienceList[i]+'.fits'):
+                                    os.remove('bbatfbrsgn'+scienceList[i]+'.fits')
+                                MEFarithpy('cont'+scienceList[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrsgn'+scienceList[i]+'.fits')
+                            elif not os.path.exists('bbatfbrsgn'+scienceList[i]+'.fits'):
+                                MEFarithpy('cont'+scienceList[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrsgn'+scienceList[i]+'.fits')
+                            else:
+                                logging.info("Output file exists and -over- not set - skipping blackbody calibration in applyTelluric")
+                    '''
+                    i+=1
+        os.chdir('../Tellurics')
+
+#--------------------------------------------------------------------------------------------------------------------------------#

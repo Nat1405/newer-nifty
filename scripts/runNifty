@@ -36,6 +36,13 @@ if __name__ == '__main__':
     # TODO(nat): find a better way to do this.
     if 'linearPipeline' in sys.argv[1]:
         nifty.linearPipeline.start(sys.argv[2:])
+    if 'nifsBaselineCalibration' in sys.argv[1]:
+        nifty.nifsBaselineCalibration.start()
+    if 'nifsReduce' in sys.argv[1]:
+        if 'Telluric' in sys.argv[2]:
+            nifty.nifsReduce.start('Telluric')
+        elif 'Science' in sys.argv[2]:
+            nifty.nifsReduce.start('Science')
     """elif 'nifsSort' in sys.argv:
         nifty.nifsSort.start()                            # TODO(nat): make these able parse input on their own.
     elif 'nifsBaselineCalibration' in sys.argv:           # Right now they assume config is in ./config.cfg...

@@ -33,6 +33,7 @@ from astropy.io.fits import getdata, getheader
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy import arange, array, exp
+from scipy.ndimage.interpolation import shift
 import pylab as pl
 import matplotlib.pyplot as plt
 # Import config parsing.
@@ -432,7 +433,7 @@ def start(kind):
                 # For telluric data:
                 # Make a 1D telluric correction spectrum from reduced telluric data.
                 if kind=='Telluric':
-                    makeTelluric(tellist, log, over)
+                    extractStandardSpec(tellist, log, over)
                     logging.info("\n##############################################################################")
                     logging.info("")
                     logging.info("  STEP 5: Extract 1D Spectra and Make Combined Telluric")
@@ -474,7 +475,7 @@ def start(kind):
                 if manualMode:
                     a = raw_input("About to enter step 6.")
                 if kind == 'Telluric' and efficiencySpectrumCorrection:
-                    createEfficiencySpectrum(
+                    makeTelluricCorrection(
                         observationDirectory, path, continuuminter, hlineinter,
                         hline_method, spectemp, mag, log, over)
                     logging.info("\n##############################################################################")
@@ -725,7 +726,7 @@ def makeCube(pre, scienceFrameList, log, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def makeTelluric(tellist, log, over):
+def extractStandardSpec(tellist, log, over):
     """Extracts 1-D spectra with iraf.nfextract and combines them with iraf.gemcombine.
     iraf.nfextract is currently only done interactively. Output: -->xtfbrsn and gxtfbrsn
 
@@ -771,37 +772,142 @@ def makeTelluric(tellist, log, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def applyTelluricPython(over):
-    """Python method to divide each spaxel by an efficiency spectrum.
-    Assumes function is called from a science observation directory.
-    Args:
-        over(bool): overwite old files.
+def makeTelluricCorrection(
+    telluricDirectory, path, continuuminter, hlineinter, hline_method="vega", spectemp=9700,
+    mag, log="test.log", over=False):
+    """FLUX CALIBRATION
+    Consists of this start function and six required functions at the end of
+    this file.
+    """
+    """iraf.gemini(_doprint=0, motd="no")
+    iraf.gnirs(_doprint=0)
+    iraf.imutil(_doprint=0)
+    iraf.onedspec(_doprint=0)
+    iraf.nsheaders('nifs',Stdout='/dev/null')"""
+    # Overview of Telluric Correction procedure:
+    # We make a telluric correction by:
+    # Remove H-lines from combined 1D standard star spectrum.
+    # Divide by H-line corrected standard spectrum by continuum fit.
+    # We apply a telluric correction by:
+    # Dividing the cube by the correction spectrum (with iraf.telluric) to figure out the shift and scaling.
+    # Dividing again by the continuum to add a continuum shape back in.
+    # Telluric correction done.
+
+
+    # Overview of flux calibration procedure:
+    # Make a blackbody spectrum.
+    # Scale to the observed magnitude of the standard.
+    # Multiply telluric corrected target spectrum by this scaled blackbody.
+    # Done!
+    iraffunctions.chdir(telluricDirectory)
+
+    logging.info('I am starting to create telluric correction spectrum and blackbody spectrum')
+    logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')
+
+    # Open the combine extracted 1d spectrum.
+    try:
+        combined_extracted_1d_spectra = str(open('telluricfile', 'r').readlines()[0]).strip()
+    except:
+        logging.info("No telluricfile found in " + str(telluricDirectory) + "Skipping telluric correction and flux calibration.")
+        return
+    if not os.path.exists('scienceMatchedTellsList'):
+        logging.info("No scienceMatchedTellsList found in " + str(telluricDirectory))
+        return
+    telheader = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
+    grating = telheader[0].header['GRATING'][0]
+    RA = telheader[0].header['RA']
+    Dec = telheader[0].header['DEC']
+
+    # Make directory PRODUCTS above the Telluric observation directory
+    # telluric_hlines.txt is stored there.
+    if not os.path.exists('../PRODUCTS'):
+        os.mkdir('../PRODUCTS')
+
+    # Make pretty Right Ascensions and Declinations, to pass to SIMBAD.
+    if '-' in str(Dec):
+        coordinates = str(RA)+'d'+str(Dec)+'d'
+    else:
+        coordinates = str(RA)+'d+'+str(Dec)+'d'
+
+    # Get standard star spectral type, teff, and magnitude from the interwebs. Go forth, brave parser!
+    getStandardInfo(coordinates, path, spectemp, mag, grating)
+
+    logging.info("\n##############################################################################")
+    logging.info("")
+    logging.info("  STEP 6a - Find standard star information - COMPLETED ")
+    logging.info("")
+    logging.info("##############################################################################\n")
+
+    hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, airmass_std, log, over)
+
+    logging.info("\n##############################################################################")
+    logging.info("")
+    logging.info("  STEP 6b - Apply or do not apply hline correction to standard star - COMPLETED ")
+    logging.info("")
+    logging.info("##############################################################################\n")
+
+    # Fit a continuum from the standard star spectrum, saving both continuum and continuum divided standard spectrum.
+    fitContinuum(continuuminter, grating)
+    # Divide the standard star spectrum by the continuum to normalize it.
+    iraf.imarith('ftell_nolines', "/", 'fit', result='telluricCorrection',title='',divzero=0.0,hparams='',pixtype='',calctype='',verbose='no',noact='no',mode='al')
+
+    # Done deriving telluric correction. We have two new products:
+    # 1) A continuum-normalized telluric correction spectrum, telluricCorrection.fits, and
+    # 2) The continuum we used to normalize it, fit.fits.
+
+#--------------------------------------------------------------------------------------------------------------------------------#
+
+def applyTelluricCube(scienceFrameList):
+    """
+    Apply a telluric correction to each cube in a science directory.
+
+    TODO(nat): only uses one telluric correction per science observation. Fix this!
     """
 
-    """TODO(nat): implement this old code from makeCube. I think it makes more
-    sense to be placed somewhere in here.
+    # Store current directory.
+    # os.path.split(os.getcwd()) returns something like "obs20"
+    scienceObservation = os.path.split(os.getcwd())
+    # Final continuum divided telluric spectrum is now in ./correctionSpectra
 
-    hdulist = astropy.io.fits.open('c'+pre+frame+'.fits', mode = 'update')
-    #            hdulist.info()
-    exptime = hdulist[0].header['EXPTIME']
-    cube = hdulist[1].data
-    gain = 2.8
-    cube_calib = cube / (exptime * gain)
-    hdulist[1].data = cube_calib
-    hdulist.flush()
+    grating = "K"
+    telluricinter = "no"
+    # For each cube in uncorrectedCubes:
+    for item in scienceFrameList:
+        # Apply a telluric correction to an on-target part of the cube (to a 1D spectrum).
+        getTelluricSpec(item)
+        a = raw_input("Pause")
+        # Get shift and scale of spec from one part of the cube.
+        get1dSpecFromCube("ctfbrsn"+item+".fits")
+        a = raw_input("Pause")
+        print os.getcwd()
+        tellshift, scale = getShiftScale("telluricCorrection.fits", grating, telluricinter)
+        a = raw_input("Pause")
+        # Shift and scale the telluric correction spectrum.
+        shiftScaleSpec("telluricCorrection.fits", tellshift, scale)
+        a = raw_input("Pause")
+        # Divide every spectrum in the cube by the shifted continuum to add a continuum shape back in.
+        divideCubebyTelandContinuuum("ctfbrsn"+item+".fits", "shiftedScaledTelluric.fits", "fit.fits")
+        a = raw_input("Pause")
+        # Done! Now have a telluric-corrected science cube.
+        os.remove("telluricCorrection.fits")
+        os.remove("cubeslice.fits")
+        os.remove("shiftedScaledTelluric.fits")
+
+#--------------------------------------------------------------------------------------------------------------------------------#
+
+def getTelluricSpec(scienceObjectName):
     """
-
+    For a given science observation, copies appropriate telluric correction spectrum to current directory.
+    TODO(nat): have to be able to choose telluric spectrum that is closest in time!
+    """
     observationDirectory = os.getcwd()
     # Get the efficiency spectrum we will use to do a telluric correction and flux calibration at the same time.
     os.chdir('../Tellurics')
     # Find a list of all the telluric observation directories.
-    telDirList_temp = glob.glob('*')
-    tempDir = os.path.split(observationDirectory)
-    telDirList = []
+    telDirList_temp = glob.glob('obs*')
     for telDir in telDirList_temp:
-        telDirList.append(tempDir[0]+'/Tellurics/'+telDir)
-    for telDir in telDirList:
-        # Change to the telluric directory.
+        # Change to the telluric directory
+        print os.getcwd()
         os.chdir(telDir)
         # Make sure an scienceMatchedTellsList is present.
         try:
@@ -810,368 +916,156 @@ def applyTelluricPython(over):
         except:
             os.chdir('..')
             continue
-
-        # Open the correction efficiency spectrum.
-        telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
-        logging.info("\nFound a finalcorrectionspectrum in\n"), telDir
-        # Open the final correction spectrum file as "telluric". Create a numpy array the same length
-        # as the telluric spectrum with each element a wavelength matching that of the telluric.
-
-        # Open the final correction spectrum so that we use its data.
-        telluric = astropy.io.fits.open(telluric+'.fits')
-        # Find the starting wavelength and the wavelength increment from the science header.
-        wstart = telluric[1].header['CRVAL1']
-        wdelt = telluric[1].header['CD1_1']
-        # Create a numpy array of zeros. We will use this to hold the efficiency spectrum.
-        effwave = np.zeros(2040)
-        # Create a wavelength array using the starting wavelength and the wavelength increment.
-        for i in range(2040):
-            effwave[i] = wstart+(wdelt*i)
-
-        # Open the efficiency spectrum as a numpy array.
-        effspec = telluric[1].data
-        # Store the airmass of the correction spectrum in telairmass.
-        telairmass = telluric[0].header['AIRMASS']
-
-        tempDir = observationDirectory.split(os.sep)
-        if tempDir[-1] in scienceMatchedTellsList:
+        foundTelluricFlag = False
+        if scienceObjectName in scienceMatchedTellsList:
+            print "made it here"
+            # Open the correction efficiency spectrum.
+            if os.path.exists(observationDirectory + "/telluricCorrection.fits"):
+                os.remove(observationDirectory + "/telluricCorrection.fits")
+            shutil.copy("telluricCorrection.fits", observationDirectory)
+            if os.path.exists(observationDirectory+"/fit.fits"):
+                os.remove(observationDirectory+"/fit.fits")
+            shutil.copy("fit.fits", observationDirectory)
             os.chdir(observationDirectory)
-            logging.info("\nWorking to apply tellurics in:\n"+ str(observationDirectory))
-            scilist = glob.glob('c*.fits')
-            for frame in scilist:
-                # TODO: this will break if for some reason we don't do something like the sky subtraction... Perhaps we should
-                # make sure the prefix is correct before the function starts?
-                if frame.replace('ctfbrsn','').replace('.fits', '') in scienceMatchedTellsList:
-                    if os.path.exists(frame[0]+'p'+frame[1:]):
-                        if not over:
-                            logging.info('Output already exists and -over- not set - skipping telluric correction and flux calibration')
-                            continue
-                        if over:
-                            os.remove(frame[0]+'p'+frame[1:])
-                            pass
-                    logging.info("\nApplying python telluric correction to: \n"+ str(frame))
-                    np.set_printoptions(threshold=np.nan)
-
-                    # Read in cube data and create a 1D array "cubewave" of the wavelengths found in the cube.
-                    # Open a data cube with astropy.io.fits. Read the data header to find the starting wavelength and wavelength increment.
-                    # From readCube docstring:
-                    #       Create a 1D array with length equal to the spectral dimension of the cube.
-                    #    For each element in array, element[i] = starting wavelength + (i * wavelength increment).
-                    #    Returns:
-                    #        cube (object reference):   Reference to the opened data cube.
-                    #        cubewave (1D numpy array): array representing pixel-wavelength mapping of data cube.
-                    cube, cubewave = readCube(frame)
-
-                    # Interpolate a function using the telluric spectrum.
-                    # From scipy.interp1d help:
-                    #   interp1d(x,y)
-                    efficiencySpectrumFunction = interp1d(effwave, effspec, bounds_error = None, fill_value=0.)
-                    # Extend the function to allow extrapolation.
-                    extendedEfficiencySpectrumFunction = extrap1d(efficiencySpectrumFunction)
-                    # For each element of the cube wavelength array, a 1D numpy array holding wavelengths from a single spaxel of the cube, evaluate extrapolatedfunction(wavelength) and
-                    # store the result in the element.
-                    # Iterate over each element, ie, wavelength, of the cubes wavelength array.
-                    # evaluate f(wavelength) and store the result in that element.
-                    effspec = extendedEfficiencySpectrumFunction(cubewave)
-                    # Optional: plot things out.
-                    #plt.ion()
-                    #plt.figure(1)
-                    #plt.plot(effspec)
-
-                    exptime = cube[0].header['EXPTIME']
-
-                    # See if we should attempt an airmass correction.
-                    try:
-                        sciairmass = cube[0].header['AIRMASS']
-                        airmcor = True
-                    except:
-                        logging.info("No airmass found in header. No airmass correction being performed on "+ str(frame)+ " .\n")
-                        airmcor= False
-
-                    if airmcor:
-                        airmassCorrection = sciairmass/telairmass
-                        logging.info("\nDoing an airmass correction; correction factor is "+ str(airmassCorrection)+".")
-                        # If effspec[i] is between 0 and 1, apply an airmass correction by multiplying ln(effspec[i]) by the correction factor.
-                        for i in range(len(effspec)):
-                            if effspec[i]>0. and effspec[i]<1.:
-                                effspec[i] = np.log(effspec[i])
-                                effspec[i] *= airmassCorrection
-                                effspec[i] = np.exp(effspec[i])
-
-                    plt.plot(effspec,"r--")
-                    # Divide each spectrum in the cubedata array by the efficiency spectrum*exptime.
-                    for i in range(cube[1].header['NAXIS2']):         # NAXIS2 is the y axis of the final cube.
-                        for j in range(cube[1].header['NAXIS1']):     # NAXIS1 is the x axis of the final cube.
-                            cube[1].data[:,i,j] /= (effspec*exptime)  # For each y and x, divide entire spectrum by effspec*exptime.
-
-                    # Write the corrected cube to a new file with a "cp" prefix, "p" for "python corrected".
-                    cube.writeto('cp'+frame[1:], output_verify='ignore')
-
-    # Make sure we exit in the right directory.
+            logging.info("\nUsing combined standard spectrum from " + str(os.getcwd()) + " for " + str(telDir))
+            foundTelluricFlag = True
+            break
+        else:
+            os.chdir('..')
+            continue
+    if not foundTelluricFlag:
+        logging.info("\nWARNING: No Telluric correction spectrum found for" + str(scienceObjectName))
     os.chdir(observationDirectory)
 
-#--------------------------------------------------------------------------------------------------------------------------------#
-
-def applyTelluricIraf(scienceList, obsid, telinter, log, over):
-    """Corrects the data for telluric absorption features with iraf.nftelluric.
-    iraf.nftelluric is currently only run interactively. Output: -->atfbrsgn
-
-    NFTELLURIC
-
-    NFTELLURIC uses input science and a 1D spectrum of a telluric
-    calibrator to correct atmospheric absorption features.
+def get1dSpecFromCube(inputcube):
     """
-
-    observationDirectory = os.getcwd()
-    os.chdir('../Tellurics')
-    telDirList = glob.glob('*')
-
-    if telinter:
-        telinter = 'yes'
-    else:
-        telinter = 'no'
-
-    # Used for brighter objects.
-    for telDir in telDirList:
-        if 'obs' in telDir:
-            os.chdir(telDir)
-            if os.path.exists('scienceMatchedTellsList'):
-                scienceMatchedTellsList = open("scienceMatchedTellsList", "r").readlines()
-                scienceList = [frame.strip() for frame in scienceMatchedTellsList]
-            else:
-                os.chdir('..')
-                continue
-            try:
-                telluric = str(open('finalcorrectionspectrum', 'r').readlines()[0]).strip()
-            except:
-                logging.info("No telluric spectrum found in "), telDir
-                os.chdir('..')
-                continue
-            shutil.copy(telluric+'.fits', observationDirectory)
-
-            '''
-            continuum = str(open('continuumfile', 'r').readlines()[0]).strip()
-            bblist = open('blackbodyfile', 'r').readlines()
-            bblist = [frame.strip() for frame in bblist]
-            '''
-
-            os.chdir(observationDirectory)
-            iraffunctions.chdir(observationDirectory)
-            if obsid in scienceList:
-                index = scienceList.index(obsid)
-                i=index+1
-
-                while i<len(scienceList) and 'obs' not in scienceList[i]:
-                    if os.path.exists("atfbrsn"+scienceList[i]+".fits"):
-                        if over:
-                            iraf.delete("atfbrsgn"+scienceList[i]+".fits")
-                            if telinter == "yes":
-                                iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', calspec=telluric, fl_inter = telinter, logfile=log)
-                            else:
-                                iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', xc=15.0, yc=33.0, calspec=telluric, fl_inter = telinter, logfile=log)
-                        else:
-                            logging.info("Output file exists and -over not set - skipping nftelluric in applyTelluric")
-                    elif not os.path.exists('atfbrsn'+scienceList[i]+'.fits'):
-                        logging.info('\ntfbrsn'+scienceList[i])
-                        logging.info(telluric)
-                        logging.info(telinter)
-                        if telinter == "yes":
-                            iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', calspec=telluric, fl_inter = telinter, logfile=log)
-                        else:
-                            iraf.nftelluric('tfbrsn'+scienceList[i], outprefix='a', xc=15.0, yc=33.0, calspec=telluric, fl_inter = telinter, logfile=log)
-
-                    '''
-                    # remove continuum fit from reduced science image
-                    if over:
-                        if os.path.exists("cont"+scienceList[i]+".fits"):
-                            iraf.delete("cont"+scienceList[i]+".fits")
-                        MEFarithpy('atfbrsgn'+scienceList[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+scienceList[i]+'.fits')
-                    elif not os.path.exists('cont'+scienceList[i]+'.fits'):
-                        MEFarithpy('atfbrsgn'+scienceList[i], '../Tellurics/'+telDir+'/'+continuum, 'divide', 'cont'+scienceList[i]+'.fits')
-                    else:
-                        logging.info("Output file exists and -over not set - skipping continuum division in applyTelluric")
-
-                    # multiply science by blackbody
-                    for bb in bblist:
-                        objheader = astropy.io.fits.open(observationDirectory+'/'+scienceList[i]+'.fits')
-                        exptime = objheader[0].header['EXPTIME']
-                        if str(int(exptime)) in bb:
-                            if over:
-                                if os.path.exists('bbatfbrsgn'+scienceList[i]+'.fits'):
-                                    os.remove('bbatfbrsgn'+scienceList[i]+'.fits')
-                                MEFarithpy('cont'+scienceList[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrsgn'+scienceList[i]+'.fits')
-                            elif not os.path.exists('bbatfbrsgn'+scienceList[i]+'.fits'):
-                                MEFarithpy('cont'+scienceList[i], '../Tellurics/'+telDir+'/'+bb, 'multiply', 'bbatfbrsgn'+scienceList[i]+'.fits')
-                            else:
-                                logging.info("Output file exists and -over- not set - skipping blackbody calibration in applyTelluric")
-                    '''
-                    i+=1
-        os.chdir('../Tellurics')
-
-#--------------------------------------------------------------------------------------------------------------------------------#
-
-def createEfficiencySpectrum(
-    telluricDirectory, path, continuuminter, hlineinter, hline_method, spectemp,
-    mag, log, over):
-    """FLUX CALIBRATION
-
-    Consists of this start function and six required functions at the end of
-    this file.
-
-
-    COMMAND LINE OPTIONS
-    If you wish to skip this script enter -g in the command line
-    Specify a spectral type or temperature with -e
-    Specify a magnitude with -f
-    Specify an H line fitting method with -l (default is vega)
-    Specify interactive H line fitting with -i (default inter=no)
-    Specify interactive continuum fitting with -y (def inter=no)
-
-    INPUT:
-    - reduced and combined standard star spectra
-
-    OUTPUT:
-    - reduced (H line and continuum fit) standard star spectra
-    - flux calibrated blackbody spectrum
-
-    Args:
-        telDirList: list of telluric directories.
-        continuuminter (boolean): Interactive continuum fitting. Specified with -y
-                                  at command line. Default False.
-        hlineinter (boolean):     Interactive H line fitting. Specified with -i at
-                                  command line. Default False.
-        hline_method (string):    Method for removing H lines from the telluric spectra.
-                                  Specified with -l or --hline at command line. Default is
-                                  vega and choices are vega, linefitAuto, linefitManual,
-                                  vega_tweak, linefit_tweak, and none.
-        spectemp:                 Spectral type or temperature. Specified at command line with -e or --stdspectemp.
-        mag:                      The IR magnitude of the standard star.
-                                  Specified at command line with -f or --stdmag.
-        over:                     overwrite old files.
+    Turn a cube into a 1D spec, used to find shift and scale values of telluric spectrum.
+    Currently: Extracts 1D spectra from center of cube.
     """
+    cube = astropy.io.fits.open(inputcube)
+    cubeheader = cube[1].header
+    cubeslice = cube[1].data[:,30,30]
+    # Create a PrimaryHDU object to encapsulate the data and header.
+    hdu = astropy.io.fits.PrimaryHDU(cubeslice)
+    hdu.header = cubeheader
+    # Modify the cd1_1 and CRVAL1 values; this adds the wavelength calibration to the correct cube dimension.
+    hdu.header['CRVAL1'] = hdu.header['CRVAL3']
+    hdu.header['CD1_1'] = hdu.header['CD3_3']
+    if os.path.exists('cubeslice.fits'):
+        os.remove('cubeslice.fits')
+    # Write the spectrum and header to a new .fits file.
+    hdu.writeto('cubeslice.fits', output_verify="ignore")
 
-    iraf.gemini(_doprint=0, motd="no")
-    iraf.gnirs(_doprint=0)
-    iraf.imutil(_doprint=0)
-    iraf.onedspec(_doprint=0)
-    iraf.nsheaders('nifs',Stdout='/dev/null')
+def getShiftScale(standardspectra, grating, telluricinter, airmass_target=1.0):
+    """
+    Use iraf.telluric() to get the best shift and scale of a telluric correction spectrum.
+    """
+    if os.path.exists('oneDcorrected.fits'):
+        os.remove('oneDcorrected.fits')
+    print os.path.exists('cubeslice.fits')
+    tell_info = iraf.telluric(input='cubeslice.fits[0]',output='oneDcorrected.fits',cal=standardspectra+"[0]",airmass=airmass_target,answer='yes',ignoreaps='yes',xcorr='yes',tweakrms='yes',inter=telluricinter,sample="*",threshold=0.1,lag=3,shift=0.0,dshift=0.1,scale=1.0,dscale=0.1, offset=1,smooth=1,cursor='',mode='al',Stdout=1)
+    # Get shift and scale from the list of values iraf.telluric() returns.
+    # Sample tell_info:
+    # ['cubeslice.fits[0]: norm.fits[1]: cubeslice.fits[0]: dshift 5.', 'window:again:window:window:again:window:window:again:window:TELLURIC:',
+    # '  Output: vtella - HE1353-1917', '  Input: cubeslice.fits[0] - HE1353-1917', '
+    # Calibration: norm.fits[1] - Hip70765', '  Tweak: shift = 59.12, scale = 1.323,
+    # normalization = 0.9041', '  WARNING: 3 pixels outside of calibration limits']
+    tellshift = 0.
+    scale = 1.0
+    for i in range(len(tell_info)):
+        # Now string looks like '  Tweak: shift = 59.12, scale = 1.323, normalization = 0.9041'
+        if "Tweak" in tell_info[i]:
+            # Remove the first 9 characters,
+            temp = tell_info[i][9:]
+            # Split into a list; now it looks like '['shift', '=', '59.12,', 'scale', '=', '1.323,', 'normalization', '=', '0.9041']'
+            temp = temp.split()
+            # Index two is the shift value with a trailing comma, index 5 is the scale value with a trailing comma.
+            # Remove trailing comma.
+            tellshift = temp[2].replace(',', '')
+            # Turn it into a float.
+            tellshift = float(tellshift) # Convert to a clean float
+            # Do the same for the scale.
+            scale = temp[5].replace(',', '')
+            scale = float(scale)
+    return tellshift, scale
 
-    iraffunctions.chdir(telluricDirectory)
+def shiftScaleSpec(inputspec, tellshift, scale):
+    """
+    Shifts and scales a spectrum using scipy.
+    Replaces overflow with 1.
+    """
+    spectrum = astropy.io.fits.open(inputspec)
+    spectrumData = spectrum[0].data
+    # Shift using SciPy, substituting 1 where data overflows.
+    spectrumData = shift(spectrumData, -1*tellshift, cval=1.)
+    # Scale by simple multiplication; 1D spectrum times a scalar.
+    spectrumData = spectrumData * scale
+    spectrum[0].data = spectrumData
+    # Write to a new file;
+    if os.path.exists("shiftedScaledTelluric.fits"):
+        os.remove("shiftedScaledTelluric.fits")
+    spectrum.writeto("shiftedScaledTelluric.fits")
 
-    logging.info(' I am starting to create telluric correction spectrum and blackbody spectrum')
-    logging.info('I am starting to create telluric correction spectrum and blackbody spectrum ')
+def divideCubebyTelandContinuuum(inputcube, telluricSpec, continuumSpec):
+    """
+    Divide every element of a data cube by the derived telluric correction spectrum.
+    """
+    # Open the data cube.
+    cube = astropy.io.fits.open(inputcube)
+    # Open the shifted, scaled telluric correction spectrum.
+    telluricSpec = astropy.io.fits.open(telluricSpec)
+    # Open the continuum fit to the cube.
+    continuumSpec = astropy.io.fits.open(continuumSpec)
+    # Divide each spectrum in the cubedata array by the telluric correction spectrum.
+    for i in range(cube[1].header['NAXIS2']):         # NAXIS2 is the y axis of the final cube.
+        for j in range(cube[1].header['NAXIS1']):     # NAXIS1 is the x axis of the final cube.
+            cube[1].data[:,i,j] /= (telluricSpec[0].data)
+            cube[1].data[:,i,j] /= (continuumSpec[0].data)
+    # Write the corrected cube to a new file with a "cp" prefix, "p" for "python corrected".
+    if os.path.exists("cp"+inputcube):
+        os.remove("cp"+inputcube)
+    cube.writeto('cp'+inputcube, output_verify='ignore')
 
-    # open and define standard star spectrum and its relevant header keywords
-    try:
-        combined_extracted_1d_spectra = str(open('telluricfile', 'r').readlines()[0]).strip()
-    except:
-        logging.info("No telluricfile found in "), telluricDirectory
-        return
-    if not os.path.exists('scienceMatchedTellsList'):
-        logging.info("No scienceMatchedTellsList found in "), telluricDirectory
-        return
 
 
-    telheader = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
-    band = telheader[0].header['GRATING'][0]
-    RA = telheader[0].header['RA']
-    Dec = telheader[0].header['DEC']
-    airmass_std = telheader[0].header['AIRMASS']
-    temp1 = os.path.split(telluricDirectory)
-    temp2 = os.path.split(temp1[0])
-    # make directory PRODUCTS above the Telluric observation directory
-    # telluric_hlines.txt is stored there
-    if not os.path.exists(temp1[0]+'/PRODUCTS'):
-        os.mkdir(temp1[0]+'/PRODUCTS')
 
-    # defines 'name' that is passed to mag2mass
-    if '-' in str(Dec):
-        name = str(RA)+'d'+str(Dec)+'d'
-    else:
-        name = str(RA)+'d+'+str(Dec)+'d'
 
-    # find standard star spectral type, temperature, and magnitude
-    mag2mass(name, path, spectemp, mag, band)
 
-    logging.info("\n##############################################################################")
-    logging.info("")
-    logging.info("  STEP 6a - Find standard star information - COMPLETED ")
-    logging.info("")
-    logging.info("##############################################################################\n")
 
-    # File for recording shift/scale from calls to "telluric"
-    telluric_shift_scale_record = open('telluric_hlines.txt', 'w')
 
-    # Remove H lines from standard star correction spectrum
-    no_hline = False
-    if os.path.exists("final_tel_no_hlines_no_norm"+band+'.fits'):
-        if over:
-            iraf.delete("final_tel_no_hlines_no_norm"+band+'.fits')
-        else:
-            no_hline = True
-            logging.info("Output file exists and -over- not set - skipping H line removal")
 
-    if hline_method == "vega" and not no_hline:
-        vega(combined_extracted_1d_spectra, band, path, hlineinter, airmass_std, telluric_shift_scale_record, log, over)
 
-    if hline_method == "linefitAuto" and not no_hline:
-        linefitAuto(combined_extracted_1d_spectra, band)
 
-    if hline_method == "linefitManual" and not no_hline:
-        linefitManual(combined_extracted_1d_spectra+'[sci,1]', band)
 
-    if hline_method == "vega_tweak" and not no_hline:
-        #run vega removal automatically first, then give user chance to interact with spectrum as well
-        vega(combined_extracted_1d_spectra,band, path, hlineinter, airmass_std, telluric_shift_scale_record, log, over)
-        linefitManual("final_tel_no_hlines_no_norm"+band, band)
 
-    if hline_method == "linefit_tweak" and not no_hline:
-        #run Lorentz removal automatically first, then give user chance to interact with spectrum as well
-        linefitAuto(combined_extracted_1d_spectra,band)
-        linefitManual("final_tel_no_hlines_no_norm"+band, band)
 
-    if hline_method == "none":
-        #need to copy files so have right names for later use
-        iraf.imcopy(input=combined_extracted_1d_spectra+'[sci,'+str(1)+']', output="final_tel_no_hlines_no_norm"+band, verbose='no')
 
-    logging.info("\n##############################################################################")
-    logging.info("")
-    logging.info("  STEP 6b - Apply or do not apply hline correction to standard star - COMPLETED ")
-    logging.info("")
-    logging.info("##############################################################################\n")
 
-    # make a list of exposure times from the science images that use this standard star spectrum for the telluric correction
-    # used to make flux calibrated blackbody spectra
-    scienceMatchedTellsList = open('scienceMatchedTellsList', 'r').readlines()
-    scienceMatchedTellsList = [frame.strip() for frame in scienceMatchedTellsList]
-    exptimelist = []
-    for item in scienceMatchedTellsList:
-        if 'obs' in item:
-            os.chdir(telluricDirectory)
-            os.chdir('../../'+item)
-        else:
-            objheader = astropy.io.fits.open(item+'.fits')
-            exptime = objheader[0].header['EXPTIME']
-            if not exptimelist or exptime not in exptimelist:
-                exptimelist.append(int(exptime))
 
-    os.chdir(telluricDirectory)
+
+
+
+def makeFluxCal():
+    """
+    # This looks more like flux calibration code.........
     for tgt_exp in exptimelist:
         # Make blackbody spectrum to be used in nifsScience.py
         file = open('std_star.txt','r')
         lines = file.readlines()
         #Extract stellar temperature from std_star.txt file , for use in making blackbody
-        star_kelvin = float(lines[0].replace('\n','').split()[3])
+        # star_kelvin = float(lines[0].replace('\n','').split()[3])
+        # Just use A0V star temperature for now
+        star_kelvin = 9700
         #Extract mag from std_star.txt file
-        #find out if a matching band mag exists in std_star.txt
-        logging.info("Band = " + str(band))
-        if band == 'K':
+        #find out if a matching grating mag exists in std_star.txt
+        logging.info("Band = " + str(grating))
+        if grating == 'K':
             star_mag = lines[0].replace('\n','').split()[2]
             star_mag = float(star_mag)
-        elif band == 'H':
+        elif grating == 'H':
             star_mag = lines[1].replace('\n','').split()[2]
             star_mag = float(star_mag)
-        elif band == 'J':
+        elif grating == 'J':
             star_mag = lines[2].replace('\n','').split()[2]
             star_mag = float(star_mag)
         else:
@@ -1179,7 +1073,7 @@ def createEfficiencySpectrum(
             logging.info("\n#####################################################################")
             logging.info("#####################################################################")
             logging.info("")
-            logging.info("     WARNING in nifsReduce: No " + str(band) + " band magnitude found for this star.")
+            logging.info("     WARNING in nifsReduce: No " + str(grating) + " grating magnitude found for this star.")
             logging.info("                            No relative flux calibration will be performed.")
             logging.info("")
             logging.info("#####################################################################")
@@ -1190,7 +1084,7 @@ def createEfficiencySpectrum(
             logging.info("star_mag=" + str(star_mag))
 
         effspec(telluricDirectory, combined_extracted_1d_spectra, \
-                star_mag, star_kelvin, over)
+                star_mag, star_kelvin, over)"""
 
 
 
@@ -1244,12 +1138,42 @@ def readCube(cube):
 
     return cube, cubewave
 
+#--------------------------------------------------------------------------------------------------------------------------------#
+
+def fitContinuum(continuuminter, grating):
+    """
+    Fit a continuum to the telluric correction spectrum to normalize it. The continuum
+    fitting regions were derived by eye and can be improved.
+
+    Results are in fit<Grating>.fits
+    """
+    # These were found to fit the curves well by hand. You can probably improve them; feel free to fiddle around!
+    if grating == "K":
+        order = 5
+        sample = "20279:20395,20953:24283"
+    elif grating == "J":
+        order = 3
+        sample = "*"
+    elif grating == "H":
+        order = 5
+        sample = "*"
+    elif grating == "Z":
+        order = 5
+        sample = "*"
+    if os.path.exists("fit.fits"):
+        os.remove("fit.fits")
+    iraf.continuum(input='final_tel_no_hlines_no_norm',output='fit',ask='yes',lines='*',bands='1',type="fit",replace='no',\
+    wavescale='yes',logscale='no',override='no',listonly='no',logfiles='',\
+    inter=continuuminter,sample=sample,naverage=1,func='spline3',order=order,low_rej=1.0,high_rej=3.0,\
+    niterate=2,grow=1.0,markrej='yes',graphics='stdgraph',cursor='',mode='ql'
+    )
+
 
 ##################################################################################################################
 #                                       FLUX CALIBRATION FUNCTIONS                                               #
 ##################################################################################################################
 
-def mag2mass(name, path, spectemp, mag, band):
+def getStandardInfo(name, path, spectemp, mag, band):
     """Find standard star spectral type, temperature, and magnitude. Write results
        to std_star.txt in cwd.
 
@@ -1310,7 +1234,6 @@ def mag2mass(name, path, spectemp, mag, band):
         html2 = html2.replace(' ','')
         search_error = str(html2.split('\n'))
 
-
         #Exit if the lookup found nothing.
         if 'Noastronomicalobjectfound' in search_error:
             logging.info("ERROR: no object was found at the coordinates you entered. You'll need to supply information in a file; see the manual for instructions.")
@@ -1350,7 +1273,6 @@ def mag2mass(name, path, spectemp, mag, band):
             if count > 0:
                 logging.info("ERROR: problem with SIMBAD output. You'll need to supply the spectral type or temperature in the command line prompt.")
                 sys.exit()
-
 
         if magfind:
             for line in html2:
@@ -1423,6 +1345,51 @@ def mag2mass(name, path, spectemp, mag, band):
 
 #-------------------------------------------------------------------------------#
 
+def hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, hline_method, log, over, airmass_std=1.0):
+    """
+    Remove hydrogen lines from the spectrum of a telluric standard,
+    using a model of vega's atmosphere.
+
+    """
+
+    # File for recording shift/scale from calls to "telluric"
+    telluric_shift_scale_record = open('telluric_hlines.txt', 'w')
+
+    # Remove H lines from standard star correction spectrum
+    no_hline = False
+    if os.path.exists("final_tel_no_hlines_no_norm"+grating+'.fits'):
+        if over:
+            iraf.delete("final_tel_no_hlines_no_norm"+grating+'.fits')
+        else:
+            no_hline = True
+            logging.info("Output file exists and -over- not set - skipping H line removal")
+
+    if hline_method == "vega" and not no_hline:
+        vega(combined_extracted_1d_spectra, grating, path, hlineinter, telluric_shift_scale_record, log, over)
+
+    if hline_method == "linefitAuto" and not no_hline:
+        linefitAuto(combined_extracted_1d_spectra, grating)
+
+    if hline_method == "linefitManual" and not no_hline:
+        linefitManual(combined_extracted_1d_spectra+'[sci,1]', grating)
+
+    if hline_method == "vega_tweak" and not no_hline:
+        #run vega removal automatically first, then give user chance to interact with spectrum as well
+        vega(combined_extracted_1d_spectra,grating, path, hlineinter, telluric_shift_scale_record, log, over)
+        linefitManual("final_tel_no_hlines_no_norm"+grating, grating)
+
+    if hline_method == "linefit_tweak" and not no_hline:
+        #run Lorentz removal automatically first, then give user chance to interact with spectrum as well
+        linefitAuto(combined_extracted_1d_spectra,grating)
+        linefitManual("final_tel_no_hlines_no_norm"+grating, grating)
+
+    if hline_method == "none":
+        #need to copy files so have right names for later use
+        iraf.imcopy(input=combined_extracted_1d_spectra+'[sci,'+str(1)+']', output="final_tel_no_hlines_no_norm"+grating, verbose='no')
+
+#-------------------------------------------------------------------------------#
+
+
 def write_line_positions(nextcur, var):
     """Write line x,y info to file containing Lorentz fitting commands for bplot
 
@@ -1450,7 +1417,7 @@ def write_line_positions(nextcur, var):
 
 #-------------------------------------------------------------------------------#
 
-def vega(spectrum, band, path, hlineinter, airmass, telluric_shift_scale_record, log, over):
+def vega(spectrum, band, path, hlineinter, telluric_shift_scale_record, log, over, airmass=1.0):
     """
     Use iraf.telluric to remove H lines from standard star, then remove
     normalization added by telluric with iraf.imarith.
@@ -1472,37 +1439,38 @@ def vega(spectrum, band, path, hlineinter, airmass, telluric_shift_scale_record,
     """
     if band=='K':
         ext = '1'
+        sample = "21537:21778"
     if band=='H':
         ext = '2'
+        sample = "16537:17259"
     if band=='J':
         ext = '3'
+        sample = "11508:13492"
     if band=='Z':
         ext = '4'
-    if os.path.exists("tell_nolines"+band+".fits"):
+    if os.path.exists("tell_nolines.fits"):
             if over:
-                os.remove("tell_nolines"+band+".fits")
-                tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=RUNTIME_DATA_PATH+'vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
+                os.remove("tell_nolines.fits")
+                tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines', cal= RUNTIME_DATA_PATH+'vega_ext.fits['+ext+']', xcorr='yes', tweakrms='yes', airmass=airmass, inter=hlineinter, sample=sample, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
             else:
                 logging.info("Output file exists and -over not set - skipping H line correction")
     else:
-        tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines'+band, cal=RUNTIME_DATA_PATH+'vega_ext.fits['+ext+']', answer='yes', ignoreaps='yes', xcorr='yes', airmass = airmass, tweakrms='yes', inter=hlineinter, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=1., dscale=0.05, offset=0, smooth=1, cursor='', mode='al', Stdout=1)
+        tell_info = iraf.telluric(input=spectrum+"[1]", output='tell_nolines', cal= RUNTIME_DATA_PATH+'vega_ext.fits['+ext+']', xcorr='yes', tweakrms='yes', inter=hlineinter, airmass=airmass, sample=sample, threshold=0.1, lag=3, shift=0., dshift=0.05, scale=.75, dscale=0.05, offset=0., smooth=1, cursor='', mode='al', Stdout=1)
 
-    # record shift and scale info for future reference
-    telluric_shift_scale_record.write(str(tell_info)+'\n')
     # need this loop to identify telluric output containing warning about pix outside calibration limits (different formatting)
     if "limits" in tell_info[-1].split()[-1]:
         norm=tell_info[-2].split()[-1]
     else:
         norm=tell_info[-1].split()[-1]
 
-    if os.path.exists("final_tel_no_hlines_no_norm"+band+".fits"):
+    if os.path.exists("final_tel_no_hlines_no_norm.fits"):
         if over:
-            os.remove("final_tel_no_hlines_no_norm"+band+".fits")
-            iraf.imarith(operand1='tell_nolines'+band, op='/', operand2=norm, result='final_tel_no_hlines_no_norm'+band, title='', divzero=0.0, hparams='', pixtype='', calctype='', verbose='yes', noact='no', mode='al')
+            os.remove("final_tel_no_hlines_no_norm.fits")
+            iraf.imarith(operand1='tell_nolines', op='/', operand2=norm, result='final_tel_no_hlines_no_norm', title='', divzero=0.0, hparams='', pixtype='', calctype='', verbose='yes', noact='no', mode='al')
         else:
             logging.info("Output file exists and -over not set - skipping H line normalization")
     else:
-        iraf.imarith(operand1='tell_nolines'+band, op='/', operand2=norm, result='final_tel_no_hlines_no_norm'+band, title='', divzero=0.0, hparams='', pixtype='', calctype='', verbose='yes', noact='no', mode='al')
+        iraf.imarith(operand1='tell_nolines', op='/', operand2=norm, result='final_tel_no_hlines_no_norm', title='', divzero=0.0, hparams='', pixtype='', calctype='', verbose='yes', noact='no', mode='al')
 
 #-------------------------------------------------------------------------------#
 
