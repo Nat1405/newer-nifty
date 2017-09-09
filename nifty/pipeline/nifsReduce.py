@@ -872,19 +872,15 @@ def applyTelluricCube(scienceFrameList):
     for item in scienceFrameList:
         # Apply a telluric correction to an on-target part of the cube (to a 1D spectrum).
         getTelluricSpec(item)
-        a = raw_input("Pause")
         # Get shift and scale of spec from one part of the cube.
         get1dSpecFromCube("ctfbrsn"+item+".fits")
-        a = raw_input("Pause")
         print os.getcwd()
         tellshift, scale = getShiftScale("telluricCorrection.fits", grating, telluricinter)
-        a = raw_input("Pause")
-        # Shift and scale the telluric correction spectrum.
+        # Shift and scale the telluric correction spectrum and continuum fit to the telluric correction spectrum.
         shiftScaleSpec("telluricCorrection.fits", tellshift, scale)
-        a = raw_input("Pause")
+        shiftScaleSpec("fit.fits", tellshift, scale)
         # Divide every spectrum in the cube by the shifted continuum to add a continuum shape back in.
         divideCubebyTelandContinuuum("ctfbrsn"+item+".fits", "shiftedScaledTelluric.fits", "fit.fits")
-        a = raw_input("Pause")
         # Done! Now have a telluric-corrected science cube.
         shutil.move("telluricCorrection.fits", "telCor"+item+".fits")
         shutil.move("cubeslice.fits", "cubeslice"+item+".fits")
@@ -892,7 +888,7 @@ def applyTelluricCube(scienceFrameList):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def fluxCalibrate(scienceFrameList, grating):
+def fluxCalibrate(scienceFrameList):
     # This looks more like flux calibration code.........
     """
     Flux calibrate input science cubes.
