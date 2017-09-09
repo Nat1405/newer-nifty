@@ -154,7 +154,7 @@ def getUserInput():
         )
         # Set yes or no for interactive the h line removal, telluric correction, and continuum fitting
 
-        # Disabled for now because of bugs in interactive Pyraf tasks.
+        # Disabled (for now!) because of bugs in interactive Pyraf tasks.
         # TODO(nat): when interactive is fixed re-enable this.
         # Temp fix:
         hlineinter = False
@@ -167,12 +167,13 @@ def getUserInput():
         "Interative telluric continuum fitting? [no]: ",
         False
         )"""
-        telluric_correction_method = getParam(
-        "Telluric correction method? [none]: ",
-        "none",
-        "Specify whether to not apply a telluric correction, to apply one using Python and numpy " + \
-        "or to apply one using iraf.telluric(). The options are \"none\", \"python\" and \"iraf\"."
+
+        telluricCorrectionMethod = getParam(
+        "Telluric correction method? [gnirs]: ",
+        "gnirs",
+        "Specify a telluric correction method or not to apply one. The options are \"gnirs\", \"none\" and \"iraf\"."
         )
+
         # TODO(nat): disabled for now because of that interactive task bug.
         telinter = False
         """
@@ -180,6 +181,7 @@ def getUserInput():
         "Interactive telluric correction? [no]: ",
         False
         )"""
+
         # Check for science as well.
         scienceReduction = getParam(
         "Reduce science data? [yes]: ",
@@ -201,11 +203,10 @@ def getUserInput():
         'yes',
         "Nifty can subtract a sky frame of the same exposure duration from each science frame."
         )
-        efficiencySpectrumCorrection = getParam(
-        "Do a flux calibration? [no]: ",
-        False,
-        "Nifty can divide each spectrum in a cube (62x64 unique spectra) by an efficiency spectrum " + \
-        "derived from observing telluric standard stars."
+        fluxCalibrationMethod = getParam(
+        "Flux calibration method? [no]: ",
+        "gnirs",
+        "Nifty can do a flux calibration. The available options are \"gnirs\" and \"none\"."
         )
         spectemp = getParam(
         "Effective temperature in kelvin of telluric standard star? [""]: ",
@@ -286,9 +287,9 @@ def getUserInput():
         config['scienceReductionConfig']['sciStart'] = sciStart
         config['scienceReductionConfig']['sciStop'] = sciStop
         config['scienceReductionConfig']['scienceSkySubtraction'] = scienceSkySubtraction
-        config['scienceReductionConfig']['telluric_correction_method'] = telluric_correction_method
+        config['scienceReductionConfig']['telluricCorrectionMethod'] = telluricCorrectionMethod
         config['scienceReductionConfig']['telinter'] = telinter
-        config['scienceReductionConfig']['efficiencySpectrumCorrection'] = efficiencySpectrumCorrection
+        config['scienceReductionConfig']['fluxCalibrationMethod'] = fluxCalibrationMethod
         config['scienceReductionConfig']['use_pq_offsets'] = use_pq_offsets
         config['scienceReductionConfig']['im3dtran'] = im3dtran
 

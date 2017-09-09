@@ -1029,3 +1029,73 @@ def applyTelluricIraf(scienceList, obsid, telinter, log, over):
         os.chdir('../Tellurics')
 
 #--------------------------------------------------------------------------------------------------------------------------------#
+
+def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
+    """This flux calibration method was adapted to NIFS.
+
+    Args:
+        telDir: telluric directory.
+        combined_extracted_1d_spectra:
+        final_tel_no_hlines_no_norm (string):
+        mag:
+        T: temperature in kelvin.
+        over (boolean): overwrite old files.
+
+    """
+
+    # define constants
+    c = 2.99792458e8
+    h = 6.62618e-34
+    k = 1.3807e-23
+
+    logging.info('Input Standard spectrum for flux calibration is ' +  str(combined_extracted_1d_spectra))
+
+    if os.path.exists('c'+combined_extracted_1d_spectra+'.fits'):
+        if not over:
+            logging.info('Output already exists and -over- not set - calculation of efficiency spectrum')
+            return
+        if over:
+            os.remove('c'+combined_extracted_1d_spectra+'.fits')
+            pass
+
+    combined_spectra_file = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
+    band = combined_spectra_file[0].header['GRATING'][0]
+    exptime = float(combined_spectra_file[0].header['EXPTIME'])
+    telfilter = combined_spectra_file[0].header['FILTER']
+
+    # Create a black body spectrum at a given temperature.
+    # Create a 1D array equal in length to the nfextracted 1d spectrum. Eg: length == 2040
+    bb_spectrum_wavelengths = np.zeros(combined_spectra_file[1].header['NAXIS1'])
+    # Find the wavelength at the start of the nfextracted 1d spectrum.
+    wstart = combined_spectra_file[1].header['CRVAL1']
+    # Find the change in wavelength with each pixel of the nfextracted 1d spectrum.
+    wdelt = combined_spectra_file[1].header['CD1_1']
+    # Starting at wstart, at intervals of wdelt, write a wavelength into each element of bb_spectrum_wavelengths.
+    for i in range(len(bb_spectrum_wavelengths)):
+        bb_spectrum_wavelengths[i] = wstart+(i*wdelt)
+    # Plank function. Results in J/s/m^2/str/m
+    blackbodyFunction = lambda x, T: (2.*h*(c**2)*(x**(-5))) / ( (np.exp((h*c)/(x*k*T))) - 1 )
+    # Evaluate that function at each wavelength of the bb_spectrum_wavelengths array,
+    # at the temperature of the standard star. Results in ergs/s/cm^2/Angstrom
+    blackbodySpectrum = (blackbodyFunction(bb_spectrum_wavelengths*1e-10, T))*1e-7
+
+    # Divide final telluric correction spectrum by blackbody spectrum.
+    final_telluric = astropy.io.fits.open('final_tel_no_hlines_no_norm.fits')
+    # Multiply by the gain to go from ADU to counts.
+    tel_bb = final_telluric[0].data/blackbodySpectrum
+
+    # Look up the coefficients for the appropriate grating and filter.
+    if 'HK' in telfilter:
+        f0 = 5.09501198044e-12
+    if 'JH' in telfilter:
+        f0 = 1.60036273943e-11
+    if 'ZJ' in telfilter:
+        f0 = 7.38127838152e-11
+
+    effspec = (tel_bb/exptime)*(10**(0.4*mag))*(f0/3.631e-20)
+
+    # Modify our working copy of the original extracted 1d spectrum. Note though that we aren't permanently writing these changes to disk.
+    combined_spectra_file[1].data = effspec
+    # Don't write our changes to the original extracted 1d spectra; write them to a new file, 'c'+combined...+'.fits'.
+    combined_spectra_file.writeto('c'+combined_extracted_1d_spectra+'.fits',  output_verify='ignore')
+    writeList('c'+combined_extracted_1d_spectra, 'finalcorrectionspectrum', telDir)
