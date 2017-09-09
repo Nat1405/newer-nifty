@@ -447,7 +447,7 @@ def start(kind):
                 # Make a telluric corrected data cube.
                 # Make a roughly flux-calibrated data cube.
                 elif kind=='Science':
-                    makeCube('tfbrsn', scienceFrameList, log, over)
+                    #makeCube('tfbrsn', scienceFrameList, log, over)
                     if telluricCorrectionMethod == "gnirs":
                         applyTelluricCube(scienceFrameList)
                     if fluxCalibrationMethod == "gnirs":
@@ -847,7 +847,7 @@ def makeTelluricCorrection(
     if os.path.exists("telluricCorrection.fits"):
         os.remove("telluricCorrection.fits")
     iraf.imarith('final_tel_no_hlines_no_norm', "/", 'fit', result='telluricCorrection',title='',divzero=0.0,hparams='',pixtype='',calctype='',verbose='no',noact='no',mode='al')
-
+    telcor = astropy.io.fits.open("final_tel_no_hlines_no_norm.fits")
     # Done deriving telluric correction! We have two new products:
     # 1) A continuum-normalized telluric correction spectrum, telluricCorrection.fits, and
     # 2) The continuum we used to normalize it, fit.fits.
@@ -874,13 +874,12 @@ def applyTelluricCube(scienceFrameList):
         getTelluricSpec(item)
         # Get shift and scale of spec from one part of the cube.
         get1dSpecFromCube("ctfbrsn"+item+".fits")
-        print os.getcwd()
         tellshift, scale = getShiftScale("telluricCorrection.fits", grating, telluricinter)
         # Shift and scale the telluric correction spectrum and continuum fit to the telluric correction spectrum.
-        shiftScaleSpec("telluricCorrection.fits", tellshift, scale)
-        shiftScaleSpec("fit.fits", tellshift, scale)
+        shiftScaleSpec("telluricCorrection.fits", "shiftedScaledTelluric.fits", tellshift, scale)
+        shiftScaleSpec("fit.fits", "shiftedFit.fits", tellshift, scale)
         # Divide every spectrum in the cube by the shifted continuum to add a continuum shape back in.
-        divideCubebyTelandContinuuum("ctfbrsn"+item+".fits", "shiftedScaledTelluric.fits", "fit.fits")
+        divideCubebyTelandContinuuum("ctfbrsn"+item+".fits", "shiftedScaledTelluric.fits", "shiftedFit.fits")
         # Done! Now have a telluric-corrected science cube.
         shutil.move("telluricCorrection.fits", "telCor"+item+".fits")
         shutil.move("cubeslice.fits", "cubeslice"+item+".fits")
@@ -1172,7 +1171,7 @@ def getShiftScale(standardspectra, grating, telluricinter, airmass_target=1.0):
             scale = float(scale)
     return tellshift, scale
 
-def shiftScaleSpec(inputspec, tellshift, scale):
+def shiftScaleSpec(inputspec, outspec, tellshift, scale):
     """
     Shifts and scales a spectrum using scipy.
     Replaces overflow with 1.
@@ -1180,14 +1179,14 @@ def shiftScaleSpec(inputspec, tellshift, scale):
     spectrum = astropy.io.fits.open(inputspec)
     spectrumData = spectrum[0].data
     # Shift using SciPy, substituting 1 where data overflows.
-    spectrumData = shift(spectrumData, -1*tellshift, cval=1.)
+    spectrumData = shift(spectrumData, -1*int(tellshift), cval=1.)
     # Scale by simple multiplication; 1D spectrum times a scalar.
     spectrumData = spectrumData * scale
     spectrum[0].data = spectrumData
     # Write to a new file;
-    if os.path.exists("shiftedScaledTelluric.fits"):
-        os.remove("shiftedScaledTelluric.fits")
-    spectrum.writeto("shiftedScaledTelluric.fits")
+    if os.path.exists(outspec):
+        os.remove(outspec)
+    spectrum.writeto(outspec)
 
 def divideCubebyTelandContinuuum(inputcube, telluricSpec, continuumSpec):
     """
@@ -1202,6 +1201,7 @@ def divideCubebyTelandContinuuum(inputcube, telluricSpec, continuumSpec):
     # Divide each spectrum in the cubedata array by the telluric correction spectrum.
     for i in range(cube[1].header['NAXIS2']):         # NAXIS2 is the y axis of the final cube.
         for j in range(cube[1].header['NAXIS1']):     # NAXIS1 is the x axis of the final cube.
+            if i == 20 and j == 20:
             cube[1].data[:,i,j] /= (telluricSpec[0].data)
             cube[1].data[:,i,j] /= (continuumSpec[0].data)
     # Write the corrected cube to a new file with a "cp" prefix, "p" for "python corrected".
