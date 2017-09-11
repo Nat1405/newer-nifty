@@ -170,7 +170,9 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
         if kind == 'Telluric':
             # Telluric reduction specific config.
             telluricReductionConfig = config['telluricReductionConfig']
-            if not telluricDirectoryList:
+            if telluricDirectoryList:
+                observationDirectoryList = telluricDirectoryList
+            else: telluricDirectoryList:
                 observationDirectoryList = config['telluricDirectoryList']
             start = telluricReductionConfig['telStart']
             stop = telluricReductionConfig['telStop']
@@ -184,7 +186,9 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
         if kind == 'Science':
             # Science reduction specific config.
             scienceReductionConfig = config['scienceReductionConfig']
-            if not scienceDirectoryList:
+            if scienceDirectoryList:
+                observationDirectoryList = scienceDirectoryList
+            else scienceDirectoryList:
                 observationDirectoryList = config['scienceDirectoryList']
             start = scienceReductionConfig['sciStart']
             stop = scienceReductionConfig['sciStop']
