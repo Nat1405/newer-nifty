@@ -6,12 +6,12 @@ Documentation contents:
 .. toctree::
    :maxdepth: 1
 
-   Running Nifty
-   Preparing Input
-   Data Reduction Examples
-   Tutorials
-   Known Issues
-   Maintenance & Package Structure
-   Future Work
-   API
-   Changelog
+   running_nifty
+   preparing_input
+   data_reduction_examples
+   tutorials
+   known_issues
+   maintenance_and_package_structure
+   future_work
+   api
+   changelog
