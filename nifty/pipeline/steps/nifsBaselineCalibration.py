@@ -25,22 +25,27 @@
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
+
+# STDLIB
+
 import logging, os, pkg_resources
 import astropy.io.fits
 from pyraf import iraf, iraffunctions
 
+# LOCAL
+
 # Import config parsing.
-from configobj.configobj import ConfigObj
+from ..configobj.configobj import ConfigObj
 
 # Import custom Nifty functions.
-from nifsUtils import datefmt, listit, checkLists
+from ..nifsUtils import datefmt, listit, checkLists
 
 # Define constants.
 # Paths to Nifty data.
 RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
 RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
-def start():
+def start(calibrationDirectoryList=""):
     """
          nifsBaselineCalibration
 
@@ -125,7 +130,8 @@ def start():
         # Read general pipeline config.
         manualMode = config['manualMode']
         over = config['over']
-        calibrationDirectoryList = config['calibrationDirectoryList']
+        if not calibrationDirectoryList:
+            calibrationDirectoryList = config['calibrationDirectoryList']
         # Read baselineCalibrationReduction specfic config.
         calibrationReductionConfig = config['calibrationReductionConfig']
         start = calibrationReductionConfig['baselineCalibrationStart']

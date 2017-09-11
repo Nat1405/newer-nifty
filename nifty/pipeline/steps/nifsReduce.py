@@ -25,6 +25,9 @@
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
+
+# STDLIB
+
 import sys, glob, shutil, getopt, os, time, logging, glob, sgmllib, urllib, re, traceback, pkg_resources
 import pexpect as p
 from pyraf import iraf, iraffunctions
@@ -36,19 +39,22 @@ from scipy import arange, array, exp
 from scipy.ndimage.interpolation import shift
 import pylab as pl
 import matplotlib.pyplot as plt
+
+# LOCAL
+
 # Import config parsing.
-from configobj.configobj import ConfigObj
+from ..configobj.configobj import ConfigObj
 # Import custom Nifty functions.
-from nifsUtils import datefmt, listit, writeList, checkLists, makeSkyList, MEFarith, convertRAdec
+from ..nifsUtils import datefmt, listit, writeList, checkLists, makeSkyList, MEFarith, convertRAdec
 # Import Nifty python data cube merging script.
-import nifsMerge
+from .nifsMerge import mergeCubes
 
 # Define constants
 # Paths to Nifty data.
 RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
 RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
-def start(kind):
+def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
     """
 
     start(kind): Do a full reduction of either Science or Telluric data.
@@ -164,8 +170,8 @@ def start(kind):
         if kind == 'Telluric':
             # Telluric reduction specific config.
             telluricReductionConfig = config['telluricReductionConfig']
-
-            observationDirectoryList = config['telluricDirectoryList']
+            if not telluricDirectoryList:
+                observationDirectoryList = config['telluricDirectoryList']
             start = telluricReductionConfig['telStart']
             stop = telluricReductionConfig['telStop']
             telluricSkySubtraction = telluricReductionConfig['telluricSkySubtraction']
@@ -178,8 +184,8 @@ def start(kind):
         if kind == 'Science':
             # Science reduction specific config.
             scienceReductionConfig = config['scienceReductionConfig']
-
-            observationDirectoryList = config['scienceDirectoryList']
+            if not scienceDirectoryList:
+                observationDirectoryList = config['scienceDirectoryList']
             start = scienceReductionConfig['sciStart']
             stop = scienceReductionConfig['sciStop']
             scienceSkySubtraction = scienceReductionConfig['scienceSkySubtraction']
@@ -481,7 +487,7 @@ def start(kind):
                     logging.info("##############################################################################\n")
                 # After the last science reduction, possibly merge final cubes to a single cube.
                 if kind == 'Science' and merge and os.getcwd() == observationDirectoryList[-1]:
-                    nifsMerge.start(observationDirectoryList, use_pq_offsets, im3dtran, over)
+                    mergeCubes(observationDirectoryList, use_pq_offsets, im3dtran, over)
                     logging.info("\n##############################################################################")
                     logging.info("")
                     logging.info("  STEP 6: Create Combined Final 3D Cube - path/scienceObjectName/Merged/ - COMPLETED ")
@@ -1026,6 +1032,7 @@ def vega(spectrum, band, path, hlineinter, telluric_shift_scale_record, log, ove
         ext = '3'
         sample = "11508:13492"
     if band=='Z':
+        sample = "*"
         ext = '4'
     if os.path.exists("tell_nolines.fits"):
             if over:

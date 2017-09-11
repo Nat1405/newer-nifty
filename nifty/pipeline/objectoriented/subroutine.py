@@ -41,12 +41,11 @@ class TaskRunner(object):
         if os.path.exists(output):
             if over:
                 iraf.delete(output)
-                task.run(listit(inputList, prefix))
+                task.run(inputFrame, prefix))
             else:
                 print "\nOutput exists and -over- not set - skipping " + str(skipMessage)
         else:
-            if len(inputList) > 1:
-                task.run(listit(inputList,prefix)
+            task.run(inputFrame,prefix)
 
 class Task(object):
     """

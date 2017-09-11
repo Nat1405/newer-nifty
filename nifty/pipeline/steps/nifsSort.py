@@ -36,17 +36,18 @@ import astropy.io.fits
 import os, sys, shutil, glob, math, logging, pkg_resources, time, datetime, re
 import numpy as np
 # Import config parsing.
-from configobj.configobj import ConfigObj
-
+from ..configobj.configobj import ConfigObj
 
 # LOCAL
 
 # Import custom Nifty functions.
-from nifsUtils import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
-datefmt, checkOverCopy, checkQAPIreq, checkDate, writeList, checkEntry, timeCalc, checkSameLengthFlatLists
+# TODO(nat): goodness, this is a lot of functions. It would be nice to split this up somehow.
+from ..nifsUtils import getUrlFiles, getFitsHeader, FitsKeyEntry, stripString, stripNumber, \
+datefmt, checkOverCopy, checkQAPIreq, checkDate, writeList, checkEntry, timeCalc, checkSameLengthFlatLists, \
+rewriteSciImageList, datefmt
 
 # Import NDMapper gemini data download, by James E.H. Turner.
-import downloadFromGeminiPublicArchive
+from ..downloadFromGeminiPublicArchive import download_query_gemini
 
 # Define constants
 # Paths to Nifty data.
@@ -97,6 +98,21 @@ def start():
     # Store current working directory for later use.
     path = os.getcwd()
 
+    # Format logging options.
+    FORMAT = '%(asctime)s %(message)s'
+    DATEFMT = datefmt()
+
+    # Set up the logging file.
+    logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    # This lets us logging.info(to stdout AND a logfile. Cool, huh?
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
     # Set up the logging file.
     log = os.getcwd()+'/Nifty.log'
 
@@ -116,6 +132,7 @@ def start():
         sortConfig = options['sortConfig']
         rawPath = sortConfig['rawPath']
         program = sortConfig['program']
+        skyThreshold = sortConfig['skyThreshold']
         sortTellurics = sortConfig['sortTellurics']
         date = sortConfig['date']
         copy = sortConfig['copy']
@@ -134,7 +151,7 @@ def start():
             os.mkdir('./rawData')
         logging.info('\nDownloading data from Gemini public archive to ./rawData. This will take a few minutes.')
         logging.info('\nURL used for the download: \n' + str(url))
-        downloadFromGeminiPublicArchive.download_query_gemini(url, './rawData')
+        download_query_gemini(url, './rawData')
         rawPath = os.getcwd()+'/rawData'
 
 
@@ -155,7 +172,7 @@ def start():
     if rawPath:
         if manualMode:
             a = raw_input("About to enter makePythonLists().")
-        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objectDateGratingList, skyFrameList, telskyFrameList, obsidDateList, sciImageList = makePythonLists(rawPath)
+        allfilelist, arclist, arcdarklist, flatlist, flatdarklist, ronchilist, objectDateGratingList, skyFrameList, telskyFrameList, obsidDateList, sciImageList = makePythonLists(rawPath, skyThreshold)
         if manualMode:
             a = raw_input("About to enter sortScienceAndTelluric().")
         objDirList, scienceDirectoryList, telluricDirectoryList = sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageList, rawPath)
@@ -234,7 +251,7 @@ def downloadRawData():
     pass
 
 
-def makePythonLists(rawPath):
+def makePythonLists(rawPath, skyThreshold):
 
     """Creates python lists of file names by type. No directories are created and no
     files are copied in this step."""
@@ -308,17 +325,17 @@ def makePythonLists(rawPath):
 
             # Create a list of science sky frames.
             # Differentiating between on target and sky frames.
-            rad = math.sqrt(poff**2 + qoff**2)
+            rad = math.sqrt(((poff)**2) + ((qoff)**2))
 
             # If the offsets are outside a circle of 5.0 units in radius, append to skyFrameList.
             if obsclass == 'science':
                 sciImageList.append(entry)
-                if rad >= 2.0:
+                if rad  >= skyThreshold:
                     skyFrameList.append(entry)
 
             # Create a list of telluric sky frames.
             if obsclass == 'partnerCal':
-                if rad >= 2.0:
+                if rad >= skyThreshold:
                     telskyFrameList.append(entry)
 
             # Create sciDateList: list of unique dates of science observations.
@@ -1381,13 +1398,21 @@ def matchTellurics(telDirList, obsDirList):
                 logging.info("#####################################################################")
                 logging.info("")
                 logging.info("     WARNING in sort: science "+str(science_observation_name))
-                logging.info("                      does not contain science images.")
+                logging.info("                      in " + str(os.getcwd()))
+                logging.info("                      does not have a scienceFrameList.")
+                logging.info("                      I am trying to rewrite it with zero point offsets.")
                 logging.info("")
                 logging.info("#####################################################################")
                 logging.info("#####################################################################\n")
 
+                rewriteSciImageList(2.0)
+            try:
+                sciImageList = open('scienceFrameList', "r").readlines()
+                logging.info("\nSucceeded; science frames are now identified.")
+            except IOError:
+                logging.info("\nWARNING: Still no science frames found in " + str(os.getcwd()) + ". You may have to adjust the skyThreshold parameter.")
 
-                sciImageList = open('skyFrameList', "r").readlines()
+
             sciImageList = [image.strip() for image in sciImageList]
 
             # Open image and get science image grating from header.

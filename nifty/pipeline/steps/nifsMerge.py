@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# STDLIB
+
 import getopt
 import os, glob, shutil, logging
 import pexpect as p
@@ -27,10 +29,13 @@ import time
 from pyraf import iraf
 from pyraf import iraffunctions
 import astropy.io.fits
-from nifsUtils import datefmt, writeList, listit
+
+# LOCAL
+
+from ..nifsUtils import datefmt, writeList, listit
 
 
-def start(obsDirList, use_pq_offsets, im3dtran, over=""):
+def mergeCubes(obsDirList, use_pq_offsets, im3dtran, over=""):
     """MERGE
 
     This module contains all the functions needed to merge

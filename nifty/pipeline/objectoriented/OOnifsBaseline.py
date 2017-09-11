@@ -322,7 +322,7 @@ def getShift(calflat, over, log):
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
+class MakeFlat(Routine):
     """Make flat and bad pixel mask.
 
     Use NFPREPARE on the lamps on/lamps off flats to update the
@@ -348,81 +348,82 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log):
     reduction.
 
     """
+    @classmethod
+    def run(self, flatlist, flatdarklist, calflat, flatdark, over, log):
+        # Update lamps on flat frames with mdf offset value and generate variance and data quality extensions.
+        task = Task(iraf.nfprepare, rawpath='.', shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
+        flatlist = TaskRunner.loop(task, flatlist, "nfprepare of lamps-on flats", "n")
 
-    # Update lamps on flat frames with mdf offset value and generate variance and data quality extensions.
-    task = Task(iraf.nfprepare, rawpath='.', shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
-    flatlist = TaskRunner.loop(task, flatlist, "nfprepare of lamps-on flats", "n")
+        # Update lamps off flat images with offset value and generate variance and data quality extensions.
+        task = Task(iraf.nfprepare, rawpath='.', shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
+        flatdarklist = TaskRunner.loop(task, flatdarklist, "nfprepare of lamps-off flats", "n")
 
-    # Update lamps off flat images with offset value and generate variance and data quality extensions.
-    task = Task(iraf.nfprepare, rawpath='.', shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
-    flatdarklist = TaskRunner.loop(task, flatdarklist, "nfprepare of lamps-off flats", "n")
+        # Combine lamps on flat images, "n"+image+".fits". Output combined file will have name of the first flat file with "gn" prefix.
+        task = Task(iraf.gemcombine, output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+        TaskRunner.runcombine(task, flatlist, "gemcombine of lamps-on flats", "n", "combinedlampson")
 
-    # Combine lamps on flat images, "n"+image+".fits". Output combined file will have name of the first flat file with "gn" prefix.
-    task = Task(iraf.gemcombine, output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
-    TaskRunner.runcombine(task, flatlist, "gemcombine of lamps-on flats", "n", "combinedlampson")
+        # Combine lamps off flat images, "n"+image+".fits". Output combined file will have name of the first darkflat file with "gn" prefix.
+        task = Task(iraf.gemcombine, output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+        TaskRunner.runcombine(task, flatlist, "gemcombine of lamps-off flats", "n", "combinedlampson")
 
-    # Combine lamps off flat images, "n"+image+".fits". Output combined file will have name of the first darkflat file with "gn" prefix.
-    task = Task(iraf.gemcombine, output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
-    TaskRunner.runcombine(task, flatlist, "gemcombine of lamps-off flats", "n", "combinedlampson")
+        # NSREDUCE on lamps on flat images, "gn"+calflat+".fits", to extract the slices and apply an approximate wavelength calibration.
+        task = Task(iraf.nsreduce, fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
+        TaskRunner.single(task, calflat, "nsreduce of lamps-on flats", "rgn")
 
-    # NSREDUCE on lamps on flat images, "gn"+calflat+".fits", to extract the slices and apply an approximate wavelength calibration.
-    task = Task(iraf.nsreduce, fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
-    TaskRunner.single(task, calflat, "nsreduce of lamps-on flats", "rgn")
-
-    # NSREDUCE on lamps off flat frames, "gn"+flatdark+".fits", to extract the slices and apply an approximate wavelength calibration.
-    task = Task(iraf.nsreduce, fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
-    TaskRunner.single(task, flatdark, "nsreduce of lamps-off flats", "rgn")
+        # NSREDUCE on lamps off flat frames, "gn"+flatdark+".fits", to extract the slices and apply an approximate wavelength calibration.
+        task = Task(iraf.nsreduce, fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
+        TaskRunner.single(task, flatdark, "nsreduce of lamps-off flats", "rgn")
 
 
-    # Create slice-by-slice flat field image and BPM image from the darkflats, using NSFLAT.
-    # Lower and upper limit of bad pixels are 0.15 and 1.55.
+        # Create slice-by-slice flat field image and BPM image from the darkflats, using NSFLAT.
+        # Lower and upper limit of bad pixels are 0.15 and 1.55.
 
-    # Get the spectral band so we can fine tune thr_flo and thr_fup. This fine tunes the number of
-    # bad pixels caught to an approximately constant level for each band. A few bad pixels will
-    # not be caught, but it was found that catching them marked large portions of the top and bottom
-    # rows of pixels of each slice as bad pixels.
-    header = astropy.io.fits.open(calflat+'.fits')
-    grat = header[0].header['GRATING'][0:1]
-    if grat == 'Z' or grat == 'J':
-        flo = 0.07
-        fup = 1.55
-        inter = 'no'
-    elif grat == 'H' or grat == 'K':
-        flo = 0.05
-        fup = 1.55
-        inter = 'no'
-    else:
-        print "\n#####################################################################"
-        print "#####################################################################"
-        print ""
-        print "     WARNING in baselineCalibration: nsflat detected a non-standard wavelength "
-        print "                                     configuration. Running interactively. "
-        print ""
-        print "#####################################################################"
-        print "#####################################################################\n"
-        # Arbitrary; not tested with non-standard configurations.
-        flo = 0.15
-        fup = 1.55
-        inter = 'yes'
+        # Get the spectral band so we can fine tune thr_flo and thr_fup. This fine tunes the number of
+        # bad pixels caught to an approximately constant level for each band. A few bad pixels will
+        # not be caught, but it was found that catching them marked large portions of the top and bottom
+        # rows of pixels of each slice as bad pixels.
+        header = astropy.io.fits.open(calflat+'.fits')
+        grat = header[0].header['GRATING'][0:1]
+        if grat == 'Z' or grat == 'J':
+            flo = 0.07
+            fup = 1.55
+            inter = 'no'
+        elif grat == 'H' or grat == 'K':
+            flo = 0.05
+            fup = 1.55
+            inter = 'no'
+        else:
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in baselineCalibration: nsflat detected a non-standard wavelength "
+            print "                                     configuration. Running interactively. "
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+            # Arbitrary; not tested with non-standard configurations.
+            flo = 0.15
+            fup = 1.55
+            inter = 'yes'
 
-    task = Task(
-        iraf.nsflat,
-        darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat",
-        darkfile="rgn"+flatdark+"_dark", fl_save_dark='yes',process="fit",
-        thr_flo=flo,thr_fup=fup, fl_vardq='yes', fl_int=inter, logfile=log
-    )
-    TaskRunner.single(task, "rgn"+calflat , "creating of preliminary flat with nsflat.", "output")
+        task = Task(
+            iraf.nsflat,
+            darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat",
+            darkfile="rgn"+flatdark+"_dark", fl_save_dark='yes',process="fit",
+            thr_flo=flo,thr_fup=fup, fl_vardq='yes', fl_int=inter, logfile=log
+        )
+        TaskRunner.single(task, "rgn"+calflat , "creating of preliminary flat with nsflat.", "output")
 
-    # Renormalize the slices to account for slice-to-slice variations using NSSLITFUNCTION - make the final flat field image.
+        # Renormalize the slices to account for slice-to-slice variations using NSSLITFUNCTION - make the final flat field image.
 
-    task = Task(iraf.nsslitfunction, flat="rgn"+calflat+"_sflat",dark="rgn"+flatdark+"_dark",combine="median", order=3,fl_vary='no',logfile=log)
-    TaskRunner.single(task, "rgn"+calflat,"rgn"+calflat+"_flat", "creating of final flat", output)
+        task = Task(iraf.nsslitfunction, flat="rgn"+calflat+"_sflat",dark="rgn"+flatdark+"_dark",combine="median", order=3,fl_vary='no',logfile=log)
+        TaskRunner.single(task, "rgn"+calflat,"rgn"+calflat+"_flat", "creating of final flat", output)
 
-    # Put the name of the final flat field and bad pixel mask (BPM) into text files of fixed name to be used by the pipeline later.
+        # Put the name of the final flat field and bad pixel mask (BPM) into text files of fixed name to be used by the pipeline later.
 
-    open("flatfile", "w").write("rgn"+calflat+"_flat")              # Final flat field
-    open("sflatfile", "w").write("rgn"+calflat+"_sflat")            # Flat field before renormalization (before nsslitfunction)
-    open("sflat_bpmfile", "w").write("rgn"+calflat+"_sflat_bpm.pl") # Bad Pixel Mask
+        open("flatfile", "w").write("rgn"+calflat+"_flat")              # Final flat field
+        open("sflatfile", "w").write("rgn"+calflat+"_sflat")            # Flat field before renormalization (before nsslitfunction)
+        open("sflat_bpmfile", "w").write("rgn"+calflat+"_sflat_bpm.pl") # Bad Pixel Mask
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 

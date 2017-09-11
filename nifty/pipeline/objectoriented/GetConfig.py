@@ -8,7 +8,7 @@ from datetime import datetime
 # Import config parsing.
 from ..configobj.configobj import ConfigObj
 # Import custom Nifty functions.
-from ..nifsUtils import datefmt, printDirectoryLists, writeList, getParam, getUserInput
+from ..nifsUtils import datefmt, printDirectoryLists, writeList, getParam, interactiveNIFSInput
 
 class GetConfig(object):
     """
@@ -78,7 +78,7 @@ class GetConfig(object):
         if self.interactive:
             # Get user input interactively.
             logging.info('\nInteractively creating a ./config.cfg configuration file.')
-            self.fullReduction = getUserInput()
+            self.fullReduction = interactiveNIFSInput()
 
         if self.fullReduction:
             # Copy default input and use it
