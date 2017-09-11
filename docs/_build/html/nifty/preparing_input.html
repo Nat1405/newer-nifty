@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API &mdash; nifty 1.0.0.dev1 documentation</title>
+  <title>Preparing the .cfg Input File &mdash; nifty 1.0.0.dev1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="nifty 1.0.0.dev1 documentation" href="../index.html"/>
         <link rel="up" title="Introduction" href="introduction.html"/>
-        <link rel="next" title="Changelog" href="changelog.html"/>
-        <link rel="prev" title="Future Work" href="future_work.html"/> 
+        <link rel="next" title="H Line Removal" href="tutorials.html"/>
+        <link rel="prev" title="Running from the Command Line" href="running_nifty.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -95,9 +95,9 @@
 <li class="toctree-l1 current"><a class="reference internal" href="introduction.html">Introduction</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="running_nifty.html">Running from the Command Line</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running_nifty.html#examples-of-running-from-the-command-line">Examples of Running from the Command Line</a></li>
-<li class="toctree-l2"><a class="reference internal" href="preparing_input.html">Preparing the .cfg Input File</a></li>
-<li class="toctree-l2"><a class="reference internal" href="preparing_input.html#interactive-input-preparation">Interactive Input Preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="preparing_input.html#example-input-file">Example Input File</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Preparing the .cfg Input File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interactive-input-preparation">Interactive Input Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-input-file">Example Input File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html">H Line Removal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html#merging-data-cubes">Merging Data Cubes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
@@ -113,7 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="maintenance_and_package_structure.html#updates">Updates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="maintenance_and_package_structure.html#code-conventions">Code Conventions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="future_work.html">Future Work</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 </li>
@@ -163,13 +163,13 @@
         
           <li><a href="introduction.html">Introduction</a> &raquo;</li>
         
-      <li>API</li>
+      <li>Preparing the .cfg Input File</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/nifty/api.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/nifty/preparing_input.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -182,8 +182,76 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api">
-<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="preparing-the-cfg-input-file">
+<h1>Preparing the .cfg Input File<a class="headerlink" href="#preparing-the-cfg-input-file" title="Permalink to this headline">¶</a></h1>
+<p>Nifty reads data reduction parameters with a config parser developed by Michael Foord. See
+<a class="reference external" href="http://www.voidspace.org.uk/python/configobj.html">http://www.voidspace.org.uk/python/configobj.html</a> for full documentation on the parser.</p>
+</div>
+<div class="section" id="interactive-input-preparation">
+<h1>Interactive Input Preparation<a class="headerlink" href="#interactive-input-preparation" title="Permalink to this headline">¶</a></h1>
+<p>The best way to learn about what each config file parameter does is to populate an input file interactively by typing:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline -i
+</pre></div>
+</div>
+<p>This will, for each parameter, print an explanation and supply a default parameter that you can accept by pressing enter. The output file
+is named “config.cfg”.</p>
+</div>
+<div class="section" id="example-input-file">
+<h1>Example Input File<a class="headerlink" href="#example-input-file" title="Permalink to this headline">¶</a></h1>
+<p>Nifty includes a default configuration file in the runtimeData/ directory. As of v1.0b2, It looks like this:
+.. TODO(nat): This is out of data! Update this!</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span># Nifty configuration file.
+#
+# Each section lists parameters required by a pipeline step.
+
+manualMode = False
+over = False
+merge = True
+scienceDirectoryList = []
+telluricDirectoryList = []
+calibrationDirectoryList = []
+
+[linearPipelineConfig]
+sort = True
+calibrationReduction = True
+telluricReduction = True
+scienceReduction = True
+
+[sortConfig]
+rawPath = &#39;&#39;
+program = &#39;&#39;
+skyThreshold = 2.0
+sortTellurics = True
+date = &#39;&#39;
+copy = &#39;&#39;
+
+[calibrationReductionConfig]
+baselineCalibrationStart = 1
+baselineCalibrationStop = 4
+
+[telluricReductionConfig]
+telStart = 1
+telStop = 6
+telluricSkySubtraction = True
+spectemp = &#39;&#39;
+mag = &#39;&#39;
+hline_method = &#39;vega&#39;
+hlineinter = False
+continuuminter = False
+
+[scienceReductionConfig]
+sciStart = 1
+sciStop = 6
+scienceSkySubtraction = True
+telluricCorrectionMethod = &#39;&#39;
+telinter = False
+fluxCalibrationMethod = &#39;&#39;
+use_pq_offsets = True
+im3dtran = True
+
+# Good luck with your Science!
+</pre></div>
+</div>
 </div>
 
 
@@ -196,10 +264,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tutorials.html" class="btn btn-neutral float-right" title="H Line Removal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="future_work.html" class="btn btn-neutral" title="Future Work" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="running_nifty.html" class="btn btn-neutral" title="Running from the Command Line" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
