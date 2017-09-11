@@ -26,7 +26,7 @@
 
 # STDLIB
 
-import time, sys, calendar, astropy.io.fits, urllib, shutil, glob, os, fileinput, logging, smtplib, pkg_resources
+import time, sys, calendar, astropy.io.fits, urllib, shutil, glob, os, fileinput, logging, smtplib, pkg_resources, math
 import numpy as np
 from xml.dom.minidom import parseString
 from pyraf import iraf
@@ -68,13 +68,13 @@ class bcolors:
 
 #-----------------------------------------------------------------------------#
 
-def getUserInput():
+def interactiveNIFSInput():
     """
-    Interactive input session based on Sphinx's interactive setup.
+    Get NIFS configuration interactively. This is based on Sphinx's interactive input session.
 
     """
 
-    logging.info("\nWelcome to Nifty! Please make sure you have at least 20 Gigabytes of disk space available before starting. \n\nPress enter to accept default data reduction options.")
+    logging.info("\nWelcome to Nifty! The current mode is NIFS data reduction.\n\nPress enter to accept default data reduction options.")
 
     fullReduction = getParam(
                 "Do a full data reduction with default parameters loaded from recipes/defaultConfig.cfg? [no]: ",
@@ -105,6 +105,13 @@ def getUserInput():
         "Path to raw files directory? []: ",
         "",
         "An example of a valid raw files path string: \"/Users/nat/data/spaceMonster\""
+        )
+        skyThreshold = getParam(
+        "Sky threshold? [2.0]: ",
+        2.0,
+        "Nifty differentiates between sky and science frames from the telescope P and Q offsets. " + \
+        "If sqrt(Poffset^2 + Qoffset^2) is more than the given threshold, a frame is marked as a science frame. " + \
+        "Nifty also tries to take the telescope P and Q offset zero point into account if the first past seems to only identify sky frames."
         )
         # See if we want to reduce the baseline calibrations. And if so, which substeps
         # to perform.
@@ -265,6 +272,7 @@ def getUserInput():
         config['sortConfig'] = {}
         config['sortConfig']['rawPath'] = rawPath
         config['sortConfig']['program'] = program
+        config['sortConfig']['skyThreshold'] = skyThreshold
         config['sortConfig']['sortTellurics'] = telluricReduction
         config['sortConfig']['date'] = date
         config['sortConfig']['copy'] = copy
@@ -303,6 +311,42 @@ def getUserInput():
 def datefmt():
     datefmt = '%Y/%m/%d %H:%M:%S '
     return datefmt
+
+#-----------------------------------------------------------------------------#
+
+def rewriteSciImageList(threshold):
+    """
+    Find zero point from first image in skyFrameList
+    calculate difference; if larger than threshold, append to new skyFrameList.
+    Else append to new scienceFrameList.
+    Write out both lists at end.
+    """
+    skyFrameList = open('skyFrameList', "r").readlines()
+    skyFrameList = [image.strip() for image in skyFrameList]
+    firstImage = astropy.io.fits.open(skyFrameList[0]+'.fits')
+    p0 = firstImage[0].header['POFFSET']
+    q0 = firstImage[0].header['QOFFSET']
+    r0 = math.sqrt(((p0)**2) + ((q0)**2))
+    newSkyFrameList = []
+    newScienceFrameList = []
+    for item in skyFrameList:
+        image = astropy.io.fits.open(item+'.fits')
+        poff = image[0].header['POFFSET']
+        qoff = image[0].header['QOFFSET']
+        pdiff = abs(p0 - poff)
+        qdiff = abs(q0 - qoff)
+        rdiff = math.sqrt(((pdiff)**2) + ((qdiff)**2))
+        if rdiff >= threshold:
+            newSkyFrameList.append(item)
+        else:
+            newScienceFrameList.append(item)
+    os.remove("skyFrameList")
+    for item in newSkyFrameList:
+        writeList(item, 'skyFrameList', './')
+        # Create a skyFrameList in the relevant directory.
+    for item in newScienceFrameList:
+        writeList(item, 'scienceFrameList', './')
+
 
 #-----------------------------------------------------------------------------#
 
@@ -546,11 +590,8 @@ def checkDate(list):
 def writeList(image, file, path):
     """ write image name into a file """
     homepath = os.getcwd()
-
     os.chdir(path)
-
     image = image.rstrip('.fits')
-
     if os.path.exists(file):
         filelist = open(file, 'r').readlines()
         if image+'\n' in filelist or not filelist:
@@ -565,7 +606,6 @@ def writeList(image, file, path):
     f.close()
     os.chdir(homepath)
 
-    return
 #-----------------------------------------------------------------------------#
 
 def checkEntry(entry, entryType, filelist):

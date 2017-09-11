@@ -22,7 +22,7 @@ PACKAGE_DATA = {
 
 setup(
     name=NAME,
-    version="1.0a1",
+    version="1.0b2",
     author='ncomeau',
     author_email='ncomeau@gemini.edu',
     description='The Gemini NIFS data reduction pipeline.',
@@ -30,7 +30,7 @@ setup(
     url='http://www.gemini.edu',
     license='MIT',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 2 - Beta',
         'Environment :: MacOS X',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Education',

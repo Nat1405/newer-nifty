@@ -21,6 +21,10 @@ on the bottom port.
 - Adding unit tests for each step and integration test for pipeline.
 - Fixing telluric correction and absolute flux calibration.
 
+1.0b1 - 2017-09-08
+==================
+- Preliminary Beta release. Syntax errors mean this version will not compile.
+
 1.0a1 - 2017-08-31
 ==================
 

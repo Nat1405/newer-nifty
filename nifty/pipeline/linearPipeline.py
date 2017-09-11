@@ -35,16 +35,16 @@ from datetime import datetime
 # LOCAL
 
 # Import major Nifty scripts.
-import nifsSort as nifsSort
-import nifsBaselineCalibration as nifsBaselineCalibration
-import nifsReduce as nifsReduce
+import steps.nifsSort as nifsSort
+import steps.nifsBaselineCalibration as nifsBaselineCalibration
+import steps.nifsReduce as nifsReduce
 import nifsUtils as nifsUtils
 # Import config parsing.
 # Import config parsing.
 from configobj.configobj import ConfigObj
 from objectoriented.getConfig import GetConfig
 # Import custom Nifty functions.
-from nifsUtils import datefmt, printDirectoryLists, writeList, getParam, getUserInput
+from nifsUtils import datefmt, printDirectoryLists, writeList, getParam, interactiveNIFSInput
 
 #                                +
 #

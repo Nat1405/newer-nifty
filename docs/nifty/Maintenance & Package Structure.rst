@@ -38,6 +38,20 @@ Other Python comments use the following convention:
 - A # is followed by a space and a capital letter.
 - All comments end in a period where possible.
 
+Pipeline Structure
+==================
+
+See the Nifty paper for a high level overview. Nifty general runs with the following procedure:
+
+- A script in the scripts/ directory is called from the command line.
+- This script imports the relevant pipeline and steps from the nifty/pipeline/ and nifty/pipeline/steps/directories.
+- The script then launches the appropriate pipeline,
+- This pipeline launches the appropriate steps,
+- These steps launch the appropriate routines, and
+- These routines launch the appropriate sub-routines.
+
+Nifty is built at the lowest level from Python and IRAF subroutines. It is built so that it is relatively easy to change the implentation of the underlying task.
+
 Updates
 =======
 

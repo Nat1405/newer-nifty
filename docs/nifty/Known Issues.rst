@@ -1,26 +1,35 @@
 Known Issues
 ============
 
-Nifty.py
---------
+linearPipeline.py
+=================
 
 nifsSort.py
------------
+===========
+
+Object and Sky frame differentiation
+------------------------------------
+
+If the sorting script does not create a skylist in the object or telluric observation
+directories this means that the offsets between sky frames and object frames were smaller
+than expected. A skyframelist can be manually created and saved in the appropriate directory, or
+the limit placed on the offset can be changed. To lower the limit manually do a search in nifsSort.py
+for "skyframelist.append(entry)" and change the <= <value_in_arcseconds> to something new.
 
 nifsBaselineCalibration.py
---------------------------
+==========================
 - **Long data file path names are not fed to IRAF tasks**. It seems IRAF task parameters
 must be 99 characters or less. Nifty's data files are stored in the Astroconda environment
 packages directory; for example, on my system it is "/Users/nat/miniconda2/envs/niftypip/lib/python2.7/site-packages/nifty/pipeline/".
 If you have a long username, for example, this can cause the path name to be too long to
 be parsed by iraf.
 *Temporary fix:* I have made the names of all the data files short enough for it to work
-okay on my system. **Please let me (ncomeau AT gemini DOT edu) know if this seems to be
+okay on my system. **Please let me know if this seems to be
 causing you issues and I can come up with a better fix.**
 
 
 nifsReduce.py
--------------
+=============
 - z-band data is not capable of a flux calibration (yet!).
 - Seems to be missing the first peak of the ronchi slit when iraf.nfsdist() is run interactively.
   This does not seem to be a problem.
@@ -32,10 +41,10 @@ nifsReduce.py
   but more testing is needed. For now applyTelluricPython() is recommended.
 
 nifsMerge.py
-------------
+============
 
-nifsDefs.py
------------
+nifsUtils.py
+============
 
 General Issues
 --------------

@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# STDLIB
+
 import getopt
 import os, glob, shutil, logging
 import pexpect as p
@@ -27,10 +29,13 @@ import time
 from pyraf import iraf
 from pyraf import iraffunctions
 import astropy.io.fits
-from nifsUtils import datefmt, writeList, listit
+
+# LOCAL
+
+from ..nifsUtils import datefmt, writeList, listit
 
 
-def start(obsDirList, use_pq_offsets, im3dtran, over=""):
+def mergeCubes(obsDirList, use_pq_offsets, im3dtran, over=""):
     """MERGE
 
     This module contains all the functions needed to merge
@@ -214,6 +219,9 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
             if i == 0:
                 continue
             header2 = astropy.io.fits.open(cubes[i])
+            # Check to see if we are using ALTAIR. If we are, later we will invert the x offset
+            # because of the different light path.
+            ALTAIR = header2[0].header['AOFOLD'].strip() == 'IN'
             suffix = cubes[i][-8:-5]
 
             # If user wants to merge using p and q offsets, grab those from .fits headers.
@@ -222,13 +230,16 @@ def start(obsDirList, use_pq_offsets, im3dtran, over=""):
                 xoff = header2[0].header['POFFSET']
                 yoff = header2[0].header['QOFFSET']
                 # calculate the difference between the zero point offsets and the offsets of the other cubes and convert that to pixels
-                xShift = round((xoff - p0)/pixScale)
+                if ALTAIR:
+                    xShift = round(-1*(xoff - p0)/pixScale)
+                else:
+                    xShift = round((xoff - p0)/pixScale)
                 yShift = round((yoff - q0)/pixScale)
                 # write all offsets to a text file (keep in mind that the x and y offsets use different pixel scales)
                 foff = open('offsets.txt', 'a')
                 if im3dtran:
                     # If we swap the y and lambda axis we must also write the offsets in x, lambda, y.
-                    foff.write('%d %d %d\n' % (-1*int(xShift), 0, int(yShift)))
+                    foff.write('%d %d %d\n' % (int(xShift), 0, int(yShift)))
                 else:
                     # Write offsets in regular x, y, lambda.
                     foff.write('%d\t%d\t%d\n' % (xShift, yShift, 0.))
