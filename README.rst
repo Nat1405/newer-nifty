@@ -36,7 +36,7 @@ For more details, please read the LICENSE.
 How to Submit Bugs and Requests
 -------------------------------
 
-Very important: **do not submit a Gemini help desk ticket!**.
+Very important: **do not submit a Gemini help desk ticket!**
 
 If you want to report a problem, use the `Gemini Data Reduction Forum thread <http://drforum.gemini.edu/topic/nifs-python-data-reduction-pipeline/>`_
 or create an issue in this repo.
