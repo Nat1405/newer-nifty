@@ -888,9 +888,18 @@ def applyTelluricCube(scienceFrameList):
         # Divide every spectrum in the cube by the shifted continuum to add a continuum shape back in.
         divideCubebyTelandContinuuum("ctfbrsn"+item+".fits", "shiftedScaledTelluric.fits", "shiftedFit.fits")
         # Done! Now have a telluric-corrected science cube.
+        shutil.move("oneDcorrected.fits", "oneDcorrected"+item+".fits")
+        shutil.move("shiftedFit.fits", "finalTelFit"+item+".fits")
         shutil.move("telluricCorrection.fits", "telCor"+item+".fits")
         shutil.move("cubeslice.fits", "cubeslice"+item+".fits")
+        shutil.move("scaledBlackBody.fits", "scaledBlackBody"+item+".fits")
         shutil.move("shiftedScaledTelluric.fits", "finaltelCor"+item+'.fits')
+        if os.path.exists('fit.fits'):
+            os.remove('fit.fits')
+        if os.path.exists('bbody.fits'):
+            os.remove('bbody.fits')
+        if os.path.exists('oneDcorrected.fits'):
+            os.remove('oneDcorrected.fits')
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 

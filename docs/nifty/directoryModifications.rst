@@ -260,7 +260,8 @@ After Step 4: Spatial Distortion, the last step of the calibration reduction, mo
 Now we are in nifsReduce of Tellurics.
 --------------------------------------
 
-After Step 1: Locate the Spectrum, two new files are created.
+After Step 1: Locate the Spectrum, calibrations are copied over from the appropriate calibrations directory and
+each raw frame is run through nfprepare().
 
 .. code-block:: text
 
@@ -268,24 +269,302 @@ After Step 1: Locate the Spectrum, two new files are created.
   |____config.cfg
   |____HD141004/
   | |____20100401/
-  | | |____K
-  | | | |____Tellurics
-  | | | | |____obs109
-  | | | | | |____database/                      # Database from
-  | | | | | | |____idrgnN20100410S0375_SCI_*_   #
-  | | | | | | |____idwrgnN20100401S0137_SCI_*_  #
+  | | |____K/
+  | | | |____Tellurics/
+  | | | | |____obs109/
+  | | | | | |____database/                      # Database from appropriate calibrations directory
+  | | | | | | |____idrgnN20100410S0375_SCI_*_   # Spatial distortion database text files
+  | | | | | | |____idwrgnN20100401S0137_SCI_*_  # Wavelength solution database text files
   | | | | | |____N201004*.fits
-  | | | | | |____nN201004*.fits
-  | | | | | |____rgnN20100410S0375.fits         #
+  | | | | | |____nN201004*.fits                 # Results of running each raw frame through nfprepare()
+  | | | | | |____rgnN20100410S0375.fits         # Final reduced ronchi flat frame from appropriate calibrations directory
   | | | | | |____scienceMatchedTellsList
   | | | | | |____skyFrameList
   | | | | | |____tellist
-  | | | | | |____wrgnN20100401S0137.fits        #
+  | | | | | |____wrgnN20100401S0137.fits        # Final reduced arc frame from appropriate calibrations directory
   |____Nifty.log
 
+After Step 2: Sky Subtraction, the only files that are written are in standard star observation directories. Each prepared standard star frame
+is sky subtracted with gemarith(), and then the sky-subtracted prepared frames are median combined into one frame.
+
+.. code-block:: text
+
+  obs109/
+  |____database/
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____gnN20100401S0139.fits           # Single median-combined standard star frame
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____rgnN20100410S0375.fits
+  |____scienceMatchedTellsList
+  |____skyFrameList
+  |____snN201004*.fits                 # Sky subtracted, prepared standard star frames
+  |____tellist
+  |____wrgnN20100401S0137.fits
+
+After Step 3: Flat fielding and Bad Pixels Correction:
+
+.. code-block:: text
+
+  obs109/
+  |____brsnN20100401S0138.fits        # Flat fielded and bad pixels corrected standard frames; results of nffixbad()
+  |____database/
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____gnN20100401S0139.fits
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____rgnN20100410S0375.fits
+  |____rsnN201004*.fits               # Flat fielded standard frames; results of nsreduce()
+  |____scienceMatchedTellsList
+  |____skyFrameList
+  ____snN201004*.fits
+  |____tellist
+  |____wrgnN20100401S0137.fits
+
+After Step 4: 2D to 3D transformation and Wavelength Calibration:
+
+.. code-block:: text
+
+  obs109/
+  |____brsnN201004*.fits
+  |____database/
+  | |____fcfbrsnN20100401S0138_SCI_*_lamp   # Textfile result of nffitcoords()
+  | |____fcfbrsnN20100401S0138_SCI_*_sdist  # Textfile result of nffitcoords()
+  | |____fcfbrsnN20100401S0140_SCI_*_lamp
+  | |____fcfbrsnN20100401S0140_SCI_*_sdist
+  | |____fcfbrsnN20100401S0142_SCI_*_lamp
+  | |____fcfbrsnN20100401S0142_SCI_*_sdist
+  | |____fcfbrsnN20100401S0144_SCI_*_lamp
+  | |____fcfbrsnN20100401S0144_SCI_*_sdist
+  | |____fcfbrsnN20100401S0146_SCI_*_lamp
+  | |____fcfbrsnN20100401S0146_SCI_*_sdist
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____fbrsnN201004*.fits                   # Results of nffitcoords()
+  |____gnN20100401S0139.fits
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____rgnN20100410S0375.fits
+  |____rsnN201004*.fits
+  |____scienceMatchedTellsList
+  |____skyFrameList
+  |____snN201004*.fits
+  |____tellist
+  |____tfbrsnN20100401S0138.fits            # Results of nftransform()
+  |____wrgnN20100401S0137.fits
+
+After Step 5: Extract 1D Spectra and Make Combined Telluric:
+
+.. code-block:: text
+
+  obs109/
+  |____brsnN201004*.fits
+  |____database/
+  | |____fcfbrsnN201004*_SCI_*_lamp
+  | |____fcfbrsnN201004*_SCI_*_sdist
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____fbrsnN201004*.fits
+  |____gnN20100401S0139.fits
+  |____gxtfbrsnN20100401S0138.fits    # Median-combined extracted standard star spectra; result of gemcombine()
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____rgnN20100410S0375.fits
+  |____rsnN201004*.fits
+  |____scienceMatchedTellsList
+  |____skyFrameList
+  |____snN201004*.fits
+  |____tellist
+  |____telluricfile                   # Text file storing name of median-combined extracted standard star spectrum.
+  |____tfbrsnN201004*.fits
+  |____wrgnN20100401S0137.fits
+  |____xtfbrsnN201004*.fits           # Extracted 1D standard star spectra; result of nfextract()
+
+After Step 6: Create Telluric Correction Spectrum, the telluric standard data reduction is complete. The final products of the reduction are
+telluricCorrection.fits, the final continuum-normalized telluric correction spectrum, and fit.fits, the continuum used to normalize the final
+telluric correction spectrum. These two products are copied to an appropriate science observation directory and used by the 'gnirs' telluric
+correction method.
+
+.. code-block:: text
+
+  obs109/
+  |____brsnN201004*.fits
+  |____database/
+  | |____fcfbrsnN201004*_SCI_*_lamp
+  | |____fcfbrsnN201004*_SCI_*_sdist
+  | |____idrgnN201004*_SCI_*_
+  | |____idwrgnN201004*_SCI_*_
+  |____fbrsnN201004*.fits
+  |____final_tel_no_hlines_no_norm.fits  # Final telluric correction spectrum NOT continuum normalized
+  |____fit.fits                          # Continuum used to normalize the final telluric correction spectrum
+  |____gnN20100401S0139.fits
+  |____gxtfbrsnN20100401S0138.fits
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____rgnN20100410S0375.fits
+  |____rsnN201004*.fits
+  |____scienceMatchedTellsList
+  |____skyFrameList
+  |____snN201004*.fits
+  |____std_star.txt                      # Text file storing temperature and magnitude of standard star
+  |____tell_nolines.fits                 # H-line corrected standard star spectrum
+  |____tellist
+  |____telluric_hlines.txt               # Text file storing what linefitAuto() and linefitManual did. Empty file for now
+  |____telluricCorrection.fits           # Final continuum-normalized telluric correction spectrum
+  |____telluricfile
+  |____tfbrsnN201004*.fits
+  |____wrgnN20100401S0137.fits
+  |____xtfbrsnN201004*.fits
+  PRODUCTS/
+
+The final telluric observation directory structure after nifsReduce Tellurics:
+
+.. code-block:: text
+
+  obs109/                                # Base standard star observation directory; from .fits headers
+  |____brsnN201004*.fits                 # Results of nffixbad()
+  |____database/                         # Database directory containing text file results of nswavelength(), nfsdist(), nffitcoords()
+  | |____fcfbrsnN201004*_SCI_*_lamp      # Text file result of nffitcoords()
+  | |____fcfbrsnN201004*_SCI_*_sdist     # Text file result of nffitcoords()
+  | |____idrgnN201004*_SCI_*_            # Text file result of nfsdist()
+  | |____idwrgnN201004*_SCI_*_           # Text file result of nswavelength()
+  |____fbrsnN201004*.fits                # Results of nffitcoords()
+  |____final_tel_no_hlines_no_norm.fits  # Final telluric correction spectrum NOT continuum normalized
+  |____fit.fits                          # Continuum used to normalize the final telluric correction spectrum
+  |____gnN20100401S0139.fits             # Median combined and prepared sky frame
+  |____gxtfbrsnN20100401S0138.fits       # Final median-combined and extracted one D standard star spectrum; result of gemcombine()
+  |____N201004*.fits                     # Raw standard star and standard star sky frames
+  |____nN201004*.fits                    # Prepared standard star and standard star sky frames; results of nfprepare()
+  |____rgnN20100410S0375.fits            # Final ronchi flat frame; copied from appropriate calibration directory. Result of nfsdist()
+  |____rsnN201004*.fits                  # Flat fielded, cut, sky subtracted, and prepared standard star frames. Results of nsreduce()
+  |____scienceMatchedTellsList           # Textfile used to match this standard star observation directory with certain science frames
+  |____skyFrameList                      # Textfile list of standard star sky frames
+  |____snN201004*.fits                   # Sky subtracted and prepared standard star frames. Results of gemarith()
+  |____std_star.txt                      # Text file storing temperature and magnitude of standard star
+  |____tell_nolines.fits                 # H-line corrected standard star spectrum
+  |____tellist                           # Text file list of standard star frames
+  |____telluric_hlines.txt               # Text file storing what linefitAuto() and linefitManual did. Empty file for now
+  |____telluricCorrection.fits           # Final continuum-normalized telluric correction spectrum
+  |____telluricfile                      # Text file storing name of final median-combined and extracted one D standard star spectrum
+  |____tfbrsnN201004*.fits               # Results of nftransform()
+  |____wrgnN20100401S0137.fits           # Final reduced arc frame; copied from appropriate calibrations directory
+  |____xtfbrsnN201004*.fits              # One D extracted standard star spectra; results of nfextract()
+  PRODUCTS/                              # Products directory; currently not used for anything
 
 
 
+Now we are in nifsReduce Science
+--------------------------------
+
+After Step 1: locate the spectrum,
+
+Our perspective is inside the science observation directory as all changes, until step 5, happen there.
+
+.. code-block:: text
+
+  obs107/
+  |____database/                       # Database directory and associated text files copied from the appropriate calibrations directory
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____N201004*.fits                   # Raw science and science sky frames
+  |____nN201004*.fits                  # Prepared science and sky frames. Results of nfprepare()
+  |____original_skyFrameList           # Sky frame list without taking P and Q zero-point offsets into account
+  |____rgnN20100410S0375.fits          # Final reduced ronchi flat; copied from appropriate calibrations directory
+  |____scienceFrameList                # Text file list of science frames
+  |____skyFrameList                    # Text file list of science sky frames. If an original_skyFrameList exists, this is the result of taking P and Q zero-point offsets into account
+  |____wrgnN20100401S0137.fits         # Final reduce arc frame; copied from appropriate calibrations directory
+
+After Step 2: Sky Subtraction. This is a bit different than the telluric sky subtraction as we do not subtract a median-combined sky frame from each science frame; we subtract the
+sky frame of (hopefully) same exposure time closest in time to the science frame from each science frame.
+
+.. code-block:: text
+
+  obs107
+  |____database/
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____original_skyFrameList
+  |____rgnN20100410S0375.fits
+  |____scienceFrameList
+  |____skyFrameList
+  |____snN201004*.fits                # Sky-subtracted and prepared science frames. Results of gemarith()
+  |____wrgnN20100401S0137.fits
+
+After Step 3: Flat Fielding and Bad Pixels Correction:
+
+.. code-block:: text
+
+  obs107/
+  |____brsnN201004*.fits          # Bad pixel corrected and flat fielded science frames. Results of nffixbad()
+  |____database/
+  | |____idrgnN201004*_SCI_*_
+  | |____idwrgnN201004*_SCI_*_
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____original_skyFrameList
+  |____rgnN20100410S0375.fits
+  |____rsnN201004*.fits           # Flat fielded science frames. Results of nsreduce()
+  |____scienceFrameList
+  |____skyFrameList
+  |____snN201004*.fits
+  |____wrgnN20100401S0137.fits
+
+After Step 4: 2D to 3D transformation and Wavelength Calibration
+
+.. code-block:: text
+
+  obs107/
+  |____brsnN201004*.fits
+  |____database/
+  | |____fcfbrsnN201004*_SCI_*_lamp     # Text file result of nffitcoords()
+  | |____fcfbrsnN201004*_SCI_*_sdist    # Text file result of nffitcoords()
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____fbrsnN20100401S0182.fits         # Results of nffitcoords()
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____original_skyFrameList
+  |____rgnN20100410S0375.fits
+  |____rsnN201004*.fits
+  |____scienceFrameList
+  |____skyFrameList
+  |____snN201004*.fits
+  |____tfbrsnN201004*.fits              # Results of nftransform()
+  |____wrgnN20100401S0137.fits
+
+After Step 5: Make Uncorrected, Telluric Corrected and Flux Calibrated Data Cubes and Extracted One D Spectra:
+
+.. code-block:: text
+
+  obs107/
+  |____actfbrsnN201004*.fits                  # Final telluric corrected data cubes
+  |____bbody.fits                             # Temporary blackbody spectrum; overwritten with each cube processed
+  |____brsnN201004*.fits
+  |____ctfbrsnN201004*.fits                   # Final uncorrected data cubes
+  |____cubesliceN201004*.fits                 # One dimensional slice from each uncorrected cube used to shift and scale telluric correction spectrum and fit
+  |____database/
+  | |____fcfbrsnN201004*_SCI_*_lamp
+  | |____fcfbrsnN201004*_SCI_*_sdist
+  | |____idrgnN20100410S0375_SCI_*_
+  | |____idwrgnN20100401S0137_SCI_*_
+  |____factfbrsnN201004*.fits                 # Final telluric corrected AND flux calibrated data cubes
+  |____fbrsnN201004*.fits
+  |____finaltelCorN201004*.fits               # Final shifted and scaled one D telluric correction spectrum used to telluric correct data cube
+  |____N201004*.fits
+  |____nN201004*.fits
+  |____original_skyFrameList
+  |____rgnN20100410S0375.fits
+  |____rsnN201004*.fits
+  |____scienceFrameList
+  |____skyFrameList
+  |____snN201004*.fits
+  |____telCorN201004*.fits                    #
+  |____tfbrsnN201004*.fits
+  |____wrgnN20100401S0137.fits
 
 
 
