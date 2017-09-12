@@ -311,11 +311,13 @@ def mergeCubes(obsDirList, cubeType, use_pq_offsets, im3dtran, over=""):
         n+=1
         os.chdir(Merged)
 
+    """
     # Copy the merged observation sequence data cubes to the Merged directory.
-    #for i in range(len(mergedCubes)):
-    #    shutil.copy(mergedCubes[i], './')
+    for i in range(len(mergedCubes)):
+        shutil.copy(mergedCubes[i], './')
 
-    # Merge all the individual merged observation sequence data cubes with the same grating.
+    # Merge all the individual merged observation sequence data cubes.
+    # TODO: test. Still untested.
 
     if len(mergedCubes)>1:
         os.chdir(Merged)
@@ -329,16 +331,20 @@ def mergeCubes(obsDirList, cubeType, use_pq_offsets, im3dtran, over=""):
         for n in range(len(gratlist)): # For each unique grating
             # Grab the indices of the cubes associated with that grating.
             indices = [k for k, x in enumerate(gratlist) if x==gratlist[n]]
+            print n
+            print "indices are: ", indices
             newcubelist = []
             for ind in indices:
                 newcubelist.append(mergedCubes[ind])
             waveshift(newcubelist, grat)
+            print newcubelist
             for i in range(len(newcubelist)):
                 # Build an input string containing all the cubes to combine.
                 if i==0:
                     inputstring = newcubelist[i]+'[1]'
                 else:
                     inputstring += ','+newcubelist[i]+'[1]'
+            print "input string is ", inputstring
             if os.path.exists('temp_merged'+gratlist[n][0]+'.fits'):
                 if over:
                     iraf.delete('temp_merged'+gratlist[n][0]+'.fits')
@@ -349,6 +355,7 @@ def mergeCubes(obsDirList, cubeType, use_pq_offsets, im3dtran, over=""):
             else:
                 iraf.imcombine(inputstring, output = 'temp_merged'+gratlist[n][0]+'.fits', combine = 'median', offsets = 'waveoffsets'+grat[0]+'.txt')
                 iraf.fxcopy(input=newcubelist[0]+'[0], temp_merged'+gratlist[n][0]+'.fits', output = 'TOTAL_merged'+gratlist[n][0]+'.fits')
+        """
 
 #####################################################################################
 #                                        FUNCTIONS                                  #

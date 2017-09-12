@@ -965,6 +965,7 @@ def applyTelluricCube(scienceFrameList):
         shutil.move("shiftedFit.fits", "finalTelFit"+item+".fits")
         shutil.move("telluricCorrection.fits", "telCor"+item+".fits")
         shutil.move("cubeslice.fits", "cubeslice"+item+".fits")
+<<<<<<< HEAD
         shutil.move("scaledBlackBody.fits", "scaledBlackBody"+item+".fits")
         shutil.move("shiftedScaledTelluric.fits", "finaltelCor"+item+'.fits')
         if os.path.exists('fit.fits'):
@@ -973,6 +974,9 @@ def applyTelluricCube(scienceFrameList):
             os.remove('bbody.fits')
         if os.path.exists('oneDcorrected.fits'):
             os.remove('oneDcorrected.fits')
+=======
+        shutil.move("scaledShiftedTelluric.fits", "finaltelCor"+item+'.fits')
+>>>>>>> 2f0603e7301e4b644ead66cfec736a4e28475b1b
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 

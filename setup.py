@@ -17,12 +17,12 @@ readme.close()
 NAME = 'Nifty4NIFS'
 SCRIPTS = glob('scripts/*')
 PACKAGE_DATA = {
-    '': ['*.dat', '*.cfg', '*.fits']
+    '': ['*.dat', '*.cfg', '*.fits', '*.txt']
 }
 
 setup(
     name=NAME,
-    version="1.0b2",
+    version="1.0b4",
     author='ncomeau',
     author_email='ncomeau@gemini.edu',
     description='The Gemini NIFS data reduction pipeline.',
@@ -30,7 +30,7 @@ setup(
     url='http://www.gemini.edu',
     license='MIT',
     classifiers=[
-        'Development Status :: 2 - Beta',
+        'Development Status :: 4 - Beta',
         'Environment :: MacOS X',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Education',
