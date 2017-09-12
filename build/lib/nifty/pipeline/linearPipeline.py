@@ -29,7 +29,7 @@
 
 # STDLIB
 
-import logging, os, sys, shutil, pkg_resources, argparse, glob
+import logging, os, sys, shutil, pkg_resources, argparse
 from datetime import datetime
 
 # LOCAL
@@ -180,63 +180,32 @@ def start(args):
     # By now, we should have paths to the three types of raw data. Print them out.
     printDirectoryLists()
 
-    with open('./config.cfg') as config_file:
-        # Load general config.
-        config = ConfigObj(config_file, unrepr=True)
-        scienceDirectoryList = config['scienceDirectoryList']
+    ###########################################################################
+    ##                STEP 2: Reduce baseline calibrations.                  ##
+    ###########################################################################
 
-    # This mode does a full reduction, science observation by science observation.
-    # For each science directory in science directory list:
-    # Reduce the associated calibrations
-    # Reduce the associated tellurics
-    # Reduce the science observation
-    for scienceObservation in scienceDirectoryList:
-        # Find associated calibrations by looping through calibration directory list.
-        # Split to this form: ('/Users/nat/tests/core/M85/20150508/J', 'obs36')
-        temp = os.path.split(scienceObservation)
-        # Split again to this form: ('/Users/nat/tests/core/M85/20150508', 'J')
-        temp2 = os.path.split(temp[0])
-        # Now temp[0] is calibation base path name, temp[1] is grating.
-        calibrationDirectory = temp2[0]+"/Calibrations_"+temp2[1]
-        # Have to convert it to a one-element list first.
-        calibrationDirectory = [calibrationDirectory]
-        # We now have our calibration directory for the given science!
-        # Now find associated telluric observations.
-        # temp[0] looks like: '/Users/nat/tests/core/M85/20150508/J'
-        telluricBaseName = temp[0]+"/Tellurics/"
-        os.chdir(telluricBaseName)
-        telluricDirectoryList = glob.glob("obs*")
-        # We must make these incomplete paths into full paths by adding the base path.
-        telluricDirectoryList = [telluricBaseName+x for x in telluricDirectoryList]
-        # Don't forget to change back to starting point.
-        os.chdir(path)
+    if calibrationReduction:
+        if manualMode:
+            a = raw_input('About to enter nifsBaselineCalibration.')
+        nifsBaselineCalibration.start()
 
-        ###########################################################################
-        ##                STEP 2: Reduce baseline calibrations.                  ##
-        ###########################################################################
+    ###########################################################################
+    ##                STEP 3: Reduce telluric observations.                  ##
+    ###########################################################################
 
-        if calibrationReduction:
-            if manualMode:
-                a = raw_input('About to enter nifsBaselineCalibration.')
-            nifsBaselineCalibration.start(calibrationDirectoryList=calibrationDirectory)
+    if telluricReduction:
+        if manualMode:
+            a = raw_input('About to enter nifsReduce to reduce Tellurics.')
+        nifsReduce.start('Telluric')
 
-        ###########################################################################
-        ##                STEP 3: Reduce telluric observations.                  ##
-        ###########################################################################
+    ###########################################################################
+    ##                 STEP 4: Reduce science observations.                  ##
+    ###########################################################################
 
-        if telluricReduction:
-            if manualMode:
-                a = raw_input('About to enter nifsReduce to reduce Tellurics.')
-            nifsReduce.start('Telluric', telluricDirectoryList=telluricDirectoryList)
-
-        ###########################################################################
-        ##                 STEP 4: Reduce science observations.                  ##
-        ###########################################################################
-
-        if scienceReduction:
-            if manualMode:
-                a = raw_input('About to enter nifsReduce to reduce science.')
-            nifsReduce.start('Science')
+    if scienceReduction:
+        if manualMode:
+            a = raw_input('About to enter nifsReduce to reduce science.')
+        nifsReduce.start('Science')
 
     ###########################################################################
     ##                    Data Reduction Complete!                           ##

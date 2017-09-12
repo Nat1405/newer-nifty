@@ -137,13 +137,13 @@ def mergeCubes(obsDirList, cubeType, use_pq_offsets, im3dtran, over=""):
         # Create a directory called Merged and copy all the data cubes to this directory.
         if not os.path.exists(obsPath+'/Merged'+suffix+'/'):
             os.mkdir(obsPath+'/Merged'+suffix+'/')
-            logging.info('\nI am creating a directory called Merged'+str(suffix))
+            logging.info('I am creating a directory called Merged_'+str(suffix))
 
         Merged = obsPath+'/Merged'+suffix
 
         if not os.path.exists(Merged+'/'+date+'_'+obsid):
             os.mkdir(Merged+'/'+date+'_'+obsid)
-            logging.info('\nI am creating a directory with date and abs ID inside Merged.')
+            logging.info('I am creating a directory with date and abs ID inside Merged ')
 
         # If a list called shiftedcubes already exists then just merge those shifted cubes and continue.
         if glob.glob("./shift*.fits"):
