@@ -457,7 +457,7 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
                 # Make a telluric corrected data cube.
                 # Make a roughly flux-calibrated data cube.
                 elif kind=='Science':
-                    #makeCube('tfbrsn', scienceFrameList, log, over)
+                    makeCube('tfbrsn', scienceFrameList, log, over)
                     if telluricCorrectionMethod == "gnirs":
                         applyTelluricCube(scienceFrameList)
                     if fluxCalibrationMethod == "gnirs":
