@@ -481,12 +481,14 @@ in a splot environment (commands found here: http://stsdas.stsci.edu/cgi-bin/get
 The most useful commands for this are:
 
 - k + (g, l or v)
+
 Mark two continuum points and fit a single line profile. The second key selects the
 type of profile: g for gaussian, l for lorentzian, and v for voigt. Any other second key
 defaults to gaussian. The center, continuum at the center, core intensity, integrated flux,
 equivalent width, and FWHMs are printed and saved in the log file. See d for fitting multiple profiles and - to subtract the fit.
 
 - w
+
 Window the graph. For further help type ? to the "window:" prompt or see help under gtools.
 To cancel the windowing use a.
 
@@ -546,6 +548,7 @@ for "skyframelist.append(entry)" and change the <= <value_in_arcseconds> to some
 
 nifsBaselineCalibration.py
 --------------------------
+
 - **Long data file path names are not fed to IRAF tasks**. It seems IRAF task parameters
 must be 99 characters or less. Nifty's data files are stored in the Astroconda environment
 packages directory; for example, on my system it is "/Users/nat/miniconda2/envs/niftypip/lib/python2.7/site-packages/nifty/pipeline/".
@@ -558,6 +561,7 @@ causing you issues and I can come up with a better fix.**
 
 nifsReduce.py
 -------------
+
 - z-band data is not capable of a flux calibration (yet!).
 - Seems to be missing the first peak of the ronchi slit when iraf.nfsdist() is run interactively.
   This does not seem to be a problem.
@@ -576,7 +580,8 @@ nifsUtils.py
 
 General Issues
 --------------
-- A longstanding bug (see `astropy<https://github.com/astropy/astropy/pull/960>`_ ) in astropy has made it
+
+- A longstanding bug (see `astropy <https://github.com/astropy/astropy/pull/960>`_ ) in astropy has made it
   difficult to build Nifty as a binary executable.
 - The conversion of print statements to logging.info() statements was messy. Some of these
   may still not be properly converted and will throw nasty tracebacks. However these seem to
@@ -611,13 +616,13 @@ a pdf.
 This file, others like it in the docs/ directory and the README are written in
 reStructuredText. This markup language integrates well with Python's automatic
 documentation builder (we used Sphinx) and Github as well as being human readable. You can
-read more about reStructuredText `here.<http://www.sphinx-doc.org/en/stable/rest.html>`_
+read more about reStructuredText `here <http://www.sphinx-doc.org/en/stable/rest.html>`_.
 
 Comments and DocStrings in Source Code
 
 
 Nifty uses the Google docstring style. Examples of docstrings can be found
-`here.<http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_
+`here <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_.
 
 Other Python comments use the following convention:
 
@@ -658,14 +663,14 @@ or changes break the public API, it is time to increment the MAJOR version numbe
 Code Conventions
 ----------------
 
-Nifty was partly written using `atom.<https://atom.io/>`_ Error messages,
-warnings and updates were written using templates in the included snippets.cson file.
+Nifty was partly written using `atom <https://atom.io/>`_. Error messages,
+warnings and updates were partly written using templates in the included snippets.cson file.
 
 Where possible, nat used 2D (and higher) dimensional lists to implement error
 checking flags. These are particularly prominent in sort.
 
 Variables and functions were named using conventions in the
-`Python Style Guide<https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_.
+`Python Style Guide <https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_.
 Specifically a mix of camelCase and lower_case_with_underscores was used.
 
 Future Work
@@ -686,7 +691,7 @@ Changelog
 =========
 All notable changes to this project will be documented in this file.
 
-The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_.
+The format is based on `Keep a Changelog <http://keepachangelog.com/en/1.0.0/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`_.
 
 Unreleased
