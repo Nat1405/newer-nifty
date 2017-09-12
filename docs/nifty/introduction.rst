@@ -692,12 +692,14 @@ and this project adheres to `Semantic Versioning<http://semver.org/spec/v2.0.0.h
 Unreleased
 ----------
 All in-development changes will be tracked here.
+
 - Adding unit tests for each step and integration test for pipeline.
 - Finished integrating multiple types of cube merging.
 
 1.0b4 - 2017-09-12
 ------------------
 Much refined and patched Beta release. Still not finished but much more robust.
+
 - Verified overwrite; it seems to be safe to use now.
 - Fixing telluric correction and absolute flux calibration.
 - Added 1D extraction routine.
@@ -706,12 +708,14 @@ Much refined and patched Beta release. Still not finished but much more robust.
 1.0b1 - 2017-09-08
 ------------------
 Preliminary Beta release.
+
 - Syntax errors mean this version will not compile.
 - Fixing merge flip due to differences between NIFS + ALTAIR and NIFS w/o ALTAIR on the bottom port.
 
 1.0a1 - 2017-08-31
 ------------------
 Preliminary Alpha release.
+
 - .whl uploaded to PIP, docs uploaded to
 ReadTheDocs and preliminary DOI assigned.
 
