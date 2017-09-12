@@ -171,3 +171,127 @@ After Step 2: Make Flat and bad pixel mask, several new files and intermediate r
   | | | |____shiftfile
   | | | |____sN20100410S0362.fits
   |____Nifty.log
+
+
+  After Step 3: Wavelength Solution, similar files are created as well as a database/ directory containing wavelength solutions for each slice.
+
+  .. code-block:: text
+
+  .
+  |____config.cfg
+  |____HD141004/
+  | |____20100401/
+  | | |____Calibrations_K/
+  | | | |____arcdarkfile
+  | | | |____arcdarklist
+  | | | |____arclist
+  | | | |____database/                        # Contains textfile results from nswavelength(), nfsdist(), nffitcoords(), nifcube()
+  | | | | |____idwrgnN20100401S0137_SCI_*_    # Textfiles containing wavelength solutions for a particular slice
+  | | | |____flatdarklist
+  | | | |____flatfile
+  | | | |____flatlist
+  | | | |____gnN20100401S0137.fits            # Median-combined with gemcombine() arc dark frame
+  | | | |____gnN20100410S0362.fits
+  | | | |____gnN20100410S0368.fits
+  | | | |____gnN20100410S0373.fits            # Median-combined with gemcombine() arc frame
+  | | | |____N201004*.fits
+  | | | |____nN201004*.fits                   # Results of running raw frames through nfprepare()
+  | | | |____original_flatdarklist
+  | | | |____original_flatlist
+  | | | |____rgnN20100401S0137.fits           # Results from nsreduce() of combined arc dark frame
+  | | | |____rgnN20100410S0362.fits
+  | | | |____rgnN20100410S0362_flat.fits
+  | | | |____rgnN20100410S0362_sflat.fits
+  | | | |____rgnN20100410S0362_sflat_bpm.pl
+  | | | |____rgnN20100410S0368.fits
+  | | | |____rgnN20100410S0368_dark.fits
+  | | | |____ronchilist
+  | | | |____sflat_bpmfile
+  | | | |____sflatfile
+  | | | |____shiftfile
+  | | | |____sN20100410S0362.fits
+  | | | |____wrgnN20100401S0137.fits          # Final wavelength calibration frame
+  |____Nifty.log
+
+After Step 4: Spatial Distortion, the last step of the calibration reduction, more files are added to the database directory.
+
+.. code-block:: text
+
+  .
+  |____config.cfg
+  |____HD141004/
+  | |____20100401/
+  | | |____Calibrations_K/
+  | | | |____arcdarkfile
+  | | | |____arcdarklist
+  | | | |____arclist
+  | | | |____database/
+  | | | | |____idrgnN20100410S0375_SCI_*_      # Textfiles containing spatial solutions for particular slices
+  | | | | |____idwrgnN20100401S0137_SCI_*_
+  | | | |____flatdarklist
+  | | | |____flatfile
+  | | | |____flatlist
+  | | | |____gnN20100401S0137.fits
+  | | | |____gnN20100410S0362.fits
+  | | | |____gnN20100410S0368.fits
+  | | | |____gnN20100410S0373.fits
+  | | | |____gnN20100410S0375.fits             # Median combined with gemcombine() lamps-on ronchi frame
+  | | | |____N201004*.fits
+  | | | |____nN20100401S0137.fits              # Results of running raw lamps-on ronchi frames through nfprepare()
+  | | | |____original_flatdarklist
+  | | | |____original_flatlist
+  | | | |____rgnN20100401S0137.fits
+  | | | |____rgnN20100410S0362.fits
+  | | | |____rgnN20100410S0362_flat.fits
+  | | | |____rgnN20100410S0362_sflat.fits
+  | | | |____rgnN20100410S0362_sflat_bpm.pl
+  | | | |____rgnN20100410S0368.fits
+  | | | |____rgnN20100410S0368_dark.fits
+  | | | |____rgnN20100410S0375.fits            # Results of running combined lamps-on ronchi frame through nsreduce() AND nfsdist()
+  | | | |____ronchifile                        # Text file storing name of final ronchi frame
+  | | | |____ronchilist
+  | | | |____sflat_bpmfile
+  | | | |____sflatfile
+  | | | |____shiftfile
+  | | | |____sN20100410S0362.fits
+  | | | |____wrgnN20100401S0137.fits
+  |____Nifty.log
+
+Now we are in nifsReduce of Tellurics.
+--------------------------------------
+
+After Step 1: Locate the Spectrum, two new files are created.
+
+.. code-block:: text
+
+  .
+  |____config.cfg
+  |____HD141004/
+  | |____20100401/
+  | | |____K
+  | | | |____Tellurics
+  | | | | |____obs109
+  | | | | | |____database/                      # Database from
+  | | | | | | |____idrgnN20100410S0375_SCI_*_   #
+  | | | | | | |____idwrgnN20100401S0137_SCI_*_  #
+  | | | | | |____N201004*.fits
+  | | | | | |____nN201004*.fits
+  | | | | | |____rgnN20100410S0375.fits         #
+  | | | | | |____scienceMatchedTellsList
+  | | | | | |____skyFrameList
+  | | | | | |____tellist
+  | | | | | |____wrgnN20100401S0137.fits        #
+  |____Nifty.log
+
+
+
+
+
+
+
+
+
+
+
+
+.. placeholder
