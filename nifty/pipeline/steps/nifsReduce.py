@@ -709,8 +709,7 @@ def transform(objlist, log, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def makeCube(pre, scienceFrameList, log, over):
-    """ Reformat the data into a 3-D datacube using iraf.nifcube. Output: If
-    telluric correction to be applied, -->catfbrsgn. Else, -->ctfbrsgn.
+    """ Reformat the data into a 3-D datacube using iraf.nifcube. Output: -->ctfbrsgn.
 
     NIFCUBE - Construct 3D NIFS datacubes.
 
@@ -719,7 +718,6 @@ def makeCube(pre, scienceFrameList, log, over):
     that have coordinates of x, y, lambda.
 
     """
-
     for frame in scienceFrameList:
         if os.path.exists("c"+pre+frame+".fits"):
             if over:
@@ -958,6 +956,7 @@ def fitContinuum(continuuminter, grating):
     plt.plot(final_tel_no_hlines_no_norm)
     plt.plot(fit)
     plt.show()
+
 #------------------------------------- hlinecorrection tasks ----------------------------------------------------#
 
 def hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, hline_method, log, over, airmass_std=1.0):
@@ -982,23 +981,24 @@ def hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, hl
     if hline_method == "vega" and not no_hline:
         vega(combined_extracted_1d_spectra, grating, path, hlineinter, telluric_shift_scale_record, log, over)
 
-    if hline_method == "linefitAuto" and not no_hline:
-        linefitAuto(combined_extracted_1d_spectra, grating)
+    #if hline_method == "linefitAuto" and not no_hline:
+    #    linefitAuto(combined_extracted_1d_spectra, grating)
 
-    if hline_method == "linefitManual" and not no_hline:
-        linefitManual(combined_extracted_1d_spectra+'[sci,1]', grating)
+    # Disabled and untested because interactive scripted iraf tasks are broken...
+    #if hline_method == "linefitManual" and not no_hline:
+    #    linefitManual(combined_extracted_1d_spectra+'[sci,1]', grating)
 
-    if hline_method == "vega_tweak" and not no_hline:
+    #if hline_method == "vega_tweak" and not no_hline:
         #run vega removal automatically first, then give user chance to interact with spectrum as well
-        vega(combined_extracted_1d_spectra,grating, path, hlineinter, telluric_shift_scale_record, log, over)
-        linefitManual("final_tel_no_hlines_no_norm", grating)
+    #    vega(combined_extracted_1d_spectra,grating, path, hlineinter, telluric_shift_scale_record, log, over)
+    #    linefitManual("final_tel_no_hlines_no_norm", grating)
 
-    if hline_method == "linefit_tweak" and not no_hline:
+    #if hline_method == "linefit_tweak" and not no_hline:
         #run Lorentz removal automatically first, then give user chance to interact with spectrum as well
-        linefitAuto(combined_extracted_1d_spectra,grating)
-        linefitManual("final_tel_no_hlines_no_norm", grating)
+    #    linefitAuto(combined_extracted_1d_spectra,grating)
+    #    linefitManual("final_tel_no_hlines_no_norm", grating)
 
-    if hline_method == "none":
+    if hline_method == "none" and not no_hline:
         #need to copy files so have right names for later use
         iraf.imcopy(input=combined_extracted_1d_spectra+'[sci,'+str(1)+']', output="final_tel_no_hlines_no_norm", verbose='no')
     # Plot the non-hline corrected spectrum and the h-line corrected spectrum.
@@ -1032,9 +1032,11 @@ def vega(spectrum, band, path, hlineinter, telluric_shift_scale_record, log, ove
     if band=='K':
         ext = '1'
         sample = "21537:21778"
+        scale = 0.8
     if band=='H':
         ext = '2'
         sample = "16537:17259"
+        scale = 0.7
     if band=='J':
         ext = '3'
         sample = "11508:13492"
@@ -1067,7 +1069,7 @@ def vega(spectrum, band, path, hlineinter, telluric_shift_scale_record, log, ove
     else:
         iraf.imarith(operand1='tell_nolines', op='/', operand2=norm, result='final_tel_no_hlines_no_norm', title='', divzero=0.0, hparams='', pixtype='', calctype='', verbose='yes', noact='no', mode='al')
 
-# TODO(nat): linefitAuto and linefitManual are untested. Test these!
+# TODO(nat): linefitAuto and linefitManual could be useful at some point.
 def linefitAuto(spectrum, band):
     """automatically fit Lorentz profiles to lines defined in existing cur* files
     Go to x position in cursor file and use space bar to find spectrum at each of those points
@@ -1151,10 +1153,11 @@ def get1dSpecFromCube(inputcube):
     cubeslice = cube[1].data[:,30,30]
     # Create a PrimaryHDU object to encapsulate the data and header.
     hdu = astropy.io.fits.PrimaryHDU(cubeslice)
-    hdu.header = cubeheader
     # Modify the cd1_1 and CRVAL1 values; this adds the wavelength calibration to the correct cube dimension.
-    hdu.header['CRVAL1'] = hdu.header['CRVAL3']
-    hdu.header['CD1_1'] = hdu.header['CD3_3']
+    hdu.header = cubeheader
+    hdu.header['CRVAL1'] = cubeheader['CRVAL3']
+    hdu.header['CD1_1'] = cubeheader['CD3_3']
+    hdu.header['CRPIX1'] = 1.
     if os.path.exists('cubeslice.fits'):
         os.remove('cubeslice.fits')
     # Write the spectrum and header to a new .fits file.
@@ -1166,7 +1169,7 @@ def getShiftScale(standardspectra, grating, telluricinter, airmass_target=1.0):
     """
     if os.path.exists('oneDcorrected.fits'):
         os.remove('oneDcorrected.fits')
-    tell_info = iraf.telluric(input='cubeslice.fits[0]',output='oneDcorrected.fits',cal=standardspectra+"[0]",airmass=airmass_target,answer='yes',ignoreaps='yes',xcorr='yes',tweakrms='yes',inter=telluricinter,sample="*",threshold=0.1,lag=3,shift=0.0,dshift=0.1,scale=1.0,dscale=0.1, offset=1,smooth=1,cursor='',mode='al',Stdout=1)
+    tell_info = iraf.telluric(input='cubeslice.fits[0]',output='oneDcorrected.fits',cal=standardspectra+"[0]",airmass=airmass_target,answer='yes',ignoreaps='yes',xcorr='yes',tweakrms='yes',inter=telluricinter,sample="*",threshold=0.1,lag=3,shift=0.,dshift=0.1,scale=1.0,dscale=0.1, offset=1,smooth=1,cursor='',mode='al',Stdout=1)
     # Get shift and scale from the list of values iraf.telluric() returns.
     # Sample tell_info:
     # ['cubeslice.fits[0]: norm.fits[1]: cubeslice.fits[0]: dshift 5.', 'window:again:window:window:again:window:window:again:window:TELLURIC:',
@@ -1566,8 +1569,10 @@ def readMagnitude(scienceObjectName, grating):
 def makeFLambda(scienceObjectName, mag, grating, std_exp_time):
     """
     - Multiply magnitude expression by appropriate constant for grating.
-    - Multiple by ratio of experiment times
+    - Multiple by ratio of experiment times.
     - If no magnitude, set flambda to 1. No absolute flux calibration performed.
+    Returns:
+        -flambda: floating point constant.
     """
     if grating == "K":
         constant = 4.283E-11
@@ -1604,6 +1609,10 @@ def makeScaledBlackBody(scienceObjectName, flambda):
     wstart = target_header[1].header['CRVAL3']
     wdelt = target_header[1].header['CD3_3']
     wend = wstart + (2040 * wdelt)
+    crpix3 = target_header[1].header['CRPIX3']
+    if crpix3 != 1.:
+        logging.info("WARNING in Reduce: CRPIX of wavelength axis not equal to one. Exiting flux calibration.")
+        raise SystemExit
     # Make a blackbody for each of the 2040 NIFS spectral pixels.
     if os.path.exists("bbody.fits"):
         os.remove("bbody.fits")
