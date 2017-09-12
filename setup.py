@@ -30,7 +30,7 @@ setup(
     url='http://www.gemini.edu',
     license='MIT',
     classifiers=[
-        'Development Status :: 2 - Beta',
+        'Development Status :: 4 - Beta',
         'Environment :: MacOS X',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Education',

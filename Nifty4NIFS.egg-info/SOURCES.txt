@@ -1,4 +1,5 @@
 README.rst
+setup.py
 Nifty4NIFS.egg-info/PKG-INFO
 Nifty4NIFS.egg-info/SOURCES.txt
 Nifty4NIFS.egg-info/dependency_links.txt
@@ -12,9 +13,9 @@ nifty/pipeline/configobj/__init__.py
 nifty/pipeline/configobj/configobj.py
 nifty/pipeline/downloadFromGeminiPublicArchive/__init__.py
 nifty/pipeline/downloadFromGeminiPublicArchive/ndmapperDownloader.py
-nifty/pipeline/objectoriented/GetConfig.py
 nifty/pipeline/objectoriented/OOnifsBaseline.py
 nifty/pipeline/objectoriented/__init__.py
+nifty/pipeline/objectoriented/getConfig.py
 nifty/pipeline/objectoriented/routine.py
 nifty/pipeline/objectoriented/step.py
 nifty/pipeline/objectoriented/subroutine.py
