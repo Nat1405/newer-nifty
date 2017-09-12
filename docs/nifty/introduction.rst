@@ -665,17 +665,17 @@ Where possible, nat used 2D (and higher) dimensional lists to implement error
 checking flags. These are particularly prominent in sort.
 
 Variables and functions were named using conventions in the
-`Python Style Guide.<https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_
+`Python Style Guide<https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_.
 Specifically a mix of camelCase and lower_case_with_underscores was used.
 
 Future Work
 ===========
 
-Throughout the code, I've placed MANY TODO(nat) notes. These are my top priorities for now.
+Throughout the code, ncomeau has placed many TODO notes. These are good to check out and could be
+a good starting point.
 
-Some nice to haves:
+Some other nice to haves:
 
--
 - Add Python 3 compatability(if possible)
 - Ability to restart individual steps easily
 - Add some sort of status indicators... Like progress
@@ -686,27 +686,33 @@ Changelog
 =========
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+The format is based on `Keep a Changelog<http://keepachangelog.com/en/1.0.0/>`_.
+and this project adheres to `Semantic Versioning<http://semver.org/spec/v2.0.0.html>`_.
 
 Unreleased
 ----------
 All in-development changes will be tracked here.
-
-- Fixing merge flip due to differences between NIFS + ALTAIR and NIFS w/o ALTAIR
-on the bottom port.
-- Adding remaining overwrite blocks.
 - Adding unit tests for each step and integration test for pipeline.
+- Finished integrating multiple types of cube merging.
+
+1.0b4 - 2017-09-12
+------------------
+Much refined and patched Beta release. Still not finished but much more robust.
+- Verified overwrite; it seems to be safe to use now.
 - Fixing telluric correction and absolute flux calibration.
+- Added 1D extraction routine.
+- Preliminary addition of three types of cubes and cube merging.
 
 1.0b1 - 2017-09-08
 ------------------
-- Preliminary Beta release. Syntax errors mean this version will not compile.
+Preliminary Beta release.
+- Syntax errors mean this version will not compile.
+- Fixing merge flip due to differences between NIFS + ALTAIR and NIFS w/o ALTAIR on the bottom port.
 
 1.0a1 - 2017-08-31
 ------------------
-
-- Preliminary Alpha release. .whl uploaded to PIP, docs uploaded to
+Preliminary Alpha release.
+- .whl uploaded to PIP, docs uploaded to
 ReadTheDocs and preliminary DOI assigned.
 
 API

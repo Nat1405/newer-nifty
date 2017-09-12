@@ -236,7 +236,7 @@ def start(args):
         if scienceReduction:
             if manualMode:
                 a = raw_input('About to enter nifsReduce to reduce science.')
-            nifsReduce.start('Science', scienceDirectoryList=scienceObservation)
+            nifsReduce.start('Science')
 
     ###########################################################################
     ##                    Data Reduction Complete!                           ##

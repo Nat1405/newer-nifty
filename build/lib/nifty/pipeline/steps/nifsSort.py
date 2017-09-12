@@ -102,7 +102,7 @@ def start():
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
 
-    # Set up the logging file.
+    """# Set up the logging file.
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -111,7 +111,7 @@ def start():
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(message)s')
     ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    logger.addHandler(ch)"""
 
     # Set up the logging file.
     log = os.getcwd()+'/Nifty.log'
@@ -134,6 +134,7 @@ def start():
         program = sortConfig['program']
         skyThreshold = sortConfig['skyThreshold']
         sortTellurics = sortConfig['sortTellurics']
+        telluricTimeThreshold = sortConfig['telluricTimeThreshold']
         date = sortConfig['date']
         copy = sortConfig['copy']
 
@@ -184,7 +185,7 @@ def start():
         if sortTellurics:
             if manualMode:
                 a = raw_input("About to enter matchTellurics().")
-            matchTellurics(telluricDirectoryList, scienceDirectoryList)
+            matchTellurics(telluricDirectoryList, scienceDirectoryList, telluricTimeThreshold)
 
     # Exit if no or incorrectly formatted input is given.
     else:
@@ -230,6 +231,7 @@ def start():
     # 1) Science observation directory
     # 2) Calibration observation directory
     # 3) Telluric observation directory
+    logging.info("\nnifsSort: writing scienceDirectoryList, calibrationDirectoryList and telluricDirectoryList in ./config.cfg.")
     with open('./config.cfg') as config_file:
         options = ConfigObj(config_file, unrepr=True)
     options['scienceDirectoryList'] = scienceDirectoryList
@@ -430,6 +432,7 @@ def makePythonLists(rawPath, skyThreshold):
     # Print information for user.
     logging.info("\nTotal number of files found by type.\n")
     logging.info("Length allfilelist (science and telluric frames): " +  str(len(allfilelist)))
+    logging.info("Length sciImageList (science and science sky frames): " +  str(len(sciImageList)))
     logging.info("Length arclist (arc frames): " + str(len(arclist)))
     logging.info("Length arcdarklist (arc dark frames): " + str(len(arcdarklist)))
     logging.info("Length flatlist (lamps on flat frames): " + str(len(flatlist)))
@@ -555,7 +558,7 @@ def sortScienceAndTelluric(allfilelist, skyFrameList, telskyFrameList, sciImageL
 
 
     # Copy science and acquisition frames to the appropriate directory.
-    logging.info("\nCopying Science and Acquisitions.\nCopying science frames.\nNow copying: ")
+    logging.info("\nCopying Science and Acquisitions.\nCopying science frames and science acquisitions.\nNow copying: ")
 
     for i in range(len(allfilelist)):
         header = astropy.io.fits.open(rawPath+'/'+allfilelist[i][0])
@@ -1266,7 +1269,7 @@ def sortCalibrations(arcdarklist, arclist, flatlist, flatdarklist, ronchilist, o
 
 #----------------------------------------------------------------------------------------#
 
-def matchTellurics(telDirList, obsDirList):
+def matchTellurics(telDirList, obsDirList, telluricTimeThreshold):
 
     """Matches science images with the telluric frames that are closest in time.
     Creates a file in each telluric observation directory called scienceMatchedTellsList.
@@ -1353,7 +1356,7 @@ def matchTellurics(telDirList, obsDirList):
                     for b in range(len(timeList)):
                         # Check to make sure telluric grating and science grating match.
                         if timeList[b][3] == science_grating:
-                            if abs(imageTime-timeList[b][1]) <= 5400 or abs(imageTime-timeList[b][2]) <=5400:
+                            if abs(imageTime-timeList[b][1]) <= int(telluricTimeThreshold) or abs(imageTime-timeList[b][2]) <= int(telluricTimeThreshold):
                                 if abs(imageTime-timeList[b][1]) < abs(imageTime-timeList[b][2]):
                                     diff = abs(imageTime-timeList[b][1])
                                 else:
@@ -1406,93 +1409,93 @@ def matchTellurics(telDirList, obsDirList):
                 logging.info("#####################################################################\n")
 
                 rewriteSciImageList(2.0)
-            try:
-                sciImageList = open('scienceFrameList', "r").readlines()
-                logging.info("\nSucceeded; science frames are now identified.")
-            except IOError:
-                logging.info("\nWARNING: Still no science frames found in " + str(os.getcwd()) + ". You may have to adjust the skyThreshold parameter.")
-
+                try:
+                    sciImageList = open('scienceFrameList', "r").readlines()
+                    logging.info("\nSucceeded; a science frame list exists in " + str(os.getcwd()))
+                except IOError:
+                    logging.info("\nWARNING: no science frames found in " + str(os.getcwd()) + ". You may have to adjust the skyThreshold parameter.")
+                    raise SystemExit
 
             sciImageList = [image.strip() for image in sciImageList]
+            for science_image in sciImageList:
+                scienceDirectory = os.getcwd()
+                # Open image and get science image grating from header.
+                science_header = astropy.io.fits.open('./'+ science_image + '.fits')
+                science_time = timeCalc(science_image+'.fits')
+                science_date = science_header[0].header[ 'DATE'].replace('-','')
 
-            # Open image and get science image grating from header.
-            science_image = sciImageList[0]
-            science_header = astropy.io.fits.open('./'+ science_image + '.fits')
-            science_time = timeCalc(science_image+'.fits')
-            science_date = science_header[0].header[ 'DATE'].replace('-','')
+                # Check that directory obsname matches header obsname.
+                temp_obs_name = 'obs' + science_header[0].header['OBSID'][-3:].replace('-','')
+                if science_observation_name != temp_obs_name:
+                    logging.info("\n#####################################################################")
+                    logging.info("#####################################################################")
+                    logging.info("")
+                    logging.info("     WARNING in sort: science "+str(science_observation_name)+ " :")
+                    logging.info("                      observation name data in headers and directory")
+                    logging.info("                      do not match.")
+                    logging.info("")
+                    logging.info("#####################################################################")
+                    logging.info("#####################################################################\n")
 
-            # Check that directory obsname matches header obsname.
-            temp_obs_name = 'obs' + science_header[0].header['OBSID'][-3:].replace('-','')
-            if science_observation_name != temp_obs_name:
-                logging.info("\n#####################################################################")
-                logging.info("#####################################################################")
-                logging.info("")
-                logging.info("     WARNING in sort: science "+str(science_observation_name)+ " :")
-                logging.info("                      observation name data in headers and directory")
-                logging.info("                      do not match.")
-                logging.info("")
-                logging.info("#####################################################################")
-                logging.info("#####################################################################\n")
-
-            # Check that a tellurics directory exists.
-            if os.path.exists('../Tellurics/'):
-                os.chdir('../Tellurics/')
-            else:
-                logging.info("\n#####################################################################")
-                logging.info("#####################################################################")
-                logging.info("")
-                logging.info("     WARNING in sort: telluric directory for science "+str(science_observation_name))
-                logging.info("                      does not exist.")
-                logging.info("")
-                logging.info("#####################################################################")
-                logging.info("#####################################################################\n")
-
-            found_telluric_flag = False
-
-            # Iterate through tellurics observation directories.
-            for directory in list(glob.glob('obs*')):
-                os.chdir('./'+directory)
-                # Check that a file, scienceMatchedTellsList exists.
-                try:
-                    scienceMatchedTellsList = open('scienceMatchedTellsList', "r").readlines()
-                    # Check that the science observation name is in the file.
-                    # Check that immediately after is at least one telluric image name.
-                    # Do this by checking for the science date in the telluric name.
-                    for i in range(len(scienceMatchedTellsList)):
-                        telluric_observation_name = scienceMatchedTellsList[i].strip()
-                        if telluric_observation_name == science_observation_name:
-                            if science_date in scienceMatchedTellsList[i+1].strip():
-                                found_telluric_flag = True
-                                break
-                except IOError:
-                    pass
-
-                if found_telluric_flag:
-                    os.chdir('../')
-                    break
+                # Check that a tellurics directory exists.
+                if os.path.exists('../Tellurics/'):
+                    os.chdir('../Tellurics/')
                 else:
+                    logging.info("\n#####################################################################")
+                    logging.info("#####################################################################")
+                    logging.info("")
+                    logging.info("     WARNING in sort: telluric directory for science "+str(science_observation_name))
+                    logging.info("                      does not exist.")
+                    logging.info("")
+                    logging.info("#####################################################################")
+                    logging.info("#####################################################################\n")
+                    continue
+                found_telluric_flag = False
+
+                # Iterate through tellurics observation directories.
+                for directory in list(glob.glob('obs*')):
+                    os.chdir('./'+directory)
+                    # Check that a file, scienceMatchedTellsList exists.
+                    try:
+                        scienceMatchedTellsList = open('scienceMatchedTellsList', "r").readlines()
+                        # Check that the science observation name is in the file.
+                        # Check that immediately after is at least one telluric image name.
+                        # Do this by checking for the science date in the telluric name.
+                        for i in range(len(scienceMatchedTellsList)):
+                            telluric_observation_name = scienceMatchedTellsList[i].strip()
+                            if telluric_observation_name == science_observation_name:
+                                rest_list = [x.strip() for x in scienceMatchedTellsList]
+                                if science_image in rest_list:
+                                    found_telluric_flag = True
+                                    break
+                    except IOError:
+                        pass
+
+                    if found_telluric_flag:
+                        os.chdir('../')
+                        break
+                    else:
+                        os.chdir('../')
+
+                if not found_telluric_flag:
                     os.chdir('../')
-
-            if not found_telluric_flag:
-                os.chdir('../')
-                logging.info("\n#####################################################################")
-                logging.info("#####################################################################")
-                logging.info("")
-                logging.info("     WARNING in sort: no tellurics data found for science "+str(science_observation_name))
-                logging.info("")
-                logging.info("#####################################################################")
-                logging.info("#####################################################################\n")
-
-
-            else:
-                logging.info("\nFound telluric data for all science observations.\n")
-            # TO DO:
-            # Optional: open that telluric image and store time in telluric_time
-            # Check that abs(telluric_time - science_time) < 1.5 hours
+                    logging.info("\n#####################################################################")
+                    logging.info("#####################################################################")
+                    logging.info("")
+                    logging.info("     WARNING in sort: no tellurics data found for science "+str(science_image))
+                    logging.info("     in " + str(os.getcwd()))
+                    logging.info("")
+                    logging.info("#####################################################################")
+                    logging.info("#####################################################################\n")
+                os.chdir(scienceDirectory)
+                # TO DO:
+                # Optional: open that telluric image and store time in telluric_time
+                # Check that abs(telluric_time - science_time) < 1.5 hours
 
     # ---------------------------- End Tests --------------------------------- #
 
     os.chdir(path)
+    logging.info("\nI am finished matching science images with telluric frames.")
     return
 
 

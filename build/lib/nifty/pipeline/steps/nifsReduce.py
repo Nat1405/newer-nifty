@@ -949,7 +949,9 @@ def applyTelluricCube(scienceFrameList):
     # For each cube in uncorrectedCubes:
     for item in scienceFrameList:
         # Apply a telluric correction to an on-target part of the cube (to a 1D spectrum).
-        getTelluricSpec(item)
+        # If didn't find a telluric correction spectrum, skip this run.
+        if not getTelluricSpec(item):
+            continue
         # Get shift and scale of spec from one part of the cube.
         get1dSpecFromCube("ctfbrsn"+item+".fits")
         tellshift, scale = getShiftScale("telluricCorrection.fits", grating, telluricinter)
@@ -977,7 +979,10 @@ def fluxCalibrate(scienceFrameList):
         grating = scienceHeader[0].header['GRATING'][0]
 
         # Get mag and telluric standard exposure time.
-        mag, std_exp_time = readMagnitude(scienceObjectName, grating)
+        mag, std_exp_time, status = readMagnitude(scienceObjectName, grating)
+        # Check that the last step succeeded; if not skip flux cal for this cube.
+        if not status:
+            continue
 
         # Flambda is just a constant.
         flambda = makeFLambda(scienceObjectName, mag, grating, std_exp_time)
@@ -1023,10 +1028,11 @@ def fitContinuum(continuuminter, grating):
     # Plot the telluric correction spectrum with the continuum fit.
     final_tel_no_hlines_no_norm = astropy.io.fits.open('final_tel_no_hlines_no_norm.fits')[0].data
     fit = astropy.io.fits.open('fit.fits')[0].data
-    plt.title('Unnormalized Telluric Correction and Continuum fit Used to Normalize')
-    plt.plot(final_tel_no_hlines_no_norm)
-    plt.plot(fit)
-    plt.show()
+    if continuuminter:
+        plt.title('Unnormalized Telluric Correction and Continuum fit Used to Normalize')
+        plt.plot(final_tel_no_hlines_no_norm)
+        plt.plot(fit)
+        plt.show()
 
 #------------------------------------- hlinecorrection tasks ----------------------------------------------------#
 
@@ -1075,10 +1081,11 @@ def hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, hl
     # Plot the non-hline corrected spectrum and the h-line corrected spectrum.
     uncorrected = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')[1].data
     corrected = astropy.io.fits.open("final_tel_no_hlines_no_norm.fits")[0].data
-    plt.title('Before and After HLine Correction')
-    plt.plot(uncorrected)
-    plt.plot(corrected)
-    plt.show()
+    if hlineinter:
+        plt.title('Before and After HLine Correction')
+        plt.plot(uncorrected)
+        plt.plot(corrected)
+        plt.show()
 
 def vega(spectrum, band, path, hlineinter, telluric_shift_scale_record, log, over, airmass=1.0):
     """
@@ -1213,6 +1220,7 @@ def getTelluricSpec(scienceObjectName):
     if not foundTelluricFlag:
         logging.info("\nWARNING: No Telluric correction spectrum found for " + str(scienceObjectName))
     os.chdir(observationDirectory)
+    return foundTelluricFlag
 
 def get1dSpecFromCube(inputcube):
     """
@@ -1296,9 +1304,8 @@ def divideCubebyTelandContinuuum(inputcube, telluricSpec, continuumSpec):
     # Divide each spectrum in the cubedata array by the telluric correction spectrum.
     for i in range(cube[1].header['NAXIS2']):         # NAXIS2 is the y axis of the final cube.
         for j in range(cube[1].header['NAXIS1']):     # NAXIS1 is the x axis of the final cube.
-            if i == 20 and j == 20:
-                cube[1].data[:,i,j] /= (telluricSpec[0].data)
-                cube[1].data[:,i,j] /= (continuumSpec[0].data)
+            cube[1].data[:,i,j] /= (telluricSpec[0].data)
+            cube[1].data[:,i,j] /= (continuumSpec[0].data)
     # Write the corrected cube to a new file with a "cp" prefix, "p" for "python corrected".
     if os.path.exists("a"+inputcube):
         os.remove("a"+inputcube)
@@ -1556,6 +1563,7 @@ def readMagnitude(scienceObjectName, grating):
     - Find appropriate mag from that std_star.txt file. If grating == 'Z' use grating == 'J'
     - Find standard exp time from telluric headers
     - Sets magnitude to None if no std_star.txt file found.
+    - Will only return True if standard exposure time and magnitude are found and read properly.
     """
     """
     # Try using this code if things don't seem to work well!
@@ -1592,6 +1600,9 @@ def readMagnitude(scienceObjectName, grating):
         logging.info("star_kelvin=" + str(star_kelvin))
         logging.info("star_mag=" + str(star_mag))"""
     observationDirectory = os.getcwd()
+    status = False
+    mag = None
+    std_exp_time = None
     # 2MASS doesn't have Z band magnitudes. Use J for rough absolute flux scaling.
     if grating == 'Z':
         grating = 'J'
@@ -1612,7 +1623,6 @@ def readMagnitude(scienceObjectName, grating):
         foundTelluricFlag = False
         if scienceObjectName in scienceMatchedTellsList:
             # Read magnitude from std_star.txt
-            mag = None
             try:
                 with open("std_star.txt") as f:
                     lines = f.read()
@@ -1630,12 +1640,13 @@ def readMagnitude(scienceObjectName, grating):
             combined_extracted_1d_spectra = str(open('telluricfile', 'r').readlines()[0]).strip()
             telheader = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')
             std_exp_time = telheader[0].header['EXPTIME']
+            status = True
             break
         else:
             os.chdir('..')
             continue
     os.chdir(observationDirectory)
-    return mag, std_exp_time
+    return mag, std_exp_time, status
 
 def makeFLambda(scienceObjectName, mag, grating, std_exp_time):
     """

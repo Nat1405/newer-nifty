@@ -106,6 +106,12 @@ def interactiveNIFSInput():
         "",
         "An example of a valid raw files path string: \"/Users/nat/data/spaceMonster\""
         )
+        telluricTimeThreshold = getParam(
+        "Max time between matched science and standard star frames? [5400]",
+        5400,
+        "Nifty will try to match science frames with the telluric frame closest to it in UT start time, " + \
+        "within a certain threshold (in seconds). The default is 5400 seconds (1.5 hours)."
+        )
         skyThreshold = getParam(
         "Sky threshold? [2.0]: ",
         2.0,
@@ -274,6 +280,7 @@ def interactiveNIFSInput():
         config['sortConfig']['program'] = program
         config['sortConfig']['skyThreshold'] = skyThreshold
         config['sortConfig']['sortTellurics'] = telluricReduction
+        config['sortConfig']['telluricTimeThreshold'] = telluricTimeThreshold
         config['sortConfig']['date'] = date
         config['sortConfig']['copy'] = copy
 
@@ -682,7 +689,8 @@ def checkSameLengthFlatLists():
         logging.info("     WARNING in sort: flatlist and flatdarklist are not the same ")
         logging.info("                      length. Removing extra entries from the")
         logging.info("                      longer list. Original lists can be found in")
-        logging.info("                      original_flatlist and original_flatdarklist.")
+        logging.info("                      original_flatlist and original_flatdarklist")
+        logging.info("     in " + str(os.getcwd()))
         logging.info("")
         logging.info("#####################################################################")
         logging.info("#####################################################################\n")
