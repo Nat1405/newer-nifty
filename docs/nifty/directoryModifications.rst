@@ -538,33 +538,42 @@ After Step 4: 2D to 3D transformation and Wavelength Calibration
 
 After Step 5: Make Uncorrected, Telluric Corrected and Flux Calibrated Data Cubes and Extracted One D Spectra:
 
+Changes take place in both science observation directories AND objectName/ExtractedOneD/ directories.
+
 .. code-block:: text
 
   obs107/
-  |____actfbrsnN201004*.fits                  # Final telluric corrected data cubes
-  |____bbody.fits                             # Temporary blackbody spectrum; overwritten with each cube processed
+  |____actfbrsnN201004*.fits               # Final telluric corrected data cubes
+  |____bbodyN201004*.fits                  # Unshifted or scaled blackbody used to flux calibrate cubes
   |____brsnN201004*.fits
-  |____ctfbrsnN201004*.fits                   # Final uncorrected data cubes
-  |____cubesliceN201004*.fits                 # One dimensional slice from each uncorrected cube used to shift and scale telluric correction spectrum and fit
+  |____combinedOneD                        # Textfile storing name of combined extracted one D standard star spectra
+  |____ctfbrsnN201004*.fits                # Final uncorrected data cubes
+  |____cubesliceN201004*.fits              # One D extracted spectrum of cube used to get telluric correction shift and scale
   |____database/
   | |____fcfbrsnN201004*_SCI_*_lamp
   | |____fcfbrsnN201004*_SCI_*_sdist
   | |____idrgnN20100410S0375_SCI_*_
   | |____idwrgnN20100401S0137_SCI_*_
-  |____factfbrsnN201004*.fits                 # Final telluric corrected AND flux calibrated data cubes
+  |____factfbrsnN201004*.fits              # Final flux calibrated AND telluric corrected data cubes
   |____fbrsnN201004*.fits
-  |____finaltelCorN201004*.fits               # Final shifted and scaled one D telluric correction spectrum used to telluric correct data cube
+  |____finaltelCorN201004*.fits            # Final shifted and scaled fit to telluric correction
+  |____gxtfbrsnN20100401S0182.fits         # One D extracted and combined standard star used to derive the telluric correction used on these cubes
   |____N201004*.fits
   |____nN201004*.fits
+  |____oneDcorrectedN201004*.fits          # One D telluric corrected slice of cube; this was used to get the shift and scale of the final correction
   |____original_skyFrameList
   |____rgnN20100410S0375.fits
   |____rsnN201004*.fits
+  |____scaledBlackBodyN201004*.fits        # Blackbody scaled by flambda and ratio of experiment times; telluric corrected cube multiplied by this
+                                           # to get flux calibrated AND telluric corrected cube.
   |____scienceFrameList
   |____skyFrameList
   |____snN201004*.fits
-  |____telCorN201004*.fits                    #
-  |____tfbrsnN201004*.fits
+  |____telCorN201004*.fits                 # UNSHIFTED AND SCALED telluric correction for each science cube
+  |____telFitN201004*.fits                 # UNSHIFTED AND SCALED fit to telluric correction for each science cube
+  |____tfbrsnN20100401S0182.fits
   |____wrgnN20100401S0137.fits
+  |____xtfbrsnN20100401S0182.fits
 
 
 

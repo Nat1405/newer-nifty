@@ -961,18 +961,26 @@ def applyTelluricCube(scienceFrameList):
         # Divide every spectrum in the cube by the shifted continuum to add a continuum shape back in.
         divideCubebyTelandContinuuum("ctfbrsn"+item+".fits", "scaledShiftedTelluric.fits", "fitShifted.fits")
         # Done! Now have a telluric-corrected science cube.
-        shutil.move("oneDcorrected.fits", "oneDcorrected"+item+".fits")
-        shutil.move("shiftedFit.fits", "finalTelFit"+item+".fits")
+        # Record intermediate files for a record of what we did.
+        shutil.move("fit.fits", "telFit"+item+".fits")
+        shutil.move("fitShifted.fits", "finalTelFit"+item+".fits")
         shutil.move("telluricCorrection.fits", "telCor"+item+".fits")
+        shutil.move("scaledShiftedTelluric.fits", "finaltelCor"+item+'.fits')
+        shutil.move("oneDcorrected.fits", "oneDcorrected"+item+".fits")
         shutil.move("cubeslice.fits", "cubeslice"+item+".fits")
-        shutil.move("scaledBlackBody.fits", "scaledBlackBody"+item+".fits")
-        shutil.move("shiftedScaledTelluric.fits", "finaltelCor"+item+'.fits')
+        # Remove the generic intermediate files without detail in their file names
         if os.path.exists('fit.fits'):
             os.remove('fit.fits')
-        if os.path.exists('bbody.fits'):
-            os.remove('bbody.fits')
+        if os.path.exists('fitShifted.fits'):
+            os.remove('fitShifted.fits')
+        if os.path.exists("telluricCorrection.fits"):
+            os.remove("telluricCorrection.fits")
+        if os.path.exists("scaledShiftedTelluric.fits"):
+            os.remove("scaledShiftedTelluric.fits")
         if os.path.exists('oneDcorrected.fits'):
             os.remove('oneDcorrected.fits')
+        if os.path.exists("cubeslice.fits"):
+            os.remove("cubeslice.fits")
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
@@ -1002,6 +1010,12 @@ def fluxCalibrate(scienceFrameList):
         # Multiply the telluric corrected cubes by this spectrum.
         multiplyByBlackBody(scienceObjectName)
 
+        shutil.move('bbody.fits', 'bbody'+scienceObjectName+'.fits')
+        shutil.move("scaledBlackBody.fits", "scaledBlackBody"+scienceObjectName+".fits")
+        if os.path.exists('bbody.fits'):
+            os.remove('bbody.fits')
+        if os.path.exists('scaledBlackBody.fits'):
+            os.remove('scaledBlackBody.fits')
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 
