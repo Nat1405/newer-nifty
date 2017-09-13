@@ -540,6 +540,8 @@ After Step 5: Make Uncorrected, Telluric Corrected and Flux Calibrated Data Cube
 
 Changes take place in both science observation directories AND objectName/ExtractedOneD/ directories.
 
+In a science observation directory:
+
 .. code-block:: text
 
   obs107/
@@ -575,7 +577,7 @@ Changes take place in both science observation directories AND objectName/Extrac
   |____wrgnN20100401S0137.fits
   |____xtfbrsnN20100401S0182.fits
 
-
+In the objectName/ExtractedOneD/ directory:
 
 
 
