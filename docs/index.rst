@@ -25,6 +25,10 @@ Package Documentation
    nifty/introduction.rst
    nifty/fileIO.rst
 
+API:
+
+.. automodule:: nifsSort
+
 
 Indices and tables
 ==================

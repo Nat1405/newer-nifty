@@ -146,6 +146,7 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
     # This helps make sure all variables are initialized to prevent bugs.
     continuuminter = None
     hlineinter = None
+    tempInter = None
     hline_method = None
     spectemp = None
     mag = None
@@ -179,6 +180,7 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
             telluricSkySubtraction = telluricReductionConfig['telluricSkySubtraction']
             continuuminter = telluricReductionConfig['continuuminter']
             hlineinter = telluricReductionConfig['hlineinter']
+            tempInter = telluricReductionConfig['tempInter']
             hline_method = telluricReductionConfig['hline_method']
             spectemp = telluricReductionConfig['spectemp']
             mag = telluricReductionConfig['mag']
@@ -261,12 +263,25 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
         sflat_bpm = calDir+str(open(calDir+"sflat_bpmfile", "r").readlines()[0]).strip()
         # Open and store the name of the reduced spatial correction ronchi flat frame name from ronchifile in ronchi.
         ronchi = open(calDir+"ronchifile", "r").readlines()[0].strip()
-        # Copy the spatial calibration ronchi flat frame from Calibrations_grating to the observation directory.
-        iraf.copy(calDir+ronchi+".fits", output="./")
+        if os.path.exists(ronchi+".fits"):
+            if over:
+                iraf.delete(ronchi+".fits")
+                # Copy the spatial calibration ronchi flat frame from Calibrations_grating to the observation directory.
+                iraf.copy(calDir+ronchi+".fits", output="./")
+            else:
+                print "\nOutput exists and -over not set - skipping copy of reduced ronchi"
+        else:
+            iraf.copy(calDir+ronchi+".fits", output="./")
         # Open and store the name of the reduced wavelength calibration arc frame from arclist in arc.
         arc = "wrgn"+str(open(calDir+"arclist", "r").readlines()[0]).strip()
-        # Copy the wavelength calibration arc frame from Calibrations_grating to the observation directory.
-        iraf.copy(calDir+arc+".fits", output="./")
+        if os.path.exists(arc+".fits"):
+            if over:
+                iraf.delete(arc+".fits")
+                iraf.copy(arc+".fits", output="./")
+            else:
+                print "\nOutput exists and -over not set - skipping copy of reduced arc"
+        else:
+            iraf.copy(arc+".fits", output="./")
         # Make sure the database files are in place. Current understanding is that
         # these should be local to the reduction directory, so need to be copied from
         # the calDir.
@@ -274,9 +289,12 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
             if over:
                 shutil.rmtree("./database")
                 os.mkdir("./database")
-        elif not os.path.isdir("./database"):
+                iraf.copy(input=calDir+"database/*", output="./database/")
+            else:
+                print "\nOutput exists and -over not set - skipping copy of database directory"
+        else:
             os.mkdir('./database/')
-        iraf.copy(input=calDir+"database/*", output="./database/")
+            iraf.copy(input=calDir+"database/*", output="./database/")
 
         if telluricSkySubtraction or scienceSkySubtraction:
             # Read the list of sky frames in the observation directory.
@@ -486,7 +504,7 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
                     a = raw_input("About to enter step 6.")
                 if kind == 'Telluric':
                     makeTelluricCorrection(
-                        observationDirectory, path, continuuminter, hlineinter,
+                        observationDirectory, path, continuuminter, hlineinter, tempInter,
                         hline_method, spectemp, mag, log, over)
                     logging.info("\n##############################################################################")
                     logging.info("")
@@ -847,7 +865,7 @@ def copyExtracted(scienceFrameList, over):
 #--------------------------------------------------------------------------------------------------------------------------------#
 
 def makeTelluricCorrection(
-    telluricDirectory, path, continuuminter, hlineinter, hline_method="vega", spectemp=9700,
+    telluricDirectory, path, continuuminter, hlineinter, tempInter, hline_method="vega", spectemp=9700,
     mag=None, log="test.log", over=False):
     """FLUX CALIBRATION
     Consists of this start function and six required functions at the end of
@@ -912,7 +930,7 @@ def makeTelluricCorrection(
     logging.info("")
     logging.info("##############################################################################\n")
 
-    hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, hline_method, log, over)
+    hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, tempInter, hline_method, log, over)
 
     logging.info("\n##############################################################################")
     logging.info("")
@@ -921,7 +939,7 @@ def makeTelluricCorrection(
     logging.info("##############################################################################\n")
 
     # Fit a continuum from the standard star spectrum, saving both continuum and continuum divided standard spectrum.
-    fitContinuum(continuuminter, grating)
+    fitContinuum(continuuminter, tempInter, grating)
     # Divide the standard star spectrum by the continuum to normalize it.
     if os.path.exists("telluricCorrection.fits"):
         os.remove("telluricCorrection.fits")
@@ -1025,7 +1043,7 @@ def fluxCalibrate(scienceFrameList):
 
 #--------------------------- makeTelluric() tasks(includes hlinecorrection tasks) -------------------------------#
 
-def fitContinuum(continuuminter, grating):
+def fitContinuum(continuuminter, tempInter, grating):
     """
     Fit a continuum to the telluric correction spectrum to normalize it. The continuum
     fitting regions were derived by eye and can be improved.
@@ -1051,7 +1069,7 @@ def fitContinuum(continuuminter, grating):
     # Plot the telluric correction spectrum with the continuum fit.
     final_tel_no_hlines_no_norm = astropy.io.fits.open('final_tel_no_hlines_no_norm.fits')[0].data
     fit = astropy.io.fits.open('fit.fits')[0].data
-    if continuuminter:
+    if continuuminter or tempInter:
         plt.title('Unnormalized Telluric Correction and Continuum fit Used to Normalize')
         plt.plot(final_tel_no_hlines_no_norm)
         plt.plot(fit)
@@ -1059,7 +1077,7 @@ def fitContinuum(continuuminter, grating):
 
 #------------------------------------- hlinecorrection tasks ----------------------------------------------------#
 
-def hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, hline_method, log, over, airmass_std=1.0):
+def hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, tempInter, hline_method, log, over, airmass_std=1.0):
     """
     Remove hydrogen lines from the spectrum of a telluric standard,
     using a model of vega's atmosphere.
@@ -1104,7 +1122,7 @@ def hLineCorrection(combined_extracted_1d_spectra, grating, path, hlineinter, hl
     # Plot the non-hline corrected spectrum and the h-line corrected spectrum.
     uncorrected = astropy.io.fits.open(combined_extracted_1d_spectra+'.fits')[1].data
     corrected = astropy.io.fits.open("final_tel_no_hlines_no_norm.fits")[0].data
-    if hlineinter:
+    if hlineinter or tempInter:
         plt.title('Before and After HLine Correction')
         plt.plot(uncorrected)
         plt.plot(corrected)
