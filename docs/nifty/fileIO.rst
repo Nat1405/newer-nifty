@@ -692,43 +692,43 @@ First, from the test data we have been using (HD141004) the final merged directo
 
 .. code-block:: text
 
-.
-|____config.cfg
-|____HD141004/
-| |____20100401/
-| | |____Calibrations_K/
-| | |____K/
-| | | |____obs107/
-| |____ExtractedOneD/
+  .
+  |____config.cfg
+  |____HD141004/
+  | |____20100401/
+  | | |____Calibrations_K/
+  | | |____K/
+  | | | |____obs107/
+  | |____ExtractedOneD/
 
-| |____Merged_telCorAndFluxCalibrated/   # Merging directory for final telluric corrected AND flux calibrated data cubes
-| | |____20100401_obs107/
-| | | |____cube_merged.fits
-| | | |____factfbrsnN201004*.fits        # Unmodified, final telluric corrected AND flux calibrated data cubes. Copied from appropriate science observation directory
-| | | |____offsets.txt                   # Offsets provided to imcombine(); see manual for details
-| | | |____out.fits
-| | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
-| | |____20100401_obs107_merged.fits     # Final merged cube for obs107
+  | |____Merged_telCorAndFluxCalibrated/   # Merging directory for final telluric corrected AND flux calibrated data cubes
+  | | |____20100401_obs107/
+  | | | |____cube_merged.fits
+  | | | |____factfbrsnN201004*.fits        # Unmodified, final telluric corrected AND flux calibrated data cubes. Copied from appropriate science observation directory
+  | | | |____offsets.txt                   # Offsets provided to imcombine(); see manual for details
+  | | | |____out.fits
+  | | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
+  | | |____20100401_obs107_merged.fits     # Final merged cube for obs107
 
-| |____Merged_telluricCorrected/         # Merging directory for telluric corrected data cubes
-| | |____20100401_obs107/
-| | | |____actfbrsnN201004*.fits         # Unmodified, final telluric corrected data cubes. Copied from appropriate science observation directory
-| | | |____cube_merged.fits
-| | | |____offsets.txt
-| | | |____out.fits                      # Offsets provided to imcombine(); see manual for details
-| | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
-| | |____20100401_obs107_merged.fits     # Final merged cube for obs107
+  | |____Merged_telluricCorrected/         # Merging directory for telluric corrected data cubes
+  | | |____20100401_obs107/
+  | | | |____actfbrsnN201004*.fits         # Unmodified, final telluric corrected data cubes. Copied from appropriate science observation directory
+  | | | |____cube_merged.fits
+  | | | |____offsets.txt
+  | | | |____out.fits                      # Offsets provided to imcombine(); see manual for details
+  | | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
+  | | |____20100401_obs107_merged.fits     # Final merged cube for obs107
 
-| |____Merged_uncorrected/               # Merging directory for UNCORRECTED data cubes
-| | |____20100401_obs107/
-| | | |____ctfbrsnN201004*.fits          # Unmodified, final UNCORRECTED data cubes. Copied from appropriate science observation directory
-| | | |____cube_merged.fits
-| | | |____offsets.txt                   # Offsets provided to imcombine(); see manual for details
-| | | |____out.fits
-| | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
-| | |____20100401_obs107_merged.fits     # Final merged cube for obs107
+  | |____Merged_uncorrected/               # Merging directory for UNCORRECTED data cubes
+  | | |____20100401_obs107/
+  | | | |____ctfbrsnN201004*.fits          # Unmodified, final UNCORRECTED data cubes. Copied from appropriate science observation directory
+  | | | |____cube_merged.fits
+  | | | |____offsets.txt                   # Offsets provided to imcombine(); see manual for details
+  | | | |____out.fits
+  | | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
+  | | |____20100401_obs107_merged.fits     # Final merged cube for obs107
 
-|____Nifty.log
+  |____Nifty.log
 
 
 .. placeholder
