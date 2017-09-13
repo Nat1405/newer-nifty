@@ -22,7 +22,7 @@ PACKAGE_DATA = {
 
 setup(
     name=NAME,
-    version="1.0b4",
+    version="1.0b5",
     author='ncomeau',
     author_email='ncomeau@gemini.edu',
     description='The Gemini NIFS data reduction pipeline.',
