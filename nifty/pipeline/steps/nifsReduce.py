@@ -151,10 +151,16 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
     spectemp = None
     mag = None
     scienceSkySubtraction = None
+    oneDExtraction = None
+    extractionXC = None
+    extractionYC = None
+    extractionRadius = None
     telluricSkySubtraction = None
     telluricCorrectionMethod = None
     telinter = None
-    efficiencySpectrumCorrection = None
+    mergeUncorrectedCubes = None
+    mergeTelluricCorrectedCubes = None
+    mergeTelCorAndFluxCalibratedCubes = None
     use_pq_offsets = None
     im3dtran = None
     fluxCalibrationMethod = None
@@ -165,8 +171,11 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
         # Read general pipeline config.
         over = config['over']
         manualMode = config['manualMode']
-        merge = config['merge']
         calDirList = config['calibrationDirectoryList']
+        oneDExtraction = config['oneDExtraction']
+        extractionXC = config['extractionXC']
+        extractionYC = config['extractionYC']
+        extractionRadius = config['extractionRadius']
 
         if kind == 'Telluric':
             # Telluric reduction specific config.
@@ -197,6 +206,9 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
             scienceSkySubtraction = scienceReductionConfig['scienceSkySubtraction']
             telluricCorrectionMethod = scienceReductionConfig['telluricCorrectionMethod']
             telinter = scienceReductionConfig['telinter']
+            mergeUncorrectedCubes = scienceReductionConfig['mergeUncorrectedCubes']
+            mergeTelluricCorrectedCubes = scienceReductionConfig['mergeTelluricCorrectedCubes']
+            mergeTelCorAndFluxCalibratedCubes = scienceReductionConfig['mergeTelCorAndFluxCalibratedCubes']
             fluxCalibrationMethod = scienceReductionConfig['fluxCalibrationMethod']
             use_pq_offsets = scienceReductionConfig['use_pq_offsets']
             im3dtran = scienceReductionConfig['im3dtran']
@@ -462,7 +474,7 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
                 # For telluric data:
                 # Make a 1D telluric correction spectrum from reduced telluric data.
                 if kind=='Telluric':
-                    extractOneD(tellist, kind, log, over)
+                    extractOneD(tellist, kind, log, over, extractionXC, extractionYC, extractionRadius)
                     logging.info("\n##############################################################################")
                     logging.info("")
                     logging.info("  STEP 5: Extract 1D Spectra and Make Combined Telluric")
@@ -475,9 +487,8 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
                 # Make a telluric corrected data cube.
                 # Make a roughly flux-calibrated data cube.
                 elif kind=='Science':
-                    extract = True
-                    if extract:
-                        extractOneD(scienceFrameList, kind, log, over)
+                    if oneDExtraction:
+                        extractOneD(scienceFrameList, kind, log, over, extractionXC, extractionYC, extractionRadius)
                         copyExtracted(scienceFrameList, over)
                     makeCube('tfbrsn', scienceFrameList, log, over)
                     if telluricCorrectionMethod == "gnirs":
@@ -512,19 +523,16 @@ def start(kind, telluricDirectoryList="", scienceDirectoryList=""):
                     logging.info("")
                     logging.info("##############################################################################\n")
                 # After the last science reduction, possibly merge final cubes to a single cube.
-                if kind == 'Science' and merge and os.getcwd() == observationDirectoryList[-1]:
+                if kind == 'Science' and os.getcwd() == observationDirectoryList[-1]:
                     # There are three types of merging to choose from. You can:
                     # Merge uncorrected cubes. These have the "ctfbrsn" prefix.
-                    mergeUncorrected = True
-                    if mergeUncorrected:
+                    if mergeUncorrectedCubes:
                         mergeCubes(observationDirectoryList, "uncorrected", use_pq_offsets, im3dtran, over)
                     # Merge telluric corrected cubes. These have the "actfbrsn" prefix.
-                    mergeTelluricCorrected = True
-                    if mergeTelluricCorrected:
+                    if mergeTelluricCorrectedCubes:
                         mergeCubes(observationDirectoryList, "telluricCorrected", use_pq_offsets, im3dtran, over)
                     # Merge telluric corrected AND flux calibrated cubes. These have the "factfbrsn" prefix.
-                    mergeTelCorAndFluxCalibrated = True
-                    if mergeTelCorAndFluxCalibrated:
+                    if mergeTelCorAndFluxCalibratedCubes:
                         mergeCubes(observationDirectoryList, "telCorAndFluxCalibrated", use_pq_offsets, im3dtran, over)
 
                     logging.info("\n##############################################################################")
@@ -764,7 +772,7 @@ def makeCube(pre, scienceFrameList, log, over):
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def extractOneD(inputList, kind, log, over):
+def extractOneD(inputList, kind, log, over, extractionXC=15.0, extractionYC=33.0, extractionRadius=2.5):
     """Extracts 1-D spectra with iraf.nfextract and combines them with iraf.gemcombine.
     iraf.nfextract is currently only done interactively. Output: -->xtfbrsn and gxtfbrsn
 
@@ -786,7 +794,7 @@ def extractOneD(inputList, kind, log, over):
                 logging.info("Output file exists and -over not set - skipping nfextract in extract1D")
                 continue
 
-        iraf.nfextract("tfbrsn"+frame, outpref="x", xc=15.0, yc=33.0, diameter=2.5, fl_int='no', logfile=log)
+        iraf.nfextract("tfbrsn"+frame, outpref="x", xc=extractionXC, yc=extractionYC, diameter=extractionRadius, fl_int='no', logfile=log)
 
     # Combine all the 1D spectra to one final output file with the name of the first input file.
     combined = str(inputList[0]).strip()

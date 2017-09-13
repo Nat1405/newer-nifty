@@ -106,6 +106,27 @@ def interactiveNIFSInput():
         "",
         "An example of a valid raw files path string: \"/Users/nat/data/spaceMonster\""
         )
+        #
+        oneDExtraction = getParam(
+        "Do a one D extraction from uncorrected cubes? [yes]: ",
+        True,
+        "Not implemeted yet"
+        )
+        extractionXC = getParam(
+        "Extraction x coordinate? [15.0]: ",
+        15.0,
+        "Not implemeted yet"
+        )
+        extractionYC = getParam(
+        "Extraction y coordinate? [33.0]: ",
+        33.0,
+        "Not implemeted yet"
+        )
+        extractionRadius = getParam(
+        "Extraction y coordinate? [2.5]: ",
+        2.5,
+        "Not implemeted yet"
+        )
         telluricTimeThreshold = getParam(
         "Max time between matched science and standard star frames? [5400]",
         5400,
@@ -233,8 +254,18 @@ def interactiveNIFSInput():
         "You can specify the magnitude of the telluric standard star. If not Nifty will attempt "+ \
         "a SIMBAD query to look it up."
         )
-        merge = getParam(
-        "Make merged cubes, one per grating per object? [yes]: ",
+        mergeUncorrectedCubes = getParam(
+        "Merge uncorrected data cubes? [yes]: ",
+        'yes',
+        "Nifty can also merge cubes in a unique observations to make one final cube per object, per grating."
+        )
+        mergeTelluricCorrectedCubes = getParam(
+        "Merge TELLURIC CORRECTED data cubes? [yes]: ",
+        'yes',
+        "Nifty can also merge cubes in a unique observations to make one final cube per object, per grating."
+        )
+        mergeTelCorAndFluxCalibratedCubes = getParam(
+        "Merge FLUX CALIBRATED AND TELLURIC CORRECTED data cubes? [yes]: ",
         'yes',
         "Nifty can also merge cubes in a unique observations to make one final cube per object, per grating."
         )
@@ -267,7 +298,10 @@ def interactiveNIFSInput():
         # General config used by all scripts.
         config['over'] = over
         config['manualMode'] = manualMode
-        config['merge'] = merge # Obsolete- TODO(nat): eliminate this
+        config['oneDExtraction'] = oneDExtraction
+        config['extractionXC'] = extractionXC
+        config['extractionYC'] = extractionYC
+        config['extractionRadius'] = extractionRadius
 
         config['nifsPipelineConfig'] = {}
         config['nifsPipelineConfig']['sort'] = sort
@@ -305,6 +339,9 @@ def interactiveNIFSInput():
         config['scienceReductionConfig']['telluricCorrectionMethod'] = telluricCorrectionMethod
         config['scienceReductionConfig']['telinter'] = telinter
         config['scienceReductionConfig']['fluxCalibrationMethod'] = fluxCalibrationMethod
+        config['scienceReductionConfig']['mergeUncorrectedCubes'] = mergeUncorrectedCubes
+        config['scienceReductionConfig']['mergeTelluricCorrectedCubes'] = mergeTelluricCorrectedCubes
+        config['scienceReductionConfig']['mergeTelCorAndFluxCalibratedCubes'] = mergeTelCorAndFluxCalibratedCubes
         config['scienceReductionConfig']['use_pq_offsets'] = use_pq_offsets
         config['scienceReductionConfig']['im3dtran'] = im3dtran
 
