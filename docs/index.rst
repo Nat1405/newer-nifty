@@ -25,11 +25,6 @@ Package Documentation
    nifty/introduction.rst
    nifty/fileIO.rst
 
-API:
-
-.. automodule:: nifsSort
-   :members:
-
 
 Indices and tables
 ==================
