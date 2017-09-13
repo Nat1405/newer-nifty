@@ -11,7 +11,7 @@ The best way to learn about what each config file parameter does is to populate 
 
 .. code-block:: text
 
-  runNifty linearPipeline -i
+  runNifty nifsPipeline -i
 
 This will, for each parameter, print an explanation and supply a default parameter that you can accept by pressing enter. The output file
 is named "config.cfg".
@@ -35,7 +35,7 @@ Nifty includes a default configuration file in the runtimeData/ directory. As of
   telluricDirectoryList = []
   calibrationDirectoryList = []
 
-  [linearPipelineConfig]
+  [nifsPipelineConfig]
   sort = True
   calibrationReduction = True
   telluricReduction = True

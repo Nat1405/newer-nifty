@@ -1,4 +1,4 @@
-import pipeline.linearPipeline as linearPipeline
+import pipeline.nifsPipeline as nifsPipeline
 import pipeline.nifsSort as nifsSort
 import pipeline.nifsBaselineCalibration as nifsBaselineCalibration
 import pipeline.nifsReduce as nifsReduce

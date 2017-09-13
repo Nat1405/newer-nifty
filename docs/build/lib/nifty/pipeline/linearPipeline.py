@@ -230,7 +230,7 @@ def start(args):
     return
 
 if __name__ == '__main__':
-    # If running ./linearPipeline or python linearPipeline.py, call start.
+    # If running ./nifsPipeline or python nifsPipeline.py, call start.
     #Currently broken... Have to supply options somehow!
     #start()
     pass

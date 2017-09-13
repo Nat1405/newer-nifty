@@ -1,4 +1,4 @@
-import pipeline.linearPipeline as linearPipeline
+import pipeline.nifsPipeline as nifsPipeline
 import pipeline.nifsLowMemoryPipeline as nifsLowMemoryPipeline
 import pipeline.nifsUtils as nifsUtils
 import pipeline.steps.nifsSort as nifsSort

@@ -34,8 +34,8 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # TODO(nat): find a better way to do this.
-    if 'linearPipeline' in sys.argv[1]:
-        nifty.linearPipeline.start(sys.argv[2:])
+    if 'nifsPipeline' in sys.argv[1]:
+        nifty.nifsPipeline.start(sys.argv[2:])
     if 'nifsLowMemoryPipeline' in sys.argv[1]:
         nifty.nifsLowMemoryPipeline.start(sys.argv[2:])
     if 'nifsSort' in sys.argv[1]:

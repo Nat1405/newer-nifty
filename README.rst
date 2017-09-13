@@ -78,11 +78,11 @@ To run Nifty, getting data reduction parameters from an interactive input sessio
 
 .. code-block:: text
 
-   runNifty linearPipeline -i
+   runNifty nifsPipeline -i
 
 To run Nifty in full-automatic mode with default input parameters, provide the -f flag
 and a full local path to the raw data or a Gemini Program ID string (Eg: GN-2013A-Q-62).
 
 .. code-block:: text
 
-   runNifty linearPipeline -f <data_location>
+   runNifty nifsPipeline -f <data_location>

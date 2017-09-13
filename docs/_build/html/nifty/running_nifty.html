@@ -105,7 +105,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html">H Line Removal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html#merging-data-cubes">Merging Data Cubes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
-<li class="toctree-l2"><a class="reference internal" href="known_issues.html#linearpipeline-py">linearPipeline.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="known_issues.html#linearpipeline-py">nifsPipeline.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html#nifssort-py">nifsSort.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html#nifsbaselinecalibration-py">nifsBaselineCalibration.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html#nifsreduce-py">nifsReduce.py</a></li>
@@ -203,19 +203,19 @@
 <div class="section" id="starting-a-data-reduction-from-the-beginning">
 <h2>Starting a Data Reduction from the Beginning<a class="headerlink" href="#starting-a-data-reduction-from-the-beginning" title="Permalink to this headline">¶</a></h2>
 <p>To start the NIFS pipeline, populating a configuration file interactively:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline -i
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline -i
 </pre></div>
 </div>
 <p>To start the NIFS pipeline from a pre-built configuration file:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline config.cfg
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline config.cfg
 </pre></div>
 </div>
 <p>To do a fully automatic data reduction, downloading raw data from the Gemini Public Archive (Eg: GN-2013A-Q-62):</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline -f GN-2013A-Q-62
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline -f GN-2013A-Q-62
 </pre></div>
 </div>
 <p>To do a fully automatic data reduction, using raw data from a local directory (Eg: /Users/ncomeau/data/TUTORIAL):</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline /Users/ncomeau/data/TUTORIAL
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline /Users/ncomeau/data/TUTORIAL
 </pre></div>
 </div>
 </div>
@@ -223,7 +223,7 @@
 <h2>Starting a Data Reduction from a Specified Point<a class="headerlink" href="#starting-a-data-reduction-from-a-specified-point" title="Permalink to this headline">¶</a></h2>
 <p>You can run each step, one at a time, from the command line like so. <em>You need a config.cfg file in your current working directory to run individual steps.
 Each step requires the general config section and its unique config section to be populated</em>.</p>
-<p>You can also run an individual step by turning them on or off in linearPipeline config and running the linearPipeline.</p>
+<p>You can also run an individual step by turning them on or off in nifsPipeline config and running the nifsPipeline.</p>
 <p><strong>nifsSort:</strong> To only copy and sort NIFS raw data type:</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsSort
 </pre></div>
@@ -240,7 +240,7 @@ scienceDirectoryList = []
 telluricDirectoryList = []
 calibrationDirectoryList = []
 
-[linearPipelineConfig]
+[nifsPipelineConfig]
 sort = True
 calibrationReduction = False
 telluricReduction = False
@@ -281,8 +281,8 @@ im3dtran = True
 # Good luck with your Science!
 </pre></div>
 </div>
-<p>And run the linearPipeline with:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline config.cfg
+<p>And run the nifsPipeline with:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline config.cfg
 </pre></div>
 </div>
 <p><strong>nifsBaselineCalibration:</strong> To only reduce calibrations type:</p>
@@ -301,7 +301,7 @@ scienceDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/o
 calibrationDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130621/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/Calibrations_H&#39;]
 telluricDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs26&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs51&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs30&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/H/Tellurics/obs53&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/H/Tellurics/obs38&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/H/Tellurics/obs34&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/H/Tellurics/obs64&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130621/H/Tellurics/obs69&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/H/Tellurics/obs42&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/H/Tellurics/obs46&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/H/Tellurics/obs73&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/H/Tellurics/obs77&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/H/Tellurics/obs81&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/H/Tellurics/obs85&#39;]
 
-[linearPipelineConfig]
+[nifsPipelineConfig]
 sort = False
 calibrationReduction = True
 telluricReduction = False
@@ -342,8 +342,8 @@ im3dtran = True
 # Good luck with your Science!
 </pre></div>
 </div>
-<p>And run the linearPipeline with:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline config.cfg
+<p>And run the nifsPipeline with:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline config.cfg
 </pre></div>
 </div>
 <p><strong>nifsReduce Telluric:</strong> To only reduce telluric data type:</p>
@@ -362,7 +362,7 @@ scienceDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/o
 calibrationDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130621/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/Calibrations_H&#39;]
 telluricDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs26&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs51&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs30&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/H/Tellurics/obs53&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/H/Tellurics/obs38&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/H/Tellurics/obs34&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/H/Tellurics/obs64&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130621/H/Tellurics/obs69&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/H/Tellurics/obs42&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/H/Tellurics/obs46&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/H/Tellurics/obs73&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/H/Tellurics/obs77&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/H/Tellurics/obs81&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/H/Tellurics/obs85&#39;]
 
-[linearPipelineConfig]
+[nifsPipelineConfig]
 sort = False
 calibrationReduction = False
 telluricReduction = True
@@ -403,8 +403,8 @@ im3dtran = True
 # Good luck with your Science!
 </pre></div>
 </div>
-<p>And run the linearPipeline with:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline config.cfg
+<p>And run the nifsPipeline with:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline config.cfg
 </pre></div>
 </div>
 <p><strong>nifsReduce Science:</strong> To only reduce science data type:</p>
@@ -423,7 +423,7 @@ scienceDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/o
 calibrationDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130621/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/Calibrations_H&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/Calibrations_H&#39;]
 telluricDirectoryList = [&#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs26&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs51&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130527/H/Tellurics/obs30&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/H/Tellurics/obs53&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130530/H/Tellurics/obs38&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/H/Tellurics/obs34&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130531/H/Tellurics/obs64&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130621/H/Tellurics/obs69&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/H/Tellurics/obs42&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130622/H/Tellurics/obs46&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/H/Tellurics/obs73&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130624/H/Tellurics/obs77&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/H/Tellurics/obs81&#39;, &#39;/Users/ncomeau/tests/newQ62/AEGISz1284/20130626/H/Tellurics/obs85&#39;]
 
-[linearPipelineConfig]
+[nifsPipelineConfig]
 sort = False
 calibrationReduction = False
 telluricReduction = False
@@ -464,8 +464,8 @@ im3dtran = True
 # Good luck with your Science!
 </pre></div>
 </div>
-<p>And run the linearPipeline with:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline config.cfg
+<p>And run the nifsPipeline with:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline config.cfg
 </pre></div>
 </div>
 </div>

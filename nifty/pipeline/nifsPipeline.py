@@ -133,7 +133,7 @@ def start(args):
 
     # Read or write a configuration file, interactively or from some defaults.
     # Second argument is the name of the current script. Used to get script-dependent configuration.
-    GetConfig(args, "linearPipeline")
+    GetConfig(args, "nifsPipeline")
 
     # TODO(nat): fix this. It isn't recursively printing the dictionaries of values.
     logging.info("\nParameters for this data reduction as read from ./config.cfg:\n")
@@ -150,12 +150,12 @@ def start(args):
         manualMode = config['manualMode']
 
         # Load pipeline specific config.
-        linearPipelineConfig = config['linearPipelineConfig']
+        nifsPipelineConfig = config['nifsPipelineConfig']
 
-        sort = linearPipelineConfig['sort']
-        calibrationReduction = linearPipelineConfig['calibrationReduction']
-        telluricReduction = linearPipelineConfig['telluricReduction']
-        scienceReduction = linearPipelineConfig['scienceReduction']
+        sort = nifsPipelineConfig['sort']
+        calibrationReduction = nifsPipelineConfig['calibrationReduction']
+        telluricReduction = nifsPipelineConfig['telluricReduction']
+        scienceReduction = nifsPipelineConfig['scienceReduction']
 
     ###########################################################################
     ##                         SETUP COMPLETE                                ##

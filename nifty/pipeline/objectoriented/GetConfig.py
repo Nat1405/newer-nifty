@@ -34,7 +34,7 @@ class GetConfig(object):
 
         self.args = args
         self.script = script
-        if self.script == "linearPipeline":
+        if self.script == "nifsPipeline":
             self.configFile = "config.cfg"
 
         self.makeConfig()

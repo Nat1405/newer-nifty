@@ -14,7 +14,7 @@ Add the following line to your ~/.bash_profile to create the **niftree** alias:
 
   alias niftree="find . -name .git -prune -o -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'"
 
-linearPipeline Data Reduction
+nifsPipeline Data Reduction
 -----------------------------
 
 Config file used:
@@ -32,7 +32,7 @@ Config file used:
   telluricDirectoryList = []
   calibrationDirectoryList = []
 
-  [linearPipelineConfig]
+  [nifsPipelineConfig]
   sort = True
   calibrationReduction = True
   telluricReduction = True
@@ -84,7 +84,7 @@ Command used to launch Nifty:
 
 .. code-block:: text
 
-  runNifty linearPipeline config.cfg
+  runNifty nifsPipeline config.cfg
 
 Directory structure after sorting:
 
@@ -257,8 +257,55 @@ After Step 4: Spatial Distortion, the last step of the calibration reduction, mo
   | | | |____wrgnN20100401S0137.fits
   |____Nifty.log
 
-Now we are in nifsReduce of Tellurics.
---------------------------------------
+The final directory structure after nifsBaselineCalibration, should look something like. The products used by appropriate
+standard star and science observation directories are the "rgn" prefixed final ronchi file, the "wrgn" prefixed final wavelength
+solution file, the "database/" directory, the "s" prefixed shiftfile, the "rgn" prefixed and "_flat.fits" suffixed final flat field correction
+frame, the "rgn" prefixed and "_sflat_bpm.pl" suffixed final bad pixel mask.
+
+.. code-block:: text
+
+  .
+  |____config.cfg
+  |____HD141004/                               # OT object name; from science frame .fits headers
+  | |____20100401/                             # Date; from science frame .fits headers
+  | | |____Calibrations_K/                     # Calibrations directory; All the work in this step happens in one of these
+  | | | |____arcdarkfile                       # Text file storing name of final reduced arc dark
+  | | | |____arcdarklist                       # Text file storing name of arc dark frames
+  | | | |____arclist                           # Text file storing name of arc frames
+  | | | |____database/                         # Directory with text file results of nswavelength() and nfsdist()
+  | | | | |____idrgnN20100410S0375_SCI_*_      # Textfiles containing spatial solutions for particular slices
+  | | | | |____idwrgnN20100401S0137_SCI_*_     # Textfiles containing wavelength solutions for particular slices
+  | | | |____flatdarklist                      # Text file storing names of lamps-off flats; pipeline uses this, not original_flatlist
+  | | | |____flatfile                          # Text file storing name of final flat field correction frame, corrected for slice to slice variation
+  | | | |____flatlist                          # Text file storing names of lamps-on flats; pipeline uses this, not original_flatlist
+  | | | |____gnN20100401S0137.fits             # Median combined and prepared arc frame
+  | | | |____gnN20100410S0362.fits             # Median combined and prepared lamps-on flat
+  | | | |____gnN20100410S0368.fits             # Median combined and prepared lamps-off flat
+  | | | |____gnN20100410S0373.fits             # Median combined and prepared arc dark frame
+  | | | |____gnN20100410S0375.fits             # Median combined and prepared lamps-on ronchi frame
+  | | | |____N201004*.fits                     # Raw calibration frames
+  | | | |____nN20100401S0137.fits              # Results of running raw lamps-on ronchi frames through nfprepare()
+  | | | |____original_flatdarklist             # Text file list of lamps-off flats, NOT taking P and Q offset zero-points into account
+  | | | |____original_flatlist                 # Text file list of lamps-on flats, NOT taking P and Q offset zero-points into account
+  | | | |____rgnN20100401S0137.fits            # Final reduced, combined and prepared arc frame
+  | | | |____rgnN20100410S0362.fits            # Final reduced, combined and prepared lamps-on flat
+  | | | |____rgnN20100410S0362_flat.fits       # Final flat field correction frame, corrected for slice to slice variations with nsslitfunction()
+  | | | |____rgnN20100410S0362_sflat.fits      # Preliminary flat field correction frame. Result of nsflat()
+  | | | |____rgnN20100410S0362_sflat_bpm.pl    # Final bad pixel mask. Result of nsflat()
+  | | | |____rgnN20100410S0368.fits            # Final reduced, combined and prepared lamps-off flat frame
+  | | | |____rgnN20100410S0368_dark.fits       # Final flat field correction dark frame; result of nsflat()
+  | | | |____rgnN20100410S0375.fits            # Results of running combined lamps-on ronchi frame through nsreduce() AND nfsdist()
+  | | | |____ronchifile                        # Text file storing name of final ronchi frame
+  | | | |____ronchilist                        # Text file list of lamps-on ronchi flat frames
+  | | | |____sflat_bpmfile                     # Text file storing name of final bad pixel mask frame
+  | | | |____sflatfile                         # Text file storing name of preliminary flat field correction frame
+  | | | |____shiftfile                         # Text file storing name of shift file; used to get consistent shift to the MDF
+  | | | |____sN20100410S0362.fits              # Shift file; used to get consistent shift to MDF. Result of nfprepare()
+  | | | |____wrgnN20100401S0137.fits           # Final wavelength solution frame. Result of nswavelength()
+  |____Nifty.log                               # Logfile; all log files should go here.
+
+nifsReduce of Tellurics
+-----------------------
 
 After Step 1: Locate the Spectrum, calibrations are copied over from the appropriate calibrations directory and
 each raw frame is run through nfprepare().
@@ -455,8 +502,8 @@ The final telluric observation directory structure after nifsReduce Tellurics:
 
 
 
-Now we are in nifsReduce Science
---------------------------------
+nifsReduce Science
+------------------
 
 After Step 1: locate the spectrum,
 
@@ -573,15 +620,115 @@ In a science observation directory:
   |____snN201004*.fits
   |____telCorN201004*.fits                 # UNSHIFTED AND SCALED telluric correction for each science cube
   |____telFitN201004*.fits                 # UNSHIFTED AND SCALED fit to telluric correction for each science cube
-  |____tfbrsnN20100401S0182.fits
+  |____tfbrsnN201004*.fits
   |____wrgnN20100401S0137.fits
-  |____xtfbrsnN20100401S0182.fits
+  |____xtfbrsnN201004*.fits
 
-In the objectName/ExtractedOneD/ directory:
+In the scienceObjectName/ExtractedOneD/ directory:
 
+.. code-block:: text
 
+  ExtractedOneD/
+  |____20100401_obs107/               # Science data and observation, from .fits headers of science frames
+  | |____xtfbrsnN201004*.fits         # Extracted one D spectra from UNCORRECTED cubes. Results of nfextract()
+  |____combined20100401_obs107.fits   # Median-combined, extracted one D spectra. Result of gemcombine()
 
+The final science observation directory and scienceObservationName/ExtractedOneD/ directory should look something like this:
 
+In each science directory:
+
+.. code-block:: text
+
+  obs107/
+  |____actfbrsnN201004*.fits               # Final telluric corrected data cubes
+  |____bbodyN201004*.fits                  # Unshifted or scaled blackbody used to flux calibrate cubes
+  |____brsnN201004*.fits                   # Bad pixel corrected, reduced, sky subtracted and prepared science frames
+  |____combinedOneD                        # Textfile storing name of combined extracted one D standard star spectra
+  |____ctfbrsnN201004*.fits                # Final uncorrected data cubes
+  |____cubesliceN201004*.fits              # One D extracted spectrum of cube used to get telluric correction shift and scale
+  |____database/
+  | |____fcfbrsnN201004*_SCI_*_lamp        # Text file results of nffitcoords()
+  | |____fcfbrsnN201004*_SCI_*_sdist       # Text file results of nffitcoords()
+  | |____idrgnN20100410S0375_SCI_*_        # Text file results of nfsdist()
+  | |____idwrgnN20100401S0137_SCI_*_       # Text file results of nswavelength()
+  |____factfbrsnN201004*.fits              # Final flux calibrated AND telluric corrected data cubes
+  |____fbrsnN201004*.fits                  # Results of nffitcoords()
+  |____finaltelCorN201004*.fits            # Final shifted and scaled fit to telluric correction
+  |____gxtfbrsnN20100401S0182.fits         # Median-combined and extracted one D spectra from UNCORRECTED cubes. Results of gemcombine()
+  |____N201004*.fits                       # Raw science and science sky frames
+  |____nN201004*.fits                      # Prepared raw science frames. Results of nfprepare()
+  |____oneDcorrectedN201004*.fits          # One D telluric corrected slice of cube; this was used to get the shift and scale of the final correction
+  |____original_skyFrameList               # Text file storing names of science sky frames, not taking P and Q offset zero points into account
+  |____rgnN20100410S0375.fits              # Final reduced, combined and prepared ronchi flat frame. Result of nfsdist()
+  |____rsnN201004*.fits                    # Flat fielded, sky subtracted and prepared science frames. Result of nsreduce()
+  |____scaledBlackBodyN201004*.fits        # Blackbody scaled by flambda and ratio of experiment times; telluric corrected cube multiplied by this
+                                           # to get flux calibrated AND telluric corrected cube.
+  |____scienceFrameList                    # Text file storing names of science frames
+  |____skyFrameList                        # Text file storing names of science sky frames; pipeline uses this and not original_skyFrameList
+  |____snN201004*.fits                     # Sky subtracted, prepared raw science frames. Results of gemarith()
+  |____telCorN201004*.fits                 # UNSHIFTED AND SCALED telluric correction for each science cube
+  |____telFitN201004*.fits                 # UNSHIFTED AND SCALED fit to telluric correction for each science cube
+  |____tfbrsnN201004*.fits                 # Results of nftransform()
+  |____wrgnN20100401S0137.fits             # Final reduced wavelength solution frame. Result of nswavelength()
+  |____xtfbrsnN201004*.fits                # Extracted one D spectra from each UNCORRECTED science cube. Result of nfextract()
+
+In the scienceObjectName/ExtractedOneD/ directory:
+
+.. code-block:: text
+
+  ExtractedOneD/
+  |____20100401_obs107/               # Science data and observation, from .fits headers of science frames
+  | |____xtfbrsnN201004*.fits         # Extracted one D spectra from UNCORRECTED cubes. Results of nfextract()
+  |____combined20100401_obs107.fits   # Median-combined, extracted one D spectra. Result of gemcombine()
+
+nifsMerge
+---------
+
+nifsMerge.py is called as the last step of nifsReduce Science to merge data cubes. It produces three cube merging directories:
+an UNCORRECTED, a telluric corrected, and a telluric corrected AND flux calibrated directory.
+Here are two examples of the structure:
+
+First, from the test data we have been using (HD141004) the final merged directory structure should look something like:
+
+.. code-block:: text
+
+.
+|____config.cfg
+|____HD141004/
+| |____20100401/
+| | |____Calibrations_K/
+| | |____K/
+| | | |____obs107/
+| |____ExtractedOneD/
+
+| |____Merged_telCorAndFluxCalibrated/   # Merging directory for final telluric corrected AND flux calibrated data cubes
+| | |____20100401_obs107/
+| | | |____cube_merged.fits
+| | | |____factfbrsnN201004*.fits        # Unmodified, final telluric corrected AND flux calibrated data cubes. Copied from appropriate science observation directory
+| | | |____offsets.txt                   # Offsets provided to imcombine(); see manual for details
+| | | |____out.fits
+| | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
+| | |____20100401_obs107_merged.fits     # Final merged cube for obs107
+
+| |____Merged_telluricCorrected/         # Merging directory for telluric corrected data cubes
+| | |____20100401_obs107/
+| | | |____actfbrsnN201004*.fits         # Unmodified, final telluric corrected data cubes. Copied from appropriate science observation directory
+| | | |____cube_merged.fits
+| | | |____offsets.txt
+| | | |____out.fits                      # Offsets provided to imcombine(); see manual for details
+| | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
+| | |____20100401_obs107_merged.fits     # Final merged cube for obs107
+
+| |____Merged_uncorrected/               # Merging directory for UNCORRECTED data cubes
+| | |____20100401_obs107/
+| | | |____ctfbrsnN201004*.fits          # Unmodified, final UNCORRECTED data cubes. Copied from appropriate science observation directory
+| | | |____cube_merged.fits
+| | | |____offsets.txt                   # Offsets provided to imcombine(); see manual for details
+| | | |____out.fits
+| | | |____transcube*.fits               # Transposed data cubes. Results of im3dtran()
+| | |____20100401_obs107_merged.fits     # Final merged cube for obs107
+
+|____Nifty.log
 
 
 .. placeholder

@@ -269,11 +269,11 @@ def interactiveNIFSInput():
         config['manualMode'] = manualMode
         config['merge'] = merge # Obsolete- TODO(nat): eliminate this
 
-        config['linearPipelineConfig'] = {}
-        config['linearPipelineConfig']['sort'] = sort
-        config['linearPipelineConfig']['calibrationReduction'] = calibrationReduction
-        config['linearPipelineConfig']['telluricReduction'] = telluricReduction
-        config['linearPipelineConfig']['scienceReduction'] = scienceReduction
+        config['nifsPipelineConfig'] = {}
+        config['nifsPipelineConfig']['sort'] = sort
+        config['nifsPipelineConfig']['calibrationReduction'] = calibrationReduction
+        config['nifsPipelineConfig']['telluricReduction'] = telluricReduction
+        config['nifsPipelineConfig']['scienceReduction'] = scienceReduction
 
         config['sortConfig'] = {}
         config['sortConfig']['rawPath'] = rawPath

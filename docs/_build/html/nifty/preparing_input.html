@@ -101,7 +101,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html">H Line Removal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html#merging-data-cubes">Merging Data Cubes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
-<li class="toctree-l2"><a class="reference internal" href="known_issues.html#linearpipeline-py">linearPipeline.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="known_issues.html#linearpipeline-py">nifsPipeline.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html#nifssort-py">nifsSort.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html#nifsbaselinecalibration-py">nifsBaselineCalibration.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="known_issues.html#nifsreduce-py">nifsReduce.py</a></li>
@@ -190,7 +190,7 @@
 <div class="section" id="interactive-input-preparation">
 <h1>Interactive Input Preparation<a class="headerlink" href="#interactive-input-preparation" title="Permalink to this headline">¶</a></h1>
 <p>The best way to learn about what each config file parameter does is to populate an input file interactively by typing:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty linearPipeline -i
+<div class="highlight-text"><div class="highlight"><pre><span></span>runNifty nifsPipeline -i
 </pre></div>
 </div>
 <p>This will, for each parameter, print an explanation and supply a default parameter that you can accept by pressing enter. The output file
@@ -211,7 +211,7 @@ scienceDirectoryList = []
 telluricDirectoryList = []
 calibrationDirectoryList = []
 
-[linearPipelineConfig]
+[nifsPipelineConfig]
 sort = True
 calibrationReduction = True
 telluricReduction = True

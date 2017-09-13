@@ -98,10 +98,12 @@ def mergeCubes(obsDirList, cubeType, use_pq_offsets, im3dtran, over=""):
     # Pixel scale in arcseconds/pixel.
     pixScale = 0.05
 
-    # TODO(ncomeau[*AT*]uvic.ca): implement a way to read and save cubelists to textfiles. It would be nice for users to
+    # TODO(nat): implement a way to read and save cubelists to textfiles. It would be nice for users to
     # be able to edit the list of cubes to merge by hand.
     # If no Merged directory exists that contains a textfile list of cubes:
     # Go to each science directory and copy cubes from there to a new directory called Merged.
+
+    # TODO(nat): This code seems to work really well, but it could use some polishing. Feel free to refactor nicely!
     for obsDir in obsDirList:
         # Get date, obsid and obsPath by splitting each science directory name.
         # Eg: directory name is ""/Users/ncomeau/research/newer-nifty/hd165459/20160705/H/obs13", then:
@@ -293,6 +295,8 @@ def mergeCubes(obsDirList, cubeType, use_pq_offsets, im3dtran, over=""):
                 logging.info('Output already exists and -over- not set - skipping imcombine')
         else:
             iraf.imcombine(prefix+'*', output = 'cube_merged.fits',  combine = 'median', offsets = 'offsets.txt')
+        # TODO(nat): barf. This is pretty nasty... We should fix the overwrite statements here and
+        # find a way to use less nesting
         if im3dtran:
             # Transpose the cube back to x, y, lambda.
             if os.path.exists('out.fits'):
