@@ -28,6 +28,7 @@ Package Documentation
 API:
 
 .. automodule:: nifsSort
+   :members:
 
 
 Indices and tables
