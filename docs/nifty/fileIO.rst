@@ -17,7 +17,7 @@ Add the following line to your ~/.bash_profile to create the **niftree** alias:
 nifsPipeline Data Reduction
 -----------------------------
 
-Config file used:
+Config file used (slightly out of date but still a useful example):
 
 .. code-block:: text
 

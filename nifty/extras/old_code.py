@@ -1099,3 +1099,134 @@ def effspec(telDir, combined_extracted_1d_spectra, mag, T, over):
     # Don't write our changes to the original extracted 1d spectra; write them to a new file, 'c'+combined...+'.fits'.
     combined_spectra_file.writeto('c'+combined_extracted_1d_spectra+'.fits',  output_verify='ignore')
     writeList('c'+combined_extracted_1d_spectra, 'finalcorrectionspectrum', telDir)
+
+
+#------------------------------------- utilities ----------------------------------------------------------------#
+
+def extrap1d(interpolator):
+    """Extrap1d takes an interpolation function and returns a function which can also extrapolate.
+    From https://stackoverflow.com/questions/2745329/how-to-make-scipy-interpolate-give-an-extrapolated-result-beyond-the-input-range
+    """
+    xs = interpolator.x
+    ys = interpolator.y
+    def pointwise(x):
+        if x < xs[0]:
+            return ys[0]+(x-xs[0])*(ys[1]-ys[0])/(xs[1]-xs[0])
+        elif x > xs[-1]:
+            return ys[-1]+(x-xs[-1])*(ys[-1]-ys[-2])/(xs[-1]-xs[-2])
+        else:
+            return interpolator(x)
+    def ufunclike(xs):
+        return array(map(pointwise, array(xs)))
+    return ufunclike
+
+def readCube(cube):
+    """Open a data cube with astropy.io.fits. Read the data header to find the starting wavelength and wavelength increment.
+        Create a 1D array with length equal to the spectral dimension of the cube.
+        For each element in array, element[i] = starting wavelength + (i * wavelength increment).
+
+        Returns:
+            cube (object reference):   Reference to the opened data cube.
+            cubewave (1D numpy array): array representing pixel-wavelength mapping of data cube.
+
+    """
+    # read cube into an HDU list
+    cube = astropy.io.fits.open(cube)
+
+    # find the starting wavelength and the wavelength increment from the science header of the cube
+    wstart = cube[1].header['CRVAL3']
+    wdelt = cube[1].header['CD3_3']
+
+    # initialize a wavelength array
+    cubewave = np.zeros(2040)
+
+    # create a wavelength array using the starting wavelength and the wavelength increment
+    for i in range(2040):
+        cubewave[i] = wstart+(i*wdelt)
+
+    return cube, cubewave
+
+def write_line_positions(nextcur, var):
+    """Write line x,y info to file containing Lorentz fitting commands for bplot
+
+    """
+
+    curfile = open(nextcur, 'w')
+    i=-1
+    for line in var:
+        i+=1
+        if i!=0:
+            var[i]=var.split()
+            var[i][2]=var[i][2].replace("',",'').replace("']", '')
+        if not i%2 and i!=0:
+            #even number, means RHS of H line
+            #write x and y position to file, also "k" key
+            curfile.write(var[i][0]+" "+var[i][2]+" 1 k \n")
+            #LHS of line, write info + "l" key to file
+            curfile.write(var[i-1][0]+" "+var[i-1][2]+" 1 l \n")
+            #now repeat but writing the "-" key to subtract the fit
+            curfile.write(var[i][0]+" "+var[i][2]+" 1 - \n")
+            curfile.write(var[i-1][0]+" "+var[i-1][2]+" 1 - \n")
+        curfile.write("0 0 1 i \n")
+        curfile.write("0 0 q \n")
+        curfile.close()
+
+def getTelluricSpec(scienceObjectName, over):
+    """
+    For a given science cube, copies appropriate telluric correction spectrum to current directory.
+    TODO(nat): have to be able to choose telluric spectrum that is closest in time!
+    """
+
+    # New method:
+    #
+    # Check if telluricCorrection.fits exists. If so, we'll use those to do our telluric correction.
+    #
+    # Else:
+    # Try going to telluricProducts, reading the .json file, looking for the science cube name.
+    # If you find it, copy appropriate telluricCorrection_obsname.fits to telluricCorrection.fits.
+    #
+    # If you don't, return False for foundTelluricFlag. Abandon the telluric correction attempt there.
+
+    observationDirectory = os.getcwd()
+    foundTelluricFlag = False
+    if os.path.exists('telluricCorrection.fits') and os.path.exists('fit.fits') and not over:
+        # User supplied their own telluric correction and fit in the science directory.
+        logging.info("\nUsing user-supplied normalized telluric correction and fit to telluric correction")
+        foundTelluricFlag = True
+        return foundTelluricFlag
+    if not os.path.exists('telluricCorrection.fits') or not os.path.exists('fit.fits'):
+        os.chdir('../Tellurics')
+        # Find a list of all the telluric observation directories.
+        telDirList_temp = glob.glob('obs*')
+        for telDir in telDirList_temp:
+            # Change to the telluric directory
+            print os.getcwd()
+            os.chdir(telDir)
+            # Make sure an scienceMatchedTellsList is present.
+            try:
+                scienceMatchedTellsList = open('scienceMatchedTellsList', 'r').readlines()
+                scienceMatchedTellsList = [item.strip() for item in scienceMatchedTellsList]
+            except:
+                os.chdir('..')
+                continue
+            foundTelluricFlag = False
+            if scienceObjectName in scienceMatchedTellsList:
+                print "made it here"
+                # Open the correction efficiency spectrum.
+                if os.path.exists(observationDirectory + "/telluricCorrection.fits"):
+                    os.remove(observationDirectory + "/telluricCorrection.fits")
+                shutil.copy("telluricCorrection.fits", observationDirectory)
+                if os.path.exists(observationDirectory+"/fit.fits"):
+                    os.remove(observationDirectory+"/fit.fits")
+                shutil.copy("fit.fits", observationDirectory)
+                os.chdir(observationDirectory)
+                logging.info("\nUsing combined standard spectrum from " + str(telDir) + " for " + str(scienceObjectName))
+                foundTelluricFlag = True
+                break
+            else:
+                os.chdir('..')
+                continue
+        if not foundTelluricFlag:
+            logging.info("\nWARNING: No Telluric correction spectrum found for " + str(scienceObjectName))
+        os.chdir(observationDirectory)
+    return foundTelluricFlag
