@@ -29,25 +29,21 @@
 
 # STDLIB
 
-import logging, os, sys, shutil, pkg_resources, argparse
+import logging, os, sys, shutil, pkg_resources, argparse, glob
 from datetime import datetime
 
 # LOCAL
 
-# Import major Nifty Steps.
+# Import major Nifty scripts.
 import steps.nifsSort as nifsSort
 import steps.nifsBaselineCalibration as nifsBaselineCalibration
 import steps.nifsReduce as nifsReduce
-import steps.nifsTelluric as nifsTelluric
-import steps.nifsFluxCalibrate as nifsFluxCalibrate
-import steps.nifsMerge as nifsMerge
-# Import nifs utilities module.
 import nifsUtils as nifsUtils
-# Import configuration file parsing.
+# Import config parsing.
+# Import config parsing.
 from configobj.configobj import ConfigObj
-# Import custom pipeline setup Class.
 from objectoriented.getConfig import GetConfig
-# Conveniently import some utility functions so we don't have to type the full name.
+# Import custom Nifty functions.
 from nifsUtils import datefmt, printDirectoryLists, writeList, getParam, interactiveNIFSInput
 
 #                                +
@@ -99,11 +95,10 @@ def start(args):
                 3) nifsReduce.py
 
     """
-    # Save starting path for later use and change one directory up.
+    # Save path for later use and change one directory up.
     path = os.getcwd()
 
-    # Get paths to built-in Nifty data. Special code in setup.py makes sure recipes/ and
-    # runtimeData/ will be installed when someone installs Nifty, and accessible in this way.
+    # Get paths to Nifty data.
     RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
     RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
@@ -111,7 +106,7 @@ def start(args):
     FORMAT = '%(asctime)s %(message)s'
     DATEFMT = datefmt()
 
-    # Set up the main logging file.
+    # Set up the logging file.
     logging.basicConfig(filename='Nifty.log',format=FORMAT,datefmt=DATEFMT,level=logging.DEBUG)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -136,8 +131,8 @@ def start(args):
     # Make sure to change this if you change the default logfile.
     logging.info('The log file is Nifty.log.')
 
-    # Read or write a configuration file, interactively, from defaults or from a provided file.
-    # Second argument is the name of the current script. This could be used to get script-dependent configuration.
+    # Read or write a configuration file, interactively or from some defaults.
+    # Second argument is the name of the current script. Used to get script-dependent configuration.
     GetConfig(args, "nifsPipeline")
 
     # TODO(nat): fix this. It isn't recursively printing the dictionaries of values.
@@ -148,7 +143,7 @@ def start(args):
             logging.info(str(i) + " " + str(config[i]))
     logging.info("")
 
-    # Load pipeline configuration from ./config.cfg that is used by this script.
+    # Load configuration from ./config.cfg that is used by this script.
     with open('./config.cfg') as config_file:
         # Load general config.
         config = ConfigObj(config_file, unrepr=True)
@@ -161,9 +156,6 @@ def start(args):
         calibrationReduction = nifsPipelineConfig['calibrationReduction']
         telluricReduction = nifsPipelineConfig['telluricReduction']
         scienceReduction = nifsPipelineConfig['scienceReduction']
-        telluricCorrection = nifsPipelineConfig['telluricCorrection']
-        fluxCalibration = nifsPipelineConfig['fluxCalibration']
-        merge = nifsPipelineConfig['merge']
 
     ###########################################################################
     ##                         SETUP COMPLETE                                ##
@@ -188,47 +180,63 @@ def start(args):
     # By now, we should have paths to the three types of raw data. Print them out.
     printDirectoryLists()
 
-    ###########################################################################
-    ##                STEP 2: Reduce baseline calibrations.                  ##
-    ###########################################################################
+    with open('./config.cfg') as config_file:
+        # Load general config.
+        config = ConfigObj(config_file, unrepr=True)
+        scienceDirectoryList = config['scienceDirectoryList']
 
-    if calibrationReduction:
-        if manualMode:
-            a = raw_input('About to enter nifsBaselineCalibration.')
-        nifsBaselineCalibration.start()
+    # This mode does a full reduction, science observation by science observation.
+    # For each science directory in science directory list:
+    # Reduce the associated calibrations
+    # Reduce the associated tellurics
+    # Reduce the science observation
+    for scienceObservation in scienceDirectoryList:
+        # Find associated calibrations by looping through calibration directory list.
+        # Split to this form: ('/Users/nat/tests/core/M85/20150508/J', 'obs36')
+        temp = os.path.split(scienceObservation)
+        # Split again to this form: ('/Users/nat/tests/core/M85/20150508', 'J')
+        temp2 = os.path.split(temp[0])
+        # Now temp[0] is calibation base path name, temp[1] is grating.
+        calibrationDirectory = temp2[0]+"/Calibrations_"+temp2[1]
+        # Have to convert it to a one-element list first.
+        calibrationDirectory = [calibrationDirectory]
+        # We now have our calibration directory for the given science!
+        # Now find associated telluric observations.
+        # temp[0] looks like: '/Users/nat/tests/core/M85/20150508/J'
+        telluricBaseName = temp[0]+"/Tellurics/"
+        os.chdir(telluricBaseName)
+        telluricDirectoryList = glob.glob("obs*")
+        # We must make these incomplete paths into full paths by adding the base path.
+        telluricDirectoryList = [telluricBaseName+x for x in telluricDirectoryList]
+        # Don't forget to change back to starting point.
+        os.chdir(path)
 
-    ###########################################################################
-    ##                STEP 3: Reduce telluric observations.                  ##
-    ###########################################################################
+        ###########################################################################
+        ##                STEP 2: Reduce baseline calibrations.                  ##
+        ###########################################################################
 
-    if telluricReduction:
-        if manualMode:
-            a = raw_input('About to enter nifsReduce to reduce Tellurics.')
-        nifsReduce.start('Telluric')
+        if calibrationReduction:
+            if manualMode:
+                a = raw_input('About to enter nifsBaselineCalibration.')
+            nifsBaselineCalibration.start(calibrationDirectoryList=calibrationDirectory)
 
-    ###########################################################################
-    ##                 STEP 4: Reduce science observations.                  ##
-    ###########################################################################
+        ###########################################################################
+        ##                STEP 3: Reduce telluric observations.                  ##
+        ###########################################################################
 
-    if scienceReduction:
-        if manualMode:
-            a = raw_input('About to enter nifsReduce to reduce science.')
-        nifsReduce.start('Science')
+        if telluricReduction:
+            if manualMode:
+                a = raw_input('About to enter nifsReduce to reduce Tellurics.')
+            nifsReduce.start('Telluric', telluricDirectoryList=telluricDirectoryList)
 
-    if telluricCorrection:
-        if manualMode:
-            a = raw_input('About to enter nifsTelluric to make and create telluric corrected cubes.')
-        nifsTelluric.run()
+        ###########################################################################
+        ##                 STEP 4: Reduce science observations.                  ##
+        ###########################################################################
 
-    if fluxCalibration:
-        if manualMode:
-            a = raw_input('About to enter nifsFluxCalibrate to make and create flux calibrated and telluric corrected cubes.')
-        nifsFluxCalibrate.run()
-
-    if merge:
-        if manualMode:
-            a = raw_input('About to enter nifsMerge to merge final 3D data cubes to single cubes.')
-        nifsMerge.run()
+        if scienceReduction:
+            if manualMode:
+                a = raw_input('About to enter nifsReduce to reduce science.')
+            nifsReduce.start('Science')
 
     ###########################################################################
     ##                    Data Reduction Complete!                           ##

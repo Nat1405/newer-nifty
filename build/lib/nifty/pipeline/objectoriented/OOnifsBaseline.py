@@ -25,27 +25,22 @@
 ################################################################################
 #                Import some useful Python utilities/modules                   #
 ################################################################################
-
-# STDLIB
-
-import logging, os, pkg_resources, glob, shutil
+import logging, os, pkg_resources
 import astropy.io.fits
 from pyraf import iraf, iraffunctions
 
-# LOCAL
-
 # Import config parsing.
-from ..configobj.configobj import ConfigObj
+from configobj.configobj import ConfigObj
 
 # Import custom Nifty functions.
-from ..nifsUtils import datefmt, listit, checkLists, copyCalibration, copyCalibrationDatabase
+from nifsUtils import datefmt, listit, checkLists
 
 # Define constants.
 # Paths to Nifty data.
 RECIPES_PATH = pkg_resources.resource_filename('nifty', 'recipes/')
 RUNTIME_DATA_PATH = pkg_resources.resource_filename('nifty', 'runtimeData/')
 
-def start(calibrationDirectoryList=""):
+def start():
     """
          nifsBaselineCalibration
 
@@ -130,8 +125,7 @@ def start(calibrationDirectoryList=""):
         # Read general pipeline config.
         manualMode = config['manualMode']
         over = config['over']
-        if not calibrationDirectoryList:
-            calibrationDirectoryList = config['calibrationDirectoryList']
+        calibrationDirectoryList = config['calibrationDirectoryList']
         # Read baselineCalibrationReduction specfic config.
         calibrationReductionConfig = config['calibrationReductionConfig']
         start = calibrationReductionConfig['baselineCalibrationStart']
@@ -218,7 +212,8 @@ def start(calibrationDirectoryList=""):
             if valindex == 1:
                 if manualMode:
                     a = raw_input("About to enter step 1: locate the spectrum.")
-                getShift(calflat, grating, over, log)
+                getShift(calflat, over, log)
+                print os.getcwd()
                 print "\n###################################################################"
                 print ""
                 print "    STEP 1: Locate the Spectrum (Determine the shift to the MDF) - COMPLETED"
@@ -234,7 +229,7 @@ def start(calibrationDirectoryList=""):
             elif valindex == 2:
                 if manualMode:
                     a = raw_input("About to enter step 2: flat field.")
-                makeFlat(flatlist, flatdarklist, calflat, flatdark, grating, over, log)
+                makeFlat(flatlist, flatdarklist, calflat, flatdark, over, log)
                 print "\n###################################################################"
                 print ""
                 print "    STEP 2: Flat Field (Create Flat Field image and BPM image) - COMPLETED       "
@@ -251,7 +246,7 @@ def start(calibrationDirectoryList=""):
             elif valindex == 3:
                 if manualMode:
                     a = raw_input("About to enter step 3: wavelength solution.")
-                makeWaveCal(arclist, arc, arcdarklist, arcdark, grating, log, over, path)
+                makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path)
                 print "\n###################################################################"
                 print ""
                 print "         STEP 3: Wavelength Solution (NFPREPARE and Combine arc darks.  "
@@ -268,7 +263,7 @@ def start(calibrationDirectoryList=""):
             elif valindex == 4:
                 if manualMode:
                     a = raw_input("About to enter step 4: spatial distortion.")
-                makeRonchi(ronchilist, ronchiflat, calflat, grating, over, flatdark, log)
+                makeRonchi(ronchilist, ronchiflat, calflat, over, flatdark, log)
                 print "\n###################################################################"
                 print ""
                 print "     Step 4: Spatial Distortion (Trace the spatial curvature and spectral distortion "
@@ -298,7 +293,7 @@ def start(calibrationDirectoryList=""):
 #                                        FUNCTIONS                                  #
 #####################################################################################
 
-def getShift(calflat, grating, over, log):
+def getShift(calflat, over, log):
     """Determine the shift to the MDF file.
 
     Run NFPREPARE on a single "lamps on" flat to  determine  the
@@ -316,22 +311,18 @@ def getShift(calflat, grating, over, log):
     if os.path.exists('s'+calflat+'.fits'):
         if over:
             os.remove('s'+calflat+'.fits')
-            iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', fl_int='no', logfile=log)
         else:
-            logging.info("\nOutput exists and -over not set - skipping find shift")
-    else:
-        iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', fl_int='no', logfile=log)
+            return
+
+    iraf.nfprepare(calflat,rawpath="",outpref="s", shiftx='INDEF', shifty='INDEF',fl_vardq='no',fl_corr='no',fl_nonl='no', fl_int='no', logfile=log)
 
     # Put the name of the reference shift file into a text file called
     # shiftfile to be used by the pipeline later.
     open("shiftfile", "w").write("s"+calflat)
 
-    copyCalibration('s'+calflat+'.fits', 'shiftFile.fits', grating, over)
-
-
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-def makeFlat(flatlist, flatdarklist, calflat, flatdark, grating, over, log):
+class MakeFlat(Routine):
     """Make flat and bad pixel mask.
 
     Use NFPREPARE on the lamps on/lamps off flats to update the
@@ -357,160 +348,86 @@ def makeFlat(flatlist, flatdarklist, calflat, flatdark, grating, over, log):
     reduction.
 
     """
+    @classmethod
+    def run(self, flatlist, flatdarklist, calflat, flatdark, over, log):
+        # Update lamps on flat frames with mdf offset value and generate variance and data quality extensions.
+        task = Task(iraf.nfprepare, rawpath='.', shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
+        flatlist = TaskRunner.loop(task, flatlist, "nfprepare of lamps-on flats", "n")
 
-    # Update lamps on flat frames with mdf offset value and generate variance and data quality extensions.
-    for image in flatlist:
-        image = str(image).strip()
-        if os.path.exists('n'+image+'.fits'):
-            if over:
-                os.remove('n'+image+'.fits')
-                iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
-            else:
-                print "Output exists and -over- not set - skipping nfprepare of lamps on flats"
+        # Update lamps off flat images with offset value and generate variance and data quality extensions.
+        task = Task(iraf.nfprepare, rawpath='.', shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
+        flatdarklist = TaskRunner.loop(task, flatdarklist, "nfprepare of lamps-off flats", "n")
+
+        # Combine lamps on flat images, "n"+image+".fits". Output combined file will have name of the first flat file with "gn" prefix.
+        task = Task(iraf.gemcombine, output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+        TaskRunner.runcombine(task, flatlist, "gemcombine of lamps-on flats", "n", "combinedlampson")
+
+        # Combine lamps off flat images, "n"+image+".fits". Output combined file will have name of the first darkflat file with "gn" prefix.
+        task = Task(iraf.gemcombine, output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
+        TaskRunner.runcombine(task, flatlist, "gemcombine of lamps-off flats", "n", "combinedlampson")
+
+        # NSREDUCE on lamps on flat images, "gn"+calflat+".fits", to extract the slices and apply an approximate wavelength calibration.
+        task = Task(iraf.nsreduce, fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
+        TaskRunner.single(task, calflat, "nsreduce of lamps-on flats", "rgn")
+
+        # NSREDUCE on lamps off flat frames, "gn"+flatdark+".fits", to extract the slices and apply an approximate wavelength calibration.
+        task = Task(iraf.nsreduce, fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
+        TaskRunner.single(task, flatdark, "nsreduce of lamps-off flats", "rgn")
+
+
+        # Create slice-by-slice flat field image and BPM image from the darkflats, using NSFLAT.
+        # Lower and upper limit of bad pixels are 0.15 and 1.55.
+
+        # Get the spectral band so we can fine tune thr_flo and thr_fup. This fine tunes the number of
+        # bad pixels caught to an approximately constant level for each band. A few bad pixels will
+        # not be caught, but it was found that catching them marked large portions of the top and bottom
+        # rows of pixels of each slice as bad pixels.
+        header = astropy.io.fits.open(calflat+'.fits')
+        grat = header[0].header['GRATING'][0:1]
+        if grat == 'Z' or grat == 'J':
+            flo = 0.07
+            fup = 1.55
+            inter = 'no'
+        elif grat == 'H' or grat == 'K':
+            flo = 0.05
+            fup = 1.55
+            inter = 'no'
         else:
-            iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
-    flatlist = checkLists(flatlist, '.', 'n', '.fits')
+            print "\n#####################################################################"
+            print "#####################################################################"
+            print ""
+            print "     WARNING in baselineCalibration: nsflat detected a non-standard wavelength "
+            print "                                     configuration. Running interactively. "
+            print ""
+            print "#####################################################################"
+            print "#####################################################################\n"
+            # Arbitrary; not tested with non-standard configurations.
+            flo = 0.15
+            fup = 1.55
+            inter = 'yes'
 
-    # Update lamps off flat images with offset value and generate variance and data quality extensions.
-    for image in flatdarklist:
-        image = str(image).strip()
-        if os.path.exists('n'+image+'.fits'):
-            if over:
-                iraf.delete('n'+image+'.fits')
-                iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
-            else:
-                print "\nOutput exists and -over- not set - skipping nfprepare of lamps off flats."
-        else:
-            iraf.nfprepare(image+'.fits',rawpath='.',shiftim="s"+calflat, fl_vardq='yes',fl_corr='no',fl_nonl='no', logfile=log)
-    flatdarklist = checkLists(flatdarklist, '.', 'n', '.fits')
+        task = Task(
+            iraf.nsflat,
+            darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat",
+            darkfile="rgn"+flatdark+"_dark", fl_save_dark='yes',process="fit",
+            thr_flo=flo,thr_fup=fup, fl_vardq='yes', fl_int=inter, logfile=log
+        )
+        TaskRunner.single(task, "rgn"+calflat , "creating of preliminary flat with nsflat.", "output")
 
-    # Combine lamps on flat images, "n"+image+".fits". Output combined file will have name of the first flat file with "gn" prefix.
-    if os.path.exists('gn'+calflat+'.fits'):
-        if over:
-            iraf.delete("gn"+calflat+".fits")
-            if len(flatlist) > 1:
-                iraf.gemcombine(listit(flatlist,"n"),output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
-            else:
-                iraf.copy('n'+calflat+'.fits', 'gn'+calflat+'.fits')
-        else:
-            print "\nOutput exists and -over- not set - skipping gemcombine of lamps on flats."
-    else:
-        if len(flatlist) > 1:
-            iraf.gemcombine(listit(flatlist,"n"),output="gn"+calflat,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
-        else:
-            iraf.copy('n'+calflat+'.fits', 'gn'+calflat+'.fits')
+        # Renormalize the slices to account for slice-to-slice variations using NSSLITFUNCTION - make the final flat field image.
 
-    # Combine lamps off flat images, "n"+image+".fits". Output combined file will have name of the first darkflat file with "gn" prefix.
-    if os.path.exists('gn'+flatdark+'.fits'):
-        if over:
-            iraf.delete("gn"+flatdark+".fits")
-            if len(flatdarklist) > 1:
-                iraf.gemcombine(listit(flatdarklist,"n"),output="gn"+flatdark,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
-            else:
-                iraf.copy('n'+flatdark+'.fits', 'gn'+flatdark+'.fits')
-        else:
-            print "\nOutput exists and -over- not set - skipping gemcombine of lamps on flats."
-    else:
-        if len(flatdarklist) > 1:
-            iraf.gemcombine(listit(flatdarklist,"n"),output="gn"+flatdark,fl_dqpr='yes', fl_vardq='yes',masktype="none",logfile=log)
-        else:
-            iraf.copy('n'+flatdark+'.fits', 'gn'+flatdark+'.fits')
+        task = Task(iraf.nsslitfunction, flat="rgn"+calflat+"_sflat",dark="rgn"+flatdark+"_dark",combine="median", order=3,fl_vary='no',logfile=log)
+        TaskRunner.single(task, "rgn"+calflat,"rgn"+calflat+"_flat", "creating of final flat", output)
 
-    # NSREDUCE on lamps on flat images, "gn"+calflat+".fits", to extract the slices and apply an approximate wavelength calibration.
-    if os.path.exists('rgn'+calflat+'.fits'):
-        if over:
-            iraf.delete("rgn"+calflat+".fits")
-            iraf.nsreduce ("gn"+calflat,fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
-        else:
-            print "\nOutput exists and -over- not set - skipping nsreduce of lamps on flats."
-    else:
-        iraf.nsreduce ("gn"+calflat,fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
+        # Put the name of the final flat field and bad pixel mask (BPM) into text files of fixed name to be used by the pipeline later.
 
-    # NSREDUCE on lamps off flat frames, "gn"+flatdark+".fits", to extract the slices and apply an approximate wavelength calibration.
-    if os.path.exists('rgn'+flatdark+'.fits'):
-        if over:
-            iraf.delete("rgn"+flatdark+".fits")
-            iraf.nsreduce ("gn"+flatdark,fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
-        else:
-            print "\nOutput exists and -over- not set - skipping nsreduce of lamps off flats."
-    else:
-        iraf.nsreduce ("gn"+flatdark,fl_cut='yes',fl_nsappw='yes',fl_vardq='yes', fl_sky='no',fl_dark='no',fl_flat='no',logfile=log)
-
-    # Create slice-by-slice flat field image and BPM image from the darkflats, using NSFLAT.
-    # Lower and upper limit of bad pixels are 0.15 and 1.55.
-
-    # Get the spectral band so we can fine tune thr_flo and thr_fup. This fine tunes the number of
-    # bad pixels caught to an approximately constant level for each band. A few bad pixels will
-    # not be caught, but it was found that catching them marked large portions of the top and bottom
-    # rows of pixels of each slice as bad pixels.
-    header = astropy.io.fits.open(calflat+'.fits')
-    grat = header[0].header['GRATING'][0:1]
-    if grat == 'Z' or grat == 'J':
-        flo = 0.07
-        fup = 1.55
-        inter = 'no'
-    elif grat == 'H' or grat == 'K':
-        flo = 0.05
-        fup = 1.55
-        inter = 'no'
-    else:
-        print "\n#####################################################################"
-        print "#####################################################################"
-        print ""
-        print "     WARNING in baselineCalibration: nsflat detected a non-standard wavelength "
-        print "                                     configuration. Running interactively. "
-        print ""
-        print "#####################################################################"
-        print "#####################################################################\n"
-        # Arbitrary; not tested with non-standard configurations.
-        flo = 0.15
-        fup = 1.55
-        inter = 'yes'
-
-    if os.path.exists("rgn"+calflat+"_sflat.fits"):
-        if over:
-            iraf.delete("rgn"+flatdark+"_dark.fits")
-            iraf.delete("rgn"+calflat+"_sflat.fits")
-            iraf.delete("rgn"+calflat+"_sflat_bpm.pl")
-            iraf.nsflat("rgn"+calflat,darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat", \
-                        darkfile="rgn"+flatdark+"_dark", fl_save_dark='yes',process="fit", \
-                        thr_flo=flo,thr_fup=fup, fl_vardq='yes', fl_int=inter, logfile=log )
-        else:
-            print "\nOutput exists and -over- not set - skipping nsflat creation of preliminary flat"
-    else:
-        iraf.nsflat("rgn"+calflat,darks="rgn"+flatdark,flatfile="rgn"+calflat+"_sflat", \
-                    darkfile="rgn"+flatdark+"_dark", fl_save_dark='yes',process="fit", \
-                    thr_flo=flo,thr_fup=fup, fl_vardq='yes', fl_int=inter, logfile=log )
-
-    # Renormalize the slices to account for slice-to-slice variations using NSSLITFUNCTION - make the final flat field image.
-
-    if os.path.exists("rgn"+calflat+"_flat.fits"):
-        if over:
-            iraf.delete("rgn"+calflat+"_flat.fits")
-            iraf.nsslitfunction("rgn"+calflat,"rgn"+calflat+"_flat", \
-                                flat="rgn"+calflat+"_sflat",dark="rgn"+flatdark+"_dark",combine="median", \
-                                order=3,fl_vary='no',logfile=log)
-        else:
-            print "\nOutput exists and -over- not set - skipping nsslitfunction flat rectification"
-    else:
-        iraf.nsslitfunction("rgn"+calflat,"rgn"+calflat+"_flat", \
-                            flat="rgn"+calflat+"_sflat",dark="rgn"+flatdark+"_dark",combine="median", \
-                            order=3,fl_vary='no',logfile=log)
-
-    # Put the name of the final flat field and bad pixel mask (BPM) into text files of fixed name to be used by the pipeline later.
-
-    open("flatfile", "w").write("rgn"+calflat+"_flat")              # Final flat field
-    open("sflatfile", "w").write("rgn"+calflat+"_sflat")            # Flat field before renormalization (before nsslitfunction)
-    open("sflat_bpmfile", "w").write("rgn"+calflat+"_sflat_bpm.pl") # Bad Pixel Mask
-
-    # Copy to relevant science directory calibrations/ directories as well
-    copyCalibration("rgn"+calflat+"_flat.fits", 'finalFlat.fits', grating, over)
-    copyCalibration("rgn"+calflat+"_sflat.fits", 'preliminaryFlat.fits', grating, over)
-    copyCalibration("rgn"+calflat+"_sflat_bpm.pl", 'finalBadPixelMask.pl', grating, over)
+        open("flatfile", "w").write("rgn"+calflat+"_flat")              # Final flat field
+        open("sflatfile", "w").write("rgn"+calflat+"_sflat")            # Flat field before renormalization (before nsslitfunction)
+        open("sflat_bpmfile", "w").write("rgn"+calflat+"_sflat_bpm.pl") # Bad Pixel Mask
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def makeWaveCal(arclist, arc, arcdarklist, arcdark, grating, log, over, path):
+def makeWaveCal(arclist, arc, arcdarklist, arcdark, log, over, path):
     """Determine the wavelength solution of each slice of the observation and
     set the arc coordinate file.
 
@@ -621,25 +538,31 @@ def makeWaveCal(arclist, arc, arcdarklist, arcdark, grating, log, over, path):
     if os.path.exists("rgn"+arc+".fits"):
         if over:
             iraf.delete("rgn"+arc+".fits")
-            iraf.nsreduce("gn"+arc, darki="gn"+arcdark, flatimage=flat, \
-                          fl_vardq="no", fl_cut="yes", fl_nsappw="yes", fl_sky="no", fl_dark="yes", fl_flat="yes", \
-                          logfile=log)
         else:
-            print "\nOutput file exists and -over not set - skipping apply_flat_arc."
+            print "Output file exists and -over not set - skipping apply_flat_arc."
+            return
+    fl_dark = "no"
+    if arcdark != "":
+        fl_dark = "yes"
+    hdulist = astropy.io.fits.open(arc+'.fits')
+    if 'K_Long' in hdulist[0].header['GRATING']:
+        iraf.nsreduce("gn"+arc, darki=arcdark, fl_cut="yes", fl_nsappw="yes", crval = 23000., fl_dark="yes", fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="no",logfile=log)
     else:
         iraf.nsreduce("gn"+arc, darki="gn"+arcdark, flatimage=flat, \
                       fl_vardq="no", fl_cut="yes", fl_nsappw="yes", fl_sky="no", fl_dark="yes", fl_flat="yes", \
                       logfile=log)
-    #fl_dark = "no"
-    #if arcdark != "":
-    #    fl_dark = "yes"
-    #hdulist = astropy.io.fits.open(arc+'.fits')
-    #if 'K_Long' in hdulist[0].header['GRATING']:
-    #    iraf.nsreduce("gn"+arc, darki=arcdark, fl_cut="yes", fl_nsappw="yes", crval = 23000., fl_dark="yes", fl_sky="no", fl_flat="yes", flatimage=flat, fl_vardq="no",logfile=log)
 
     # Put the name of the combined and prepared arc dark frame "gn"+arcdark into a text
     # file called arcdarkfile to be used by the pipeline later.
     open("arcdarkfile", "w").write("gn"+arcdark)
+
+    if os.path.exists("wrgn"+arc+".fits"):
+        if over:
+            iraf.delete("wrgn"+arc+".fits")
+        else:
+            print "\nOutput file exists and -over not set - ",\
+            "not determining wavelength solution and recreating the wavelength reference arc.\n"
+            return
 
     # Determine the wavelength setting.
     hdulist = astropy.io.fits.open("rgn"+arc+".fits")
@@ -677,36 +600,21 @@ def makeWaveCal(arclist, arc, arcdarklist, arcdark, grating, log, over, path):
         my_thresh=100.0
         interactive = 'yes'
 
-    # TODO(nat): I don't like this nesting at all
     if not pauseFlag:
         # Establish wavelength calibration for arclamp spectra. Output: A series of
         # files in a "database/" directory containing the wavelength solutions of
         # each slice and a reduced arc frame "wrgn"+ARC+".fits".
-        if os.path.exists("wrgn"+arc+".fits"):
-            if over:
-                iraf.delete("wrgn"+arc+".fits")
-                iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, \
-                                  trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter='no',nfound=10,nlost=10, \
-                                  logfile=log)
-            else:
-                print "\nOutput file exists and -over not set - ",\
-                "not determining wavelength solution and recreating the wavelength reference arc.\n"
-        else:
-            iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, \
-                              trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter='no',nfound=10,nlost=10, \
-                              logfile=log)
+        iraf.nswavelength("rgn"+arc, coordli=clist, nsum=10, thresho=my_thresh, \
+                          trace='yes', fwidth=2.0, match=-6,cradius=8.0,fl_inter='no',nfound=10,nlost=10, \
+                          logfile=log)
     else:
         a = raw_input("For now, interactive Z or non-standard wavelength calibrations are unsupported. " + \
         "Bugs running IRAF tasks interactively from python mean iraf.nswavelength cannot be activated automatically. " + \
         "Therefore please run iraf.nswavelength() interactively from Pyraf to do a wavelength calibration by hand.")
 
-    # Copy to relevant science observation/calibrations/ directories
-    copyCalibration("wrgn"+arc+".fits", 'finalArc.fits', grating, over)
-    copyCalibrationDatabase("idwrgn", grating, over)
-
 #--------------------------------------------------------------------------------------------------------------------------------#
 
-def makeRonchi(ronchilist, ronchiflat, calflat, grating, over, flatdark, log):
+def makeRonchi(ronchilist, ronchiflat, calflat, over, flatdark, log):
     """Establish Spatial-distortion calibration with nfsdist.
 
     NFSDIST uses the information in the "Ronchi" Calibration images
@@ -725,58 +633,37 @@ def makeRonchi(ronchilist, ronchiflat, calflat, grating, over, flatdark, log):
     # Output: "n"+image+".fits".
     for image in ronchilist:
         image = str(image).strip()
-        if os.path.exists("n"+image+'.fits'):
-            if over:
-                iraf.delete("n"+image+'.fits')
-                iraf.nfprepare(image,rawpath=".", shiftimage="s"+calflat, \
-                               bpm="rgn"+calflat+"_sflat_bpm.pl", fl_vardq="yes",fl_corr="no",fl_nonl="no", \
-                               logfile=log)
-            else:
-                print "\nOutput file exists and -over not set - skipping prepare of ronchis"
-        else:
-            iraf.nfprepare(image,rawpath=".", shiftimage="s"+calflat, \
-                           bpm="rgn"+calflat+"_sflat_bpm.pl", fl_vardq="yes",fl_corr="no",fl_nonl="no", \
-                           logfile=log)
+        if over:
+            iraf.delete("n"+image+'.fits')
+        iraf.nfprepare(image,rawpath=".", shiftimage="s"+calflat, \
+                       bpm="rgn"+calflat+"_sflat_bpm.pl", fl_vardq="yes",fl_corr="no",fl_nonl="no", \
+                       logfile=log)
     ronchilist = checkLists(ronchilist, '.', 'n', '.fits')
 
     # Combine nfprepared ronchi flat images "n"+image+".fits". Output: combined file will
     # have the name of the first ronchi flat file, "gn"+ronchiflat+".fits".
-    if os.path.exists("gn"+ronchiflat+".fits"):
-        if over:
-            iraf.delete("gn"+ronchiflat+".fits")
-            if len(ronchilist) > 1:
-                iraf.gemcombine(listit(ronchilist,"n"),output="gn"+ronchiflat,fl_dqpr="yes", \
-                                       masktype="none",fl_vardq="yes",logfile=log)
-            else:
-                iraf.copy("n"+ronchiflat+".fits","gn"+ronchiflat+".fits")
-        else:
-            "\nOutput file exists and -over not set - skipping combine of ronchis"
+    if over:
+        iraf.delete("gn"+ronchiflat+".fits")
+    if len(ronchilist) > 1:
+        iraf.gemcombine(listit(ronchilist,"n"),output="gn"+ronchiflat,fl_dqpr="yes", \
+                               masktype="none",fl_vardq="yes",logfile=log)
     else:
-        if len(ronchilist) > 1:
-            iraf.gemcombine(listit(ronchilist,"n"),output="gn"+ronchiflat,fl_dqpr="yes", \
-                                   masktype="none",fl_vardq="yes",logfile=log)
-        else:
-            iraf.copy("n"+ronchiflat+".fits","gn"+ronchiflat+".fits")
+        iraf.copy("n"+ronchiflat+".fits","gn"+ronchiflat+".fits")
 
     # NSREDUCE combined ronchi frame, "gn"+ronchiflat+".fits", to extract the slices into unique MEF extensions and
     # apply an approximate wavelength calibration to each slice. Output: "rgn"+ronchiflat+".fits".
-    if os.path.exists("rgn"+ronchiflat+".fits"):
-        if over:
-            iraf.delete("rgn"+ronchiflat+".fits")
-            iraf.nsreduce("gn"+ronchiflat, outpref="r", dark="rgn"+flatdark+"_dark", flatimage="rgn"+calflat+"_flat", fl_cut="yes", fl_nsappw="yes", fl_flat="yes", fl_sky="no", fl_dark="yes", fl_vardq="no", logfile=log)
-        else:
-            "\nOutput file exists and -over not set - skipping nsreduce of ronchis"
-    else:
-        iraf.nsreduce("gn"+ronchiflat, outpref="r", dark="rgn"+flatdark+"_dark", flatimage="rgn"+calflat+"_flat", fl_cut="yes", fl_nsappw="yes", fl_flat="yes", fl_sky="no", fl_dark="yes", fl_vardq="no", logfile=log)
+    if over:
+        iraf.delete("rgn"+ronchiflat+".fits")
+    iraf.nsreduce("gn"+ronchiflat, outpref="r", dark="rgn"+flatdark+"_dark", flatimage="rgn"+calflat+"_flat", fl_cut="yes", fl_nsappw="yes", fl_flat="yes", fl_sky="no", fl_dark="yes", fl_vardq="no", logfile=log)
 
     if os.path.exists("ronchifile"):
         if over:
             iraf.delete("ronchifile")
-            os.remove("rgn"+ronchiflat+".fits")
-            iraf.nfsdist("rgn"+ronchiflat,fwidth=6.0, cradius=8.0, glshift=2.8, minsep=6.5, thresh=2000.0, nlost=3, fl_inter='no',logfile=log)
+            iraf.delete("rgn"+ronchiflat)
         else:
             print "\nOutput file exists and -over not set - ",\
             "not performing ronchi calibration with iraf.nfsdist.\n"
+            return
     else:
         # Determine the spatial distortion correction. Output: overwrites "rgn"+ronchiflat+".fits" and makes
         # changes to files in /database directory.
@@ -787,9 +674,6 @@ def makeRonchi(ronchilist, ronchiflat, calflat, grating, over, flatdark, log):
     # are in the "database/" directory.
 
     open("ronchifile", "w").write("rgn"+ronchiflat)
-    # Copy to relevant science observation/calibrations/ directories
-    copyCalibration("rgn"+ronchiflat+".fits", 'finalRonchi.fits', grating, over)
-    copyCalibrationDatabase("idrgn", grating, over)
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 

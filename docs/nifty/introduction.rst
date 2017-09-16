@@ -494,6 +494,17 @@ To cancel the windowing use a.
 
 It is necessary to press 'i' before 'q' once the h-lines have been removed in order to save the changes.
 
+Custom Telluric Corrections
+---------------------------
+
+
+
+You can supply your own continuum-normalized telluric correction spectrum by placing a "telluricCorrection.fits" one D spectra
+and a "fit.fits" that you used to normalize that spectra in the science observation directory. Both spectra must be 2040 pixels
+long and have the data extension located in header unit zero. Note that overwrite must be turned off for this to work.
+
+
+
 Merging Data Cubes
 ------------------
 
