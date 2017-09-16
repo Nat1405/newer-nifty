@@ -8,8 +8,6 @@ Welcome to Nifty's documentation!
 
 Nifty is a full-featured Gemini NIFS data reduction pipeline and data reduction package.
 
-This is a test phrase.
-
 ===========
 User Manual
 ===========
