@@ -1,3 +1,9 @@
+NOTE
+====
+
+This is my old development version. To see all my contributions, check out `the new repository <https://github.com/mrlb05/Nifty4Gemini>`_.
+
+
 Nifty
 =====
 
